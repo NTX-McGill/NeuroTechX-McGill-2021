@@ -20,10 +20,12 @@ data = load_virgin_file(file_path)
 print(data.shape)
 print(data.T[0][:100])
 
+# filter the signals as usual
 filtered = filter_signal_mne_8chan(data.T)
 
 window_length = 2.0 # in seconds, the length of window to display on right column
 
+# display each channel, the whole signal on left column, a short window on right column
 plt.subplots()
 for n,ts in enumerate(filtered):
     plt.subplot(8,2,2*n+1)
