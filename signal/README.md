@@ -12,6 +12,13 @@ In this project we use EEG (electroencephalogram) and ECG (electrocardiogram) si
 
 [See 2020 code for inspiration on writing this readme](https://github.com/NTX-McGill/NeuroTechX-McGill-2020/tree/main/offline/signal_processing)
 
+### ECG
+
+**peak detectiction** algorithm
+![peak detection algorithm](./figures/ecg_peak_detection.png)
+
+### EEG
+
 ## Code
 ``example_code/`` contains a jupyter notebook ``numpy and mne filtering examples.ipynb`` that shows you how to filter signals with mne library. There is also a numpy implementation but it doesn't seem to be doing a good job - someone will have to fix this. Also contains ``plot_all_spectrograms.py``: some informative code from 2019.
 

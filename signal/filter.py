@@ -11,8 +11,6 @@ import mne
 
 SAMPLE_RATE = 250 # Hz
 
-file_path = "../data/2021-05-20/01-1_video_OpenBCI-RAW-2021-05-20_19-59-47.txt"
-
 def load_virgin_file(file_path,channels=[1,2,3,4,5,6,7,8]):
     """
     loads a raw OpenBci output textfile into a 2D numpy array
@@ -129,19 +127,19 @@ def plot_epoched(epoched,maxdisp=50):
 if __name__ == "__main__":
     file_path = "../data/2021-05-20/01-1_video_OpenBCI-RAW-2021-05-20_19-59-47.txt"
     # load only the ECG signal i.e. channel 1
-    raw = load_ecg(file_path)
+    raw_signal = load_ecg(file_path)
     print("The raw ECG signal looks like this \n")
 
     # plot the raw ECG signal
     plt.figure(figsize=(9,6))
-    plt.plot(np.arange(len(raw[20:-1000]))/SAMPLE_RATE,raw[20:-1000])
+    plt.plot(np.arange(len(raw_signal[20:-1000]))/SAMPLE_RATE,raw_signal[20:-1000])
     plt.title("raw signal")
     plt.xlabel("time in seconds")
     plt.ylabel("micro volts")
     plt.show()
 
     # filter the raw signal w/ default bandpass params for ECG
-    filtered = np.squeeze(filter_signal_mne_uniform_band(np.array([raw])))
+    filtered = np.squeeze(filter_signal_mne_uniform_band(np.array([raw_signal])))
     # display the filtered signal
     print("\nThe filtered signal looks like this \n")
     plt.figure(figsize=(9,6))

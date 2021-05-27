@@ -10,9 +10,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 sys.path.append('../signal/')
-from filter import load_virgin_file,filter_signal_mne_8chan,filter_signal_mne_uniform_band,SAMPLE_RATE
+from filter import load_virgin_file,filter_signal_mne_8chan,SAMPLE_RATE
 
-file_path = sys.argv[1] # this is the path to an OpenBci raw data file (.txt)
+file_path = sys.argv[1] # this is the path to an OpenBci raw data file (.txt) input by the user
 
 print("Displaying all channels in \n'{}'".format(file_path))
 
