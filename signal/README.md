@@ -35,7 +35,7 @@ Note: it's bad form to push jupyter notebooks, should we move this to google col
 - [ ] Implement filters in numpy, see [2020](https://github.com/NTX-McGill/NeuroTechX-McGill-2020/blob/main/offline/signal_processing/filtering.py) and [2019](https://github.com/NTX-McGill/NeuroTechX-McGill-2019) code 
 - [ ] Research: Look into what the mne and mne-realtime libraries have to offer, we may not have to code everything ourselves if we can make use of these efficiently.
 - [ ] Start featurizing:
-    - [ ] Implement [peak detection algorithm](https://www.sciencedirect.com/science/article/pii/S2212017312004227) (I made a really basic one, but we need a better one, this one is not fool-proof in featurize)
+    - [ ] Implement [peak detection algorithm](https://www.sciencedirect.com/science/article/pii/S2212017312004227) (I made a really basic one, but we need a better one, this one is not fool-proof in featurize), also https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3342622/, https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5516746/#:~:text=R%20peak%20detection%20in%20ECG,T%20wave%2C%20and%20time%20intervals.&text=Moreover%2C%20SEHT%20detects%20many%20noise,ECG%20data%20with%20long%20pauses.
     - [ ] basic time domain HRV (heart-rate variability) feature (keep in mind we'll have to make this a real-time feature, think about this when you design it) 
     - [ ] Pointcare plots for nice visual display of HRV
     - [ ] Frequency domain HRV stuff
