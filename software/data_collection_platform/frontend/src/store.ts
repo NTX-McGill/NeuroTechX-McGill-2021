@@ -1,10 +1,8 @@
 import { configureStore } from "@reduxjs/toolkit";
+import reducer from "./state";
 
 const store = configureStore({
-  reducer: {
-    // Placeholder reducer, remove once we've added one.
-    placeholder: (st = null) => st,
-  },
+  reducer,
   devTools: true,
 });
 
