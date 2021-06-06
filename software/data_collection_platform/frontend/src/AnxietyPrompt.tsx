@@ -1,29 +1,20 @@
-import React, { useState, useEffect, useRef } from "react";
-import { anxiousPeriods } from "./state";
-import { useDispatch } from "./hooks";
+import React, { useState, useEffect } from "react";
+import api from "./api";
 import "./AnxietyPrompt.scss";
 
 const AnxietyPrompt = () => {
   const [anxious, setAnxious] = useState<boolean>(false);
-  const startTime = useRef<string | null>(null);
-  const dispatch = useDispatch();
 
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
       if (e.code === "Space") {
-        startTime.current = new Date().toISOString();
+        api.anxiousStart({ time: new Date().toISOString() })
         setAnxious(true);
       }
     };
     const keyup = (e: KeyboardEvent) => {
       if (e.code === "Space") {
-        if (startTime.current !== null) {
-          const period: [string, string] = [
-            startTime.current,
-            new Date().toISOString(),
-          ];
-          dispatch(anxiousPeriods.addPeriod(period));
-        }
+        api.anxiousStop({ time: new Date().toISOString() });
         setAnxious(false);
       }
     };
@@ -33,7 +24,7 @@ const AnxietyPrompt = () => {
       document.removeEventListener("keydown", keydown);
       document.removeEventListener("keyup", keyup);
     };
-  }, [dispatch]);
+  }, []);
 
   return (
     <div className="AnxietyPrompt">
