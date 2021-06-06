@@ -10,4 +10,7 @@
 3. Install dependencies in newly created virtual environment: `pip install -r requirements.txt`
 
 ## Running the application
-To run the application, simply use `python app.py`
+
+```
+$ python -m flask run
+```
