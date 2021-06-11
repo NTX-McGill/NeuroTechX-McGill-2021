@@ -1,0 +1,77 @@
+.DataCollectionPage {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  flex-flow: column nowrap;
+  justify-content: flex-center;
+  align-items: center;
+
+  h1 {
+    margin-bottom: 1rem;
+    padding-top: 1rem;
+
+    &:not(:first-child) {
+      margin-top: 1rem;
+    }
+
+    color: var(--color-primary-blue);
+    font-size: 2.5rem;
+    font-weight: bold;
+  }
+
+  p {
+    font-size: 1.5rem;
+    margin: 1.5rem 0;
+  }
+
+  > :is(main, header) {
+    padding: 0 clamp(1rem, 5%, 8rem);
+  }
+
+  > header {
+    margin-bottom: auto;
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+
+    height: 5rem;
+    border-bottom: 1px solid var(--color-secondary-blue);
+    width: 100%;
+
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: center;
+
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--color-primary-blue);
+
+    #header-logo {
+      margin: 0;
+      margin-right: 1rem;
+      height: 2.5rem;
+      width: auto;
+    }
+  }
+
+  > nav {
+    margin-top: auto;
+    margin-bottom: 4rem;
+    padding-top: 1rem;
+    padding-bottom: 2rem;
+
+    display: flex;
+    flex-flow: row nowrap;
+
+    .arrow-prev {
+      margin-right: 1rem;
+      color: var(--color-primary-blue);
+    }
+
+    .arrow-next {
+      margin-left: 1rem;
+      color: white;
+      background-color: var(--color-primary-blue);
+    }
+  }
+}
