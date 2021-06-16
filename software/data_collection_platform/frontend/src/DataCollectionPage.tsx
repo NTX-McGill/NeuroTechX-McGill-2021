@@ -1,8 +1,11 @@
 import React, { useState } from "react";
-import { IconButton } from "@material-ui/core";
+import { IconButton, Radio } from "@material-ui/core";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import { logo } from "./assets";
+import api from "./api";
 import "./DataCollectionPage.scss";
+
+type FeedbackValue = 1 | 2 | 3;
 
 const DataCollectionPage = ({ links }: { links: string[] }) => {
   // Highest possible integer value for status.
@@ -18,10 +21,18 @@ const DataCollectionPage = ({ links }: { links: string[] }) => {
 
   const isWelcome = status === -1;
   const isFinal = status === endIndex;
+  const isFeedback = !isWelcome && !isFinal && status % 2 !== 0;
   const index = Math.floor(status / 2);
 
+  const [feedback, setFeedback] = useState<FeedbackValue | null>(null);
+
   const onClickPrev = () => setStatus(Math.max(-1, status - 1));
-  const onClickNext = () => setStatus(Math.min(endIndex, status + 1));
+  const onClickNext = () => {
+    if (isFeedback && feedback !== null) {
+      api.sendFeedback({ url: links[index], stress_level: feedback });
+    }
+    setStatus(Math.min(endIndex, status + 1));
+  };
 
   const Main = isWelcome ? (
     <Welcome
@@ -31,9 +42,9 @@ const DataCollectionPage = ({ links }: { links: string[] }) => {
   ) : isFinal ? (
     <Final />
   ) : status % 2 === 0 ? (
-    <Video url={links[index]} />
+    <Video {...{ index, links }} />
   ) : (
-    <Feedback url={links[index]} />
+    <Feedback {...{ index, links }} value={feedback} onChange={setFeedback} />
   );
 
   return (
@@ -108,10 +119,59 @@ const Welcome = ({
 
 const Final = () => <div>End!</div>;
 
-const Video = ({ url }: { url: string }) => {
-  return <div>Video for {url}</div>;
+const Video = ({ index, links }: { index: number; links: string[] }) => {
+  return (
+    <div>
+      <h1>
+        Viewing video {index + 1} of {links.length}
+      </h1>
+    </div>
+  );
 };
 
-const Feedback = ({ url }: { url: string }) => {
-  return <div>Feedback for {url}</div>;
+const Feedback = ({
+  index,
+  links,
+  value,
+  onChange,
+}: {
+  index: number;
+  links: string[];
+  value: FeedbackValue | null;
+  onChange?: (v: FeedbackValue) => void;
+}) => {
+  const isFinal = index + 1 === links.length;
+
+  const onChange_ = ({ target: { value } }) =>
+    onChange?.(parseInt(value) as FeedbackValue);
+
+  return (
+    <div>
+      <h1>Feedback</h1>
+      <h2>How would you rate your overall stress level from that video?</h2>
+      <div className="feedback-form">
+        <label>
+          Not stressed at all
+          <Radio value={"1"} checked={value === 1} onChange={onChange_} />
+        </label>
+        <Radio value={"2"} checked={value === 2} onChange={onChange_} />
+        <label>
+          <Radio value={"3"} checked={value === 3} onChange={onChange_} />
+          Extremely stressed
+        </label>
+      </div>
+
+      {!isFinal && (
+        <>
+          <h2>Take some breaths to relax yourself before the next video</h2>
+          <p>
+            Before we start video {index + 2} of {links.length}, please take a
+            minute to relax yourself. Whenever you feel ready, please continue
+            to the next page. As a reminder, you are allowed to skip the video
+            at any point if it makes you uncomfortable.
+          </p>
+        </>
+      )}
+    </div>
+  );
 };

@@ -4,8 +4,6 @@
 
   display: flex;
   flex-flow: column nowrap;
-  justify-content: flex-center;
-  align-items: center;
 
   h1 {
     margin-bottom: 1rem;
@@ -20,9 +18,15 @@
     font-weight: bold;
   }
 
-  p {
-    font-size: 1.5rem;
+  h2 {
     margin: 1.5rem 0;
+    color: var(--color-primary-blue);
+    font-size: 1.5rem;
+  }
+
+  p {
+    margin-bottom: 1.5rem;
+    font-size: 1.5rem;
   }
 
   > :is(main, header) {
@@ -36,7 +40,6 @@
 
     height: 5rem;
     border-bottom: 1px solid var(--color-secondary-blue);
-    width: 100%;
 
     display: flex;
     flex-flow: row nowrap;
@@ -60,6 +63,7 @@
     padding-top: 1rem;
     padding-bottom: 2rem;
 
+    align-self: center;
     display: flex;
     flex-flow: row nowrap;
 
@@ -72,6 +76,25 @@
       margin-left: 1rem;
       color: white;
       background-color: var(--color-primary-blue);
+    }
+  }
+
+  .feedback-form {
+    display: flex;
+    flex-flow: row;
+    align-items: center;
+    color: var(--color-gray);
+
+    .MuiRadio-root {
+      color: var(--color-primary-blue);
+
+      &:first-child {
+        margin-left: 1.5rem;
+      }
+
+      &:last-child {
+        margin-right: 1.5rem;
+      }
     }
   }
 }

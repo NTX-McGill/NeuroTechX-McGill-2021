@@ -20,8 +20,16 @@ const query = async (endpoint: string, method: string, data: object = {}) => {
 // e.g.
 //   api.anxietyUp({ ... })
 //   api.anxietyDown({ ... })
+//
+// prettier-ignore
 const api = {
-  anxiousStart: (d: { time: string }) => query("/api/anxious/start", "POST", d),
-  anxiousStop: (d: { time: string }) => query("/api/anxious/stop", "POST", d),
+  anxiousStart: (d: { time: string }) =>
+    query("/api/anxious/start", "POST", d),
+
+  anxiousStop: (d: { time: string }) =>
+    query("/api/anxious/stop", "POST", d),
+
+  sendFeedback: (d: { url: string; stress_level: 1 | 2 | 3 }) =>
+    query("/api/feedback", "POST", d),
 };
 export default api;
