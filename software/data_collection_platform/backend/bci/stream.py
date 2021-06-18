@@ -1,11 +1,9 @@
 import time
 from pylsl import StreamInlet, resolve_stream
+import logging
+import numpy as np
 
 from mp.shared import *
-
-import logging
-
-import numpy as np
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
 logger = logging.getLogger(__name__)
