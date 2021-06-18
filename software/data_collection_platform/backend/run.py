@@ -9,7 +9,7 @@ if __name__ == "__main__":
     p = Process(target=stream_bci)
     p.start()
 
-    # create an run flask app using current process
+    # create and run flask app using current process
     app = create_app()
     app.run()
 
