@@ -35,16 +35,14 @@ def stream_bci():
         # get a chunk of samples
         samples, _ = inlet.pull_chunk() # ignoring the timestamps for now...
         
-        if samples:
-            with video_playing_status.get_lock():
-                if video_playing_status.value: 
+        if not samples:
+            continue
 
-                    # if video is playing, start recording
-                    with spacebar_status.get_lock():
-                        if spacebar_status.value: 
-                            q.put_nowait((samples, 1)) # if spacebar is held (spacebar_status.value == 1), annotate samples with 1
-                        else: 
-                            q.put_nowait((samples, 0)) # otherwise annotate samples with 0 (spacebar_status.value == 0)
+        with video_playing_status.get_lock():
+            if video_playing_status.value: 
 
-                    # log stored samples
-                    logger.info(samples)
+                with spacebar_status.get_lock():
+                    spacebar_held = 1 if spacebar_status.value else 0
+                    q.put_nowait((samples, spacebar_held))
+
+                logger.info(samples)
