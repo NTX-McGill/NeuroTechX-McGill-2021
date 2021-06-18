@@ -27,7 +27,7 @@ def validate_json(*fields):
 
 @bp.route('/video/start', methods=['POST'])
 @validate_json('time')
-def start_recording():
+def video_start():
     if not request.is_json:
         return {}, 400
 
