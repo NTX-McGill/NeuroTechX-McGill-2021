@@ -40,7 +40,7 @@ def video_start():
 
 @bp.route('/video/stop', methods=['POST'])
 @validate_json('time')
-def end_recording():
+def video_stop():
     if not request.is_json:
         return {}, 400
     
