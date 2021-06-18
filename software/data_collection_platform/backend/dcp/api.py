@@ -18,7 +18,7 @@ def validate_json(*fields):
 
             missing_fields = fields - request.json.keys()
             if len(missing_fields) > 0:
-                return {'error': f'Missing fields {", ".join(missing_fields)}'}, 400
+                return {'error': f'Missing fields: {", ".join(missing_fields)}'}, 400
 
             return f(*args, **kwargs)
         return decorated
@@ -64,10 +64,8 @@ def feedback():
     return {}, 200
 
 @bp.route('/anxious/start', methods=['POST'])
+@validate_json()
 def anxious_start():
-    if not request.is_json:
-        return {}, 400
-
     # acquire lock to modify shared variable
     with spacebar_status.get_lock():
         # set the variable to 1 to indicate that the space bar is held
@@ -76,10 +74,8 @@ def anxious_start():
     return {}, 200
 
 @bp.route('/anxious/stop', methods=['POST'])
+@validate_json()
 def anxious_stop():
-    if not request.is_json:
-        return {}, 400
-    
     # acquire lock to modify shared variable
     with spacebar_status.get_lock():
         # set the variable to 0 to indicate that the space bar is released
