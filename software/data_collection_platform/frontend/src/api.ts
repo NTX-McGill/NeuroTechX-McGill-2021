@@ -1,34 +1,7 @@
-const endpoints = {
-  // {
-  //   time: string; // RFC3339 time
-  // }
-  anxiousStart: {
-    method: "POST",
-    endpoint: "/api/anxious/start",
-  },
-
-  // {
-  //   time: string // RFC3339 time
-  // }
-  anxiousStop: {
-    method: "POST",
-    endpoint: "/api/anxious/stop",
-  },
-};
-
-type Endpoints = typeof endpoints;
-
-type Api = {
-  [k in keyof Endpoints]: (
-    data: object,
-  ) => ReturnType<ReturnType<typeof makeQuery>>;
-};
-
-const makeQuery = ({ endpoint, method }: Endpoints[keyof Endpoints]) => async (
-  data: object = {},
-) => {
+const query = async (endpoint: string, method: string, data: object = {}) => {
   if (process.env.REACT_APP_SERVER_URL === undefined)
     throw new Error("$REACT_APP_SERVER_URL is undefined");
+
   const url = `${process.env.REACT_APP_SERVER_URL}${endpoint}`;
 
   const resp = await fetch(url, {
@@ -47,7 +20,16 @@ const makeQuery = ({ endpoint, method }: Endpoints[keyof Endpoints]) => async (
 // e.g.
 //   api.anxietyUp({ ... })
 //   api.anxietyDown({ ... })
-const api = Object.fromEntries(
-  Object.entries(endpoints).map(([k, v]) => [k, makeQuery(v)]),
-) as Api;
+//
+// prettier-ignore
+const api = {
+  anxiousStart: (d: { time: string }) =>
+    query("/api/anxious/start", "POST", d),
+
+  anxiousStop: (d: { time: string }) =>
+    query("/api/anxious/stop", "POST", d),
+
+  sendFeedback: (d: { url: string; stress_level: 1 | 2 | 3 }) =>
+    query("/api/feedback", "POST", d),
+};
 export default api;
