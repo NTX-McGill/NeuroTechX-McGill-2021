@@ -7,8 +7,7 @@ def create_app():
 
     CORS(app)
 
-    from . import api, openbci
-    app.register_blueprint(openbci.bp)
+    from . import api
     app.register_blueprint(api.bp)
 
     return app
