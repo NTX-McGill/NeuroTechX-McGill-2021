@@ -1,12 +1,11 @@
 import React from "react";
-import VideoBox from "./VideoBox";
-import AnxietyPrompt from "./AnxietyPrompt";
+import DataCollectionPage from "./DataCollectionPage";
+import { youtubeLinks } from "./utils/links";
 import "./App.scss";
 
 const App = () => (
   <div className="App">
-    <VideoBox />
-    <AnxietyPrompt />
+    <DataCollectionPage links={youtubeLinks} />
   </div>
 );
 
