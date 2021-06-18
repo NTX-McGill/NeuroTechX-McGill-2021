@@ -64,7 +64,7 @@ def feedback():
     return {}, 200
 
 @bp.route('/anxious/start', methods=['POST'])
-def spacebar_down():
+def anxious_start():
     if not request.is_json:
         return {}, 400
 
