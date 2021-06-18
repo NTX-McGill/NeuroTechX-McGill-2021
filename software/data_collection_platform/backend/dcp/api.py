@@ -76,7 +76,7 @@ def anxious_start():
     return {}, 200
 
 @bp.route('/anxious/stop', methods=['POST'])
-def spacebar_up():
+def anxious_stop():
     if not request.is_json:
         return {}, 400
     
