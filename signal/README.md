@@ -1,7 +1,7 @@
 # Signal Processing
 
 ## Dependencies
-Install all of the packages together with ``pip install -r requirements.txt`
+Install all of the packages together with ``pip install -r requirements.txt``
 - [Python 3.8.5](https://www.python.org/downloads/) or later
 - [Numpy 1.19.3](https://numpy.org/) or later ``pip install numpy``
 - [Matplotlib 3.3.2](https://matplotlib.org/) or later ``pip install matplotlib``
