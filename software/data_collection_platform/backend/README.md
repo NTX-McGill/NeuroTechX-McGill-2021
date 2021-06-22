@@ -23,3 +23,8 @@ $ python run.py
 3. Select "Networking" on one of the dropdowns, choose LSL protocol, select a data type (TimeSeries) then click "Start LSL Stream"
 4. Run the application as shown above
 5. Open a web browser and go to URLSHOWNINCONSOLEFORFLASKAPP/bci/stream
+
+
+## Connect to db
+1. Download the Python SQL Driver - pyodbc. See [here](https://docs.microsoft.com/en-us/sql/connect/python/pyodbc/python-sql-driver-pyodbc?view=sql-server-ver15)
+1. Export database username as `usr` and database password as `pwd`
