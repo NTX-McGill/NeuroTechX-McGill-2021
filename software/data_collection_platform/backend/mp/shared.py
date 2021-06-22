@@ -1,6 +1,6 @@
 """ This file holds the shared variables between processes """
 
-from multiprocessing import Queue, Value, Lock, Array
+from multiprocessing import Queue, Value
 
 # queue is used as shared buffer allocated from shared memory 
 # NOTE: using a queue for message passing between processes would be more efficient - the queue is unused for now but could be used for message passing
