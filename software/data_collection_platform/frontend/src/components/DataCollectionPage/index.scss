@@ -29,7 +29,8 @@
     font-size: 1.5rem;
   }
 
-  > :is(main, header) {
+  > header,
+  > main > div {
     padding: 0 clamp(1rem, 5%, 8rem);
   }
 
@@ -70,12 +71,20 @@
     .arrow-prev {
       margin-right: 1rem;
       color: var(--color-primary-blue);
+
+      &.Mui-disabled {
+        color: var(--color-gray);
+      }
     }
 
     .arrow-next {
       margin-left: 1rem;
       color: white;
       background-color: var(--color-primary-blue);
+
+      &.Mui-disabled {
+        background-color: var(--color-gray);
+      }
     }
   }
 
@@ -95,6 +104,22 @@
       &:last-child {
         margin-right: 1.5rem;
       }
+    }
+  }
+
+  .Final {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    margin-top: 0;
+    padding-right: 0;
+
+    > div {
+      margin-right: 1rem;
+    }
+
+    img {
+      width: auto;
+      height: 100%;
     }
   }
 }
