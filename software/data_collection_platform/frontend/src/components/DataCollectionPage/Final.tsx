@@ -18,4 +18,5 @@ const Final = () => (
     <img alt="" src={finalBackground} />
   </div>
 );
+
 export default Final;

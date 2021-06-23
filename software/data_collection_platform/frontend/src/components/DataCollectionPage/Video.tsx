@@ -9,7 +9,7 @@ interface Props
 }
 
 const Video = ({ index, videos, ...rest }: Readonly<Props>) => {
-  const { url, start, end } = videos[index];
+  const { youtube_url, start, end } = videos[index];
 
   return (
     <div>
@@ -18,7 +18,7 @@ const Video = ({ index, videos, ...rest }: Readonly<Props>) => {
       </h1>
 
       <ReactPlayer
-        url={url}
+        url={youtube_url}
         config={{
           youtube: {
             playerVars: {
