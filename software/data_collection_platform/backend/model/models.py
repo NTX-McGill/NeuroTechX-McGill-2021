@@ -3,9 +3,6 @@ from sqlalchemy.orm import declarative_base, relationship
 from datetime import datetime
 from sqlalchemy import create_engine, MetaData
 from sqlalchemy.ext.declarative import declarative_base
-import os
-import urllib
-import pyodbc
 
 Base = declarative_base()
 
