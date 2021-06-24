@@ -217,6 +217,18 @@ def plot_epoched(epoched,maxdisp=50):
         plt.show()
     return
 
+def get_heartrate(npeaks, nsamples):
+    """
+    Convert the number of peaks in a number of samples to a heart rate (bpm)
+
+    Input:
+    - npeaks : number of peaks
+    - nsamples : number of samples
+
+    Output:
+        heart rate in BPM
+    """
+    return int((float(npeaks) * 250 * 60) / float(nsamples))
 
 if __name__ == "__main__":
     file_path = "../data/2021-05-27/01-5_guitar_OpenBCI-RAW-2021-05-27_20-56-18.txt"
