@@ -228,7 +228,7 @@ def get_heartrate(npeaks, nsamples):
     Output:
         heart rate in BPM
     """
-    return int((float(npeaks) * 250 * 60) / float(nsamples))
+    return int((float(npeaks) * SAMPLE_RATE * 60) / float(nsamples))  # peaks * samples/s * 60s/min * 1/samples -> peaks/min
 
 if __name__ == "__main__":
     file_path = "../data/2021-05-27/01-5_guitar_OpenBCI-RAW-2021-05-27_20-56-18.txt"
