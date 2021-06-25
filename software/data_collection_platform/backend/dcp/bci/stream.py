@@ -32,7 +32,6 @@ def stream_bci():
     
     # retrieve estimated time correction offset for the given stream - this is the number that needs to be added to a time stamp that was remotely generated via local_clock() to map it into the local clock domain fo this machine
     inlet.time_correction()
-    
     while True:
         
         # get a chunk of samples
