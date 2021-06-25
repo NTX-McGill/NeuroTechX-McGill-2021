@@ -35,7 +35,7 @@ def stream_bci():
     while True:
         
         # get a chunk of samples
-        samples, _ = inlet.pull_chunk() # ignoring the timestamps for now...
+        samples, _timestamps = inlet.pull_chunk() # ignoring the timestamps for now...
         
         if not samples:
             continue
