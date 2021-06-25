@@ -1,10 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Float, ForeignKey
-from sqlalchemy.orm import declarative_base, relationship, validates
 from datetime import datetime
-from sqlalchemy.ext.declarative import declarative_base
-
-Base = declarative_base()
-
+# import db stuff 
 
 def auto_str(cls):
     def __str__(self):
@@ -17,35 +12,35 @@ def auto_str(cls):
 
 
 @auto_str
-class CollectedData(Base):
+class CollectedData(db.Model):
 
     __tablename__ = "collected_data"
 
-    id = Column(Integer, primary_key=True)
-    channel_1 = Column(Float)
-    channel_2 = Column(Float)
-    channel_3 = Column(Float)
-    channel_4 = Column(Float)
-    channel_5 = Column(Float)
-    channel_6 = Column(Float)
-    channel_7 = Column(Float)
-    channel_8 = Column(Float)
-    is_subject_anxious = Column(Boolean)
-    collection_instance = Column(String, ForeignKey("collection_instance.id"))
-    order = Column(Integer)
+    id = db.Column(db.Integer, primary_key=True)
+    channel_1 = db.Column(db.Float)
+    channel_2 = db.Column(db.Float)
+    channel_3 = db.Column(db.Float)
+    channel_4 = db.Column(db.Float)
+    channel_5 = db.Column(db.Float)
+    channel_6 = db.Column(db.Float)
+    channel_7 = db.Column(db.Float)
+    channel_8 = db.Column(db.Float)
+    is_subject_anxious = db.Column(db.Boolean)
+    collection_instance = db.Column(db.String, ForeignKey("collection_instance.id"))
+    order = db.Column(db.Integer)
 
     def __repr__(self):
         return str(self.__dict__)
 
 
 @auto_str
-class CollectionInstance(Base):
+class CollectionInstance(db.Model):
     __tablename__ = "collection_instance"
 
-    id = Column(Integer, primary_key=True)
-    stress_level = Column(Integer)
-    video_id = Column(String, ForeignKey("video.id"))
-    date = Column(DateTime, default=datetime.utcnow, timezone=True)
+    id = db.Column(db.Integer, primary_key=True)
+    stress_level = db.Column(db.Integer)
+    video_id = db.Column(db.String, db.ForeignKey("video.id"))
+    date = db.Column(db.DateTime, default=datetime.utcnow, timezone=True)
 
     @validates("stress_level")
     def validates_stress_level(self, key, stress_lv):
@@ -57,14 +52,14 @@ class CollectionInstance(Base):
 
 
 @auto_str
-class Video(Base):
+class Video(db.Model):
     __tablename__ = "video"
 
-    id = Column(String, primary_key=True)
-    start = Column(Integer)
-    end = Column(Integer)
-    is_stressful = Column(Boolean)
-    keywords = Column(String)
+    id = db.Column(db.String, primary_key=True)
+    start = db.Column(db.Integer)
+    end = db.Column(db.Integer)
+    is_stressful = db.Column(db.Boolean)
+    keywords = db.Column(db.String)
 
     def __repr__(self):
         return str(self.__dict__)
