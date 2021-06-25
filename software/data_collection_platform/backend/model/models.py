@@ -1,5 +1,10 @@
 from datetime import datetime
-# import db stuff 
+from sqlalchemy.ext.declarative import declarative_base
+
+db = SQLAlchemy()
+
+Base = declarative_base()
+
 
 def auto_str(cls):
     def __str__(self):
