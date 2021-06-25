@@ -12,7 +12,7 @@ class Video(db.Model):
     start = db.Column(db.Time, nullable=True)
     end = db.Column(db.Time, nullable=True)
     is_stressful = db.Column(db.Boolean, nullable=False)
-    keywords = db.Column(ARRAY(db.String), nullable=False)
+    keywords = db.Column(ARRAY(db.String), nullable=True)
 
     def __repr__(self):
         return str(self.__dict__)
