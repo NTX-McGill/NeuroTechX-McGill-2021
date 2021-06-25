@@ -6,17 +6,16 @@ import wfdb
 from wfdb import processing
 from heartpy.datautils import rolling_mean, _sliding_window
 from heartpy.peakdetection import detect_peaks
-import utils
+from feature_extractions import get_features_matrix 
 
-#Load data from csv 
-data = hp.get_data('e0103.csv')
+#Load data for driver 3 
+signals, fields = wfdb.rdsamp('drive03', pn_dir='drivedb')
+#Clean data 
+patient_data = pd.DataFrame(signals, columns=fields['sig_name'], dtype='float')
+patient_data.dropna(inplace=True)
+data = np.asarray(patient_data['ECG'])
+#Download feature matrix 
+fm = get_features_matrix(data, sr = fields['fs'] ) 
+print(fm.shape)
 
-#You can full service process the dataset into windowed dataset 
-utils.make_windowed_dataset2(data, sample_rate=250, windowsize=20, overlap=0)
 
-#Or you can extract peaks on your own generate features 
-#METHOD 1: Heartpy
-peaks = utils.calculate_peaks_heartpy(data, windowsize=.75, sample_rate=250)
-
-#METHOD 2: WFDB
-peaks = utils.calculate_peaks_wfdb(data, sample_rate = 250)
