@@ -1,8 +1,3 @@
-from flask_sqlalchemy import SQLAlchemy
-
-# global database object
-db = SQLAlchemy()
-
 def auto_str(cls):
     def __str__(self):
         return '%s(%s)' % (

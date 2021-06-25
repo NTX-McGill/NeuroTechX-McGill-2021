@@ -1,15 +1,19 @@
 from datetime import datetime
 
-from models import auto_str, db
+from dcp.models.utils import auto_str
+from dcp import db
+
+from sqlalchemy.orm import validates
 
 @auto_str
 class CollectionInstance(db.Model):
     __tablename__ = "collection_instance"
 
     id = db.Column(db.Integer, primary_key=True)
-    stress_level = db.Column(db.Integer) 
+    stress_level = db.Column(db.Integer, nullable=False) 
     video_id = db.Column(db.Integer, db.ForeignKey("video.id"))
-    date = db.Column(db.DateTime, default=datetime.utcnow, timezone=True)
+    date = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+    config_id = db.Column(db.Integer, db.ForeignKey("bci_config.id"))
 
     @validates("stress_level")
     def validates_stress_level(self, key, stress_lv):

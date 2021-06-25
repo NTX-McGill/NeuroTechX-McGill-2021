@@ -1,7 +1,5 @@
 from dcp import create_app
-from multiprocessing import Process, Queue, Value
-from bci.stream import stream_bci
-import logging
+from dcp.bci.stream import stream_bci
 from dotenv import load_dotenv
 
 if __name__ == "__main__":

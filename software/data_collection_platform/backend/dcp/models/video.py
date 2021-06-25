@@ -1,4 +1,5 @@
-from models import auto_str, db
+from dcp.models.utils import auto_str
+from dcp import db
 
 from sqlalchemy.types import ARRAY
 

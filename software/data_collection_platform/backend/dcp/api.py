@@ -1,7 +1,7 @@
 from functools import wraps
 from flask import Blueprint, request
 import dateutil.parser
-from mp.shared import *
+from dcp.mp.shared import *
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
