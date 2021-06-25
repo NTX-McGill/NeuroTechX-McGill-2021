@@ -32,6 +32,7 @@ class CollectedData(Base):
     channel_8 = Column(Float)
     is_subject_anxious = Column(Boolean)
     collection_instance = Column(String, ForeignKey("collection_instance.id"))
+    order = Column(Integer)
 
     def __repr__(self):
         return str(self.__dict__)
