@@ -40,7 +40,7 @@ def stream_bci():
             if video_playing_status.value: 
 
                 with spacebar_status.get_lock():
-                    spacebar_held = 1 if spacebar_status.value else 0
+                    spacebar_held = True if spacebar_status.value else False
                     q.put_nowait((samples, spacebar_held))
 
                 logger.info(samples)
