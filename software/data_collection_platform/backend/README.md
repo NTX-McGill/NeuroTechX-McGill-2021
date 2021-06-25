@@ -26,5 +26,4 @@ $ python run.py
 
 
 ## Connect to db
-1. Download the Python SQL Driver - pyodbc. See [here](https://docs.microsoft.com/en-us/sql/connect/python/pyodbc/python-sql-driver-pyodbc?view=sql-server-ver15)
-1. Export database username as `usr` and database password as `pwd`
+1. Export database connection url as `DATABASE_URL`.
