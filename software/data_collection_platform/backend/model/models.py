@@ -1,5 +1,5 @@
-from sqlalchemy import Column, Integer, String, DateTime, Boolean, Numeric, ForeignKey
-from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import Column, Integer, String, DateTime, Boolean, Float, ForeignKey
+from sqlalchemy.orm import declarative_base, relationship, validates
 from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -22,15 +22,15 @@ class CollectedData(Base):
     __tablename__ = "collected_data"
 
     id = Column(Integer, primary_key=True)
-    channel_1 = Column(Numeric)
-    channel_2 = Column(Numeric)
-    channel_3 = Column(Numeric)
-    channel_4 = Column(Numeric)
-    channel_5 = Column(Numeric)
-    channel_6 = Column(Numeric)
-    channel_7 = Column(Numeric)
-    channel_8 = Column(Numeric)
-    space_bar_status = Column(Boolean)
+    channel_1 = Column(Float)
+    channel_2 = Column(Float)
+    channel_3 = Column(Float)
+    channel_4 = Column(Float)
+    channel_5 = Column(Float)
+    channel_6 = Column(Float)
+    channel_7 = Column(Float)
+    channel_8 = Column(Float)
+    is_subject_anxious = Column(Boolean)
     collection_instance = Column(String, ForeignKey("collection_instance.id"))
 
     def __repr__(self):
@@ -44,8 +44,12 @@ class CollectionInstance(Base):
     id = Column(Integer, primary_key=True)
     stress_level = Column(Integer)
     video_id = Column(String, ForeignKey("video.id"))
-    date = Column(DateTime, default=datetime.utcnow)
-    video_id = Column(String, ForeignKey("video.id"))
+    date = Column(DateTime, default=datetime.utcnow, timezone=True)
+
+    @validates("stress_level")
+    def validates_stress_level(self, key, stress_lv):
+        assert 1 <= stress_lv <= 3
+        return stress_lv
 
     def __repr__(self):
         return str(self.__dict__)
@@ -56,8 +60,8 @@ class Video(Base):
     __tablename__ = "video"
 
     id = Column(String, primary_key=True)
-    start = Column(String)
-    end = Column(String)
+    start = Column(Integer)
+    end = Column(Integer)
     is_stressful = Column(Boolean)
     keywords = Column(String)
 
