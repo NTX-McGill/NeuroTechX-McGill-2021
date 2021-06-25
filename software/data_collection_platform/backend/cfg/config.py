@@ -1,9 +1,14 @@
-# DEFAULT CONFIGURATIONS
 import os 
 
-class DefaultConfig(object):
-    ENV = "development"
-    SECRET_KEY = 'dev'
-    DEBUG = True
+class Config(object):
+    DEBUG = False
     TESTING = False
-    DATABASE = os.path.join(os.path.dirname(__file__), "instance\\flaskr.sqlite")
+    SECRET_KEY = os.getenv('DATABASE_URL', default='not_so_secret')
+    SQLALCHEMY_DATABASE_URI = os.getenv('DATABASE_URL', default='sqlite:///test.db')
+
+class DevelopmentConfig(Config):
+    DEVELOPMENT = True
+    DEBUG = True
+
+class TestingConfig(Config):
+    TESTING = True
