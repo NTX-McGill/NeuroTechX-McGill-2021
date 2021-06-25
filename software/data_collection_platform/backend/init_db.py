@@ -11,5 +11,5 @@ if __name__ == "__main__":
     # loading environment variables in .env
     load_dotenv() 
 
-    # create and run flask app using current process
+    # use dcp app context to create all db tables
     db.create_all(app = create_app())
