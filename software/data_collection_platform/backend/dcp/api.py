@@ -1,7 +1,11 @@
 from functools import wraps
-from flask import Blueprint, request
+from flask import Blueprint, request, Flask
+from flask_sqlalchemy import SQLAlchemy
 import dateutil.parser
-from dcp.mp.shared import *
+import csv
+from mp.shared import *
+from . import db
+from models.video import *
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -90,29 +94,16 @@ def anxious_stop():
     return {}, 200
 
 
-# DATABASE CONFIGURATION
-server = '<server>.database.windows.net'
-database = '<database>'
-username = '<username>'
-password = '<password>'
-driver = '{ODBC Driver 17 for SQL Server}'
-table_name = ""
-
-
 @bp.route('/videos', methods=['GET'])
 def get_videos():
-    with pyodbc.connect('DRIVER='+driver+';SERVER='+server+';PORT=1433;DATABASE='+database+';UID='+username+';PWD=' + password) as conn:
-        with conn.cursor() as cursor:
-            vid_array = []
-
-            for row in cursor.execute("SELECT * FROM " + table_name):
-                new_entry = {}
-                new_entry["link"] = row.link
-                new_entry["start"] = row.start
-                new_entry["end"] = row.end
-                new_entry["is_stressful"] = row.is_stressful
-                new_entry["keywords"] = row.keywords
-                new_entry["video_id"] = row.link.split('/')[-1]
-                vid_array.append(new_entry)
-
-            return vid_array, 200
+    videos = []
+    for video in Video.query.all():
+        video_dict = {
+            "start": video.start
+            "end": video.end
+            "is_stressful": video.is_stressful
+            "keywords": video.keywords
+            "link": youtube_id
+        }
+        videos.append(video_dict)
+    return {"data": videos}, 200
