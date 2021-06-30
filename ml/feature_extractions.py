@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import wfdb
 from scipy import signal 
 from wfdb import processing
-from heartpy.datautils import rolling_mean, _sliding_window
+from heartpy.datautils import get_samplerate_datetime, rolling_mean, _sliding_window
 from heartpy.peakdetection import detect_peaks, make_windows, check_peaks, fit_peaks
 from heartpy import process_segmentwise
 from heartpy.analysis import calc_rr, calc_fd_measures 
@@ -128,7 +128,7 @@ class Feature_Extractor():
     def get_rMSSD(self, nn_intervals): # (9)
         return np.sqrt(((nn_intervals[1:] - nn_intervals[:-1])**2).mean())
 
-    def get_all_features(self, win, n_win):
+    def get_all_features(self, win, n_win, gsr = None):
         """
         :param window np.ndarray: 1d array, 2 second filtered window of data
         :param n_window np.ndarray: 1d array, 2 second normalized window
@@ -150,12 +150,21 @@ class Feature_Extractor():
         # print("FREQ DOMAIN FEATURES EXTRACTED")
     
         features = [nfd, nsd, hrv, avNN, sdNN, rMSSD, pNN20, pNN50, vlf, lf, hf, lf_hf]
+        if gsr.any(): features.append(gsr.mean())
+        
         return np.array(features)
 
-    def feature_matrix_from_whole_sample(self, freq_domain=True, time_domain=True): 
+    def feature_matrix_from_whole_sample(self, gsr=None): 
         windows, n_windows = window(self.data, self.sr, windowsize=10, overlap=0, min_size=0, filter=self.apply_bandpass)
-        # print("WINDOWING COMPLETE")
         features_mat = []
-        for win,n_win in zip(windows,n_windows):
-            features_mat.append(self.get_all_features(win, n_win)) 
+        if gsr.any(): 
+            gsr_windows, _ = window(gsr, self.sr, windowsize=10, overlap=0, min_size=0, filter=False)
+            for i in range(len(windows)): 
+                ecg, n_ecg, gsr = windows[i], n_windows[i], gsr_windows[i]
+                features_mat.append(self.get_all_features(win = ecg, n_win = n_ecg, gsr=gsr)) 
+        else: 
+            for win,n_win in zip(windows,n_windows):
+                features_mat.append(self.get_all_features(win, n_win)) 
         return np.array(features_mat)
+    
+    
