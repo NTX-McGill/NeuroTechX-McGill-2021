@@ -3,12 +3,12 @@ from flask import Blueprint, request, Flask
 from flask_sqlalchemy import SQLAlchemy
 import dateutil.parser
 import csv
-from mp.shared import *
+from .mp.shared import *
 from . import db
-from models.video import *
+from .models.video import *
+from .utils import save_videos
 
 bp = Blueprint('api', __name__, url_prefix='/api')
-
 
 def validate_json(*fields):
     """Decorator to validate JSON body.
@@ -99,11 +99,12 @@ def get_videos():
     videos = []
     for video in Video.query.all():
         video_dict = {
-            "start": video.start
-            "end": video.end
-            "is_stressful": video.is_stressful
-            "keywords": video.keywords
-            "link": youtube_id
+            "start": str(video.start),
+            "end": str(video.end),
+            "is_stressful": video.is_stressful,
+            "keywords": video.keywords,
+            "link": video.youtube_id
         }
         videos.append(video_dict)
     return {"data": videos}, 200
+    
