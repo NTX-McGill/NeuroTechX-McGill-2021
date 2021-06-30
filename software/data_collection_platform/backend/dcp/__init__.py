@@ -25,6 +25,7 @@ def create_app():
 
     # initialize extensions
     db.init_app(app)
+<<<<<<< HEAD
     celery.conf.update(app.config)
 
     # importing models so that Flask-Migrate can detect them
@@ -35,3 +36,17 @@ def create_app():
     migrate.init_app(app, db)
 
     return app
+=======
+
+    return app
+
+
+def save_videos():
+    with open('data/videos.csv', newline='') as videofile:
+        reader = csv.reader(videofile, delimiter=',')
+        for row in reader:
+            video = Video(youtube_id=row[0], start=row[1],
+                          end=row[2], is_stressful=row[3], keywords=row[4])
+            db.session.add(video)
+    db.session.commit()
+>>>>>>> feat: save videos to db and query them
