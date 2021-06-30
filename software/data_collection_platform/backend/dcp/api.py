@@ -13,7 +13,6 @@ from dcp.tasks import store_stream_data
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
-
 def validate_json(*fields):
     """Decorator to validate JSON body.
 
@@ -133,3 +132,4 @@ def get_videos():
         }
         videos.append(video_dict)
     return {"data": videos}, 200
+    
