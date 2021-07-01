@@ -34,4 +34,5 @@ def create_app():
     from dcp.models.video import Video
     migrate.init_app(app, db)
 
+
     return app

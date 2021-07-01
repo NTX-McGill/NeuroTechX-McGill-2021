@@ -117,3 +117,4 @@ def feedback():
 
     # returning the task_id for each task so that frontend can check back whether the task has completed or not later
     return {"tasks_ids": tasks_ids}, 200
+
