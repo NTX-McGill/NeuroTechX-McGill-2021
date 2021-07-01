@@ -1,6 +1,7 @@
 from dcp.models.utils import auto_str
 from dcp import db
 
+
 @auto_str
 class CollectedData(db.Model):
 

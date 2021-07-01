@@ -40,3 +40,15 @@ For example:
 >>> CollectedData.query.all()
 [<CollectedData>, ..., <CollectedData>]
 ```
+
+## Development database
+
+In order to not corrupt the production database, we should use a development database when developing the application. There are two options to setup such database locally: 
+1. Install the PostgreSQL server [here](https://www.postgresql.org/download/)
+2. Using docker: ``docker run --name my-db-name -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres``
+
+Then update the `DB_USERNAME`, `DB_PASSWORD` and `DATABASE_URL` to the configurations of your local database. 
+For example, if I used docker to start a postgres server on my local machine, then I would have in my `.env` file:
+- DB_USERNAME=postgres
+- DB_PASSWORD=mysecretpassword
+- DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/postgres
