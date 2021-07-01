@@ -1,7 +1,11 @@
 from pylsl import StreamInlet, resolve_stream
 import logging
 
-from dcp.mp.shared import *
+from dcp import db
+
+from models.configurations import OpenBCIConfig
+
+from dcp.mp.shared import bci_config_id, is_video_playing, is_subject_anxious, q
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
@@ -26,9 +30,16 @@ def stream_bci():
 
     # get information about the stream
     bci_config = inlet.info().as_xml()
-    with bci_configuration.get_lock():
-        bci_configuration.value = bci_config.encode("utf-8")
     logger.info(bci_config)
+
+    # write configuration to database and store
+    config = OpenBCIConfig(configuration=bci_config)
+    with bci_config_id.get_lock():
+        bci_config_id.value = config.id
+
+    # save current configuration to database
+    db.session.add(config)
+    db.session.commit()
 
     # retrieve estimated time correction offset for the given stream - this is the number that needs to be added to a
     # time stamp that was remotely generated via local_clock() to map it into the local clock domain fo this machine
