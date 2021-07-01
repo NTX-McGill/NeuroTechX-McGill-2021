@@ -3,6 +3,7 @@ from dcp import db
 
 from sqlalchemy.types import ARRAY
 
+
 @auto_str
 class Video(db.Model):
     __tablename__ = "video"
@@ -13,6 +14,7 @@ class Video(db.Model):
     end = db.Column(db.Time, nullable=True)
     is_stressful = db.Column(db.Boolean, nullable=False)
     keywords = db.Column(ARRAY(db.String), nullable=True)
+    youtube_url = db.Column(db.String(2048), nullable=False)
 
     def __repr__(self):
         return str(self.__dict__)

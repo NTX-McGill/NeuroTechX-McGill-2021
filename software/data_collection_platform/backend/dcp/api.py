@@ -1,9 +1,9 @@
 from functools import wraps
 from flask import Blueprint, request
-import dateutil.parser
 from dcp.mp.shared import *
 
 bp = Blueprint('api', __name__, url_prefix='/api')
+
 
 def validate_json(*fields):
     """Decorator to validate JSON body.
@@ -33,6 +33,7 @@ def video_start():
     
     return {}, 200
 
+
 @bp.route('/video/stop', methods=['POST'])
 @validate_json('time')
 def video_stop():
@@ -54,8 +55,9 @@ def anxious_start():
 def anxious_stop():
     with is_subject_anxious.get_lock():
         is_subject_anxious.value = 0
-    
+
     return {}, 200
+
 
 @bp.route('/feedback', methods=['POST'])
 @validate_json('url', 'stress_level')
@@ -67,4 +69,5 @@ def feedback():
     feedback = request.json['stress_level']
     print(f'Feedback for {url} is {feedback}')
     return {}, 200
+
 
