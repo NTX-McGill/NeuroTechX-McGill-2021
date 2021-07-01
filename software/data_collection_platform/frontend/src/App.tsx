@@ -1,11 +1,11 @@
 import React from "react";
-import DataCollectionPage from "./DataCollectionPage";
+import DataCollectionPage from "./components/DataCollectionPage";
 import { youtubeLinks } from "./utils/links";
 import "./App.scss";
 
 const App = () => (
   <div className="App">
-    <DataCollectionPage links={youtubeLinks} />
+    <DataCollectionPage videos={youtubeLinks} />
   </div>
 );
 
