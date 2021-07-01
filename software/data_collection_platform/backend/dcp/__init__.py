@@ -10,7 +10,7 @@ from dcp.cfg.config import app_configs
 # global database object
 db = SQLAlchemy()
 migrate = Migrate()
-celery = Celery(__name__, broker=app_configs.CELERY_BROKER_URL)
+celery = Celery(__name__, broker=app_configs.CELERY_BROKER_URL, backend=app_configs.CELERY_RESULT_BACKEND)
 
 
 def create_app():

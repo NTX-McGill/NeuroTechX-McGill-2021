@@ -75,7 +75,7 @@ def anxious_stop():
 @validate_json('video_id', 'stress_level')
 def feedback():
     """Clear the buffer containing OpenBCI data once the feedback form is received.
-    Store this data to the database by creating celery tasks that write to the database. 
+    Store this data to the database by creating celery tasks that write to the database.
     """
     # TODO: frontend needs to send video_id and feedback
 
@@ -111,18 +111,8 @@ def feedback():
         # update new value for order
         order += data.shape[0]
 
-        store_stream_data(data)
+        celery.send_task("tasks.store_stream_data", kwargs={"data": data})
+
+    # TODO return task_id so that user can check back whether the task has completed or not
 
     return {}, 200
-
-
-@celery.task
-def store_stream_data(data: np.ndarray):
-    """Celery task responsible for storing a chunk of streamed data to the database.
-
-    Args:
-        data (numpy.ndarray): OpenBCI data to store to the database.
-    """
-    df = pd.DataFrame(data, columns=["channel_1", "channel_2", "channel_3", "channel_4", "channel_5", "channel_6",
-                                     "channel_7", "channel_8", "is_subject_anxious", "collection_instance", "order"])
-    df.to_sql(name=CollectedData.__tablename__, con=db.engine, if_exists="append")

@@ -9,6 +9,10 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
+    # cloudamqp Rabbit MQ
+    CELERY_BROKER_URL = os.environ["MESSAGE_QUEUE_URL"]
+    CELERY_RESULT_BACKEND = os.environ["MESSAGE_QUEUE_BACKEND"]
+
 
 class DevelopmentConfig(Config):
     ENV = "development"
@@ -17,8 +21,8 @@ class DevelopmentConfig(Config):
     # better to have it explicitly specified, as sometimes we want to deactivate Flask reloading
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ['DEV_DATABASE_URL']
-    CELERY_BROKER_URL = "redis://localhost:6379/0"
-    CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
+    CELERY_BROKER_URL = os.environ["DEV_MESSAGE_QUEUE_URL"]
+    CELERY_RESULT_BACKEND = os.environ["DEV_MESSAGE_QUEUE_BACKEND"]
 
 
 class TestingConfig(Config):
