@@ -28,28 +28,33 @@ def validate_json(*fields):
 @bp.route('/video/start', methods=['POST'])
 @validate_json('time')
 def video_start():
-    if not request.is_json:
-        return {}, 400
-
-    # acquire lock to modify shared variable
-    with video_playing_status.get_lock():
-        # set the variable to 1 to indicate that the video started
-        video_playing_status.value = 1
-
+    with is_video_playing.get_lock():
+        is_video_playing.value = 1
+    
     return {}, 200
 
 
 @bp.route('/video/stop', methods=['POST'])
 @validate_json('time')
 def video_stop():
-    if not request.is_json:
-        return {}, 400
+    with is_video_playing.get_lock():
+        is_video_playing.value = 0
+    
+    return {}, 200
 
-    # acquire lock to modify shared variable
-    with video_playing_status.get_lock():
-        # set the variable to 0 to indicate that the video ended
-        if video_playing_status.value:
-            video_playing_status.value = 0
+@bp.route('/anxious/start', methods=['POST'])
+@validate_json()
+def anxious_start():
+    with is_subject_anxious.get_lock():
+        is_subject_anxious.value = 1
+    
+    return {}, 200
+
+@bp.route('/anxious/stop', methods=['POST'])
+@validate_json()
+def anxious_stop():
+    with is_subject_anxious.get_lock():
+        is_subject_anxious.value = 0
 
     return {}, 200
 
@@ -66,24 +71,3 @@ def feedback():
     return {}, 200
 
 
-@bp.route('/anxious/start', methods=['POST'])
-@validate_json()
-def anxious_start():
-    # acquire lock to modify shared variable
-    with spacebar_status.get_lock():
-        # set the variable to 1 to indicate that the space bar is held
-        spacebar_status.value = 1
-
-    return {}, 200
-
-
-@bp.route('/anxious/stop', methods=['POST'])
-@validate_json()
-def anxious_stop():
-    # acquire lock to modify shared variable
-    with spacebar_status.get_lock():
-        # set the variable to 0 to indicate that the space bar is released
-        if spacebar_status.value:
-            spacebar_status.value = 0
-
-    return {}, 200
