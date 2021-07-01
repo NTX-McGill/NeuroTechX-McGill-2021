@@ -1,3 +1,4 @@
+from flask import current_app
 import numpy as np
 import pandas as pd
 
@@ -19,3 +20,13 @@ def store_stream_data(data: np.ndarray):
 
     # put message back onto the queue
     return "write successful"
+
+
+@celery.task()
+def add(x, y):
+    current_app.logger.info('Got Request - Starting work ')
+    import random
+    import time
+    time.sleep(random.randrange(60))
+    current_app.logger.info('Work Finished!')
+    return x + y
