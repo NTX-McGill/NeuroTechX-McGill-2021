@@ -3,10 +3,10 @@ import React from "react";
 const Welcome = ({
   timeEstimate,
   videoCount,
-}: {
+}: Readonly<{
   timeEstimate: string;
   videoCount: string;
-}) => (
+}>) => (
   <div>
     <h1>Welcome!</h1>
     <p>

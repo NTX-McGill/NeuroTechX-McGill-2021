@@ -41,11 +41,10 @@ def stream_bci():
         if not samples:
             continue
 
-        with video_playing_status.get_lock():
-            if video_playing_status.value:
+        with is_video_playing.get_lock():
+            if is_video_playing.value:
 
-                with spacebar_status.get_lock():
-                    spacebar_held = True if spacebar_status.value else False
-                    q.put_nowait((samples, spacebar_held))
+                with is_subject_anxious.get_lock():
+                    q.put_nowait((samples, bool(is_subject_anxious.value)))
 
                 logger.info(samples)
