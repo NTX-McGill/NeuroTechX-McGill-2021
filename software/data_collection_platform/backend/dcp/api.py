@@ -1,18 +1,16 @@
 from functools import wraps
-from flask import Blueprint, request
+from flask import Blueprint, request, current_app
 
 from dcp.mp.shared import is_subject_anxious, is_video_playing, q, bci_config_id
-from dcp import celery, db
+from dcp import db
 
 import numpy as np
-import pandas as pd
 
-from dcp.models.data import CollectedData
 from dcp.models.collection import CollectionInstance
 
-bp = Blueprint('api', __name__, url_prefix='/api')
+from dcp.tasks import store_stream_data
 
-# TODO add Flask logging
+bp = Blueprint('api', __name__, url_prefix='/api')
 
 
 def validate_json(*fields):
@@ -97,6 +95,7 @@ def feedback():
     order = 1
 
     # empty queue
+    tasks_ids = []
     while not q.empty():
         stream_data, is_anxious = q.pop()
 
@@ -111,8 +110,10 @@ def feedback():
         # update new value for order
         order += data.shape[0]
 
-        celery.send_task("tasks.store_stream_data", kwargs={"data": data})
+        try:
+            tasks_ids.append(store_stream_data.delay(data).id)
+        except store_stream_data.OperationalError as exc:
+            current_app.logger.exception("Sending task raised: %r", exc)
 
-    # TODO return task_id so that user can check back whether the task has completed or not
-
-    return {}, 200
+    # returning the task_id for each task so that frontend can check back whether the task has completed or not later
+    return {"tasks_ids": tasks_ids}, 200
