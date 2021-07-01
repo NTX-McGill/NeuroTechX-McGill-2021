@@ -18,8 +18,6 @@ def create_app():
 
     app.config.from_object(app_configs)
 
-    celery.conf.update(app.config)
-
     CORS(app)
 
     from . import api
@@ -27,6 +25,7 @@ def create_app():
 
     # initialize extensions
     db.init_app(app)
+    celery.conf.update(app.config)
 
     # importing models so that Flask-Migrate can detect them
     from dcp.models.collection import CollectionInstance

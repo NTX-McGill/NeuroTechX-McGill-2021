@@ -2,13 +2,17 @@ from functools import wraps
 from flask import Blueprint, request
 
 from dcp.mp.shared import is_subject_anxious, is_video_playing, q, bci_config_id
-from dcp import celery
+from dcp import celery, db
 
 import numpy as np
 import pandas as pd
 
+from dcp.models.data import CollectedData
+from dcp.models.collection import CollectionInstance
 
 bp = Blueprint('api', __name__, url_prefix='/api')
+
+# TODO add Flask logging
 
 
 def validate_json(*fields):
@@ -68,62 +72,59 @@ def anxious_stop():
 
 
 @bp.route('/feedback', methods=['POST'])
-@validate_json('url', 'stress_level')
+@validate_json('video_id', 'stress_level')
 def feedback():
-    # TODO clear the buffer and store data to database this can be done using celery if we don't want this endpoint to hang ...
-    # NOTE: frontend needs to send video_id and feedback
+    """Clear the buffer containing OpenBCI data once the feedback form is received.
+    Store this data to the database by creating celery tasks that write to the database. 
+    """
+    # TODO: frontend needs to send video_id and feedback
 
-    url = request.json['url']
+    video_id = request.json['video_id']
     feedback = request.json['stress_level']
-    # clean queue
-    df = pd.DataFrame()
-    while not queue.empty():
-        stream, anxious = queue.pop()
-        # do some processing
-        """
-        we have
-        [
-            [1,2,3,4,5,6,7,8]
-            [1,2,3,4,5,6,7,8]
-            [1,2,3,4,5,6,7,8]
-            [1,2,3,4,5,6,7,8]
-            [1,2,3,4,5,6,7,8]
-        ], 0
-        
-        
-        we want into a df
-        [
-            [1,2,3,4,5,6,7,8], 1, 0
-            [1,2,3,4,5,6,7,8], 2, 0
-            [1,2,3,4,5,6,7,8], 3, 0
-            [1,2,3,4,5,6,7,8], 4, 0
-            [1,2,3,4,5,6,7,8], 5 ,0
-        ]
-        """
-    write_to_db(df, feedback)
-    print(f'Feedback for {url} is {feedback}')
+
+    # create the collection instance
+    with bci_config_id.get_lock():
+        configuration_id = bci_config_id.value
+
+    # create a collection instance
+    collection = CollectionInstance(stress_level=feedback, video_id=video_id, config_id=configuration_id)
+
+    # save current configuration to database
+    db.session.add(collection)
+    db.session.commit()
+
+    # variable to keep track of the order of each samples
+    order = 1
+
+    # empty queue
+    while not q.empty():
+
+        stream_data, is_anxious = q.pop()
+
+        # create a numpy array with
+        data = np.asarray(stream_data, dtype=np.float32)
+
+        # add is_suject_anxious column
+        is_subject_anxious = np.full((data.shape[0], 1), is_anxious)
+        collection_instance_id = np.full((data.shape[0], 1), collection.id)
+        order = np.arange(order, order + data.shape[0]).reshape(data.shape[0], 1)
+        data = np.hstack((data, is_subject_anxious, collection_instance_id))
+
+        # update new value for order
+        order += data.shape[0]
+
+        store_stream_data(data)
+
     return {}, 200
 
 
 @celery.task
-def write_to_db(df, feedback):
-    # convert df to python object then write to db
+def store_stream_data(data: np.ndarray):
+    """Celery task responsible for storing a chunk of streamed data to the database.
+
+    Args:
+        data (numpy.ndarray): OpenBCI data to store to the database.
     """
-    CollectionInstance = new CollectionInstance()
-
-    CollectionInstance = feedback.stress leve
-    CollectionInstance= feedback.video id
-    CollectionInstance= collection time --> not needed.
-
-
-
-    CollectedData = new CollectedData(
-    CollectedData. collection_instance =  CollectionInstance
-    set:
-    - channels 1-8
-    - order
-
-    finally write to db
-    """
-    with bci_config_id.get_lock():
-        configuration_id = bci_config_id.value
+    df = pd.DataFrame(data, columns=["channel_1", "channel_2", "channel_3", "channel_4", "channel_5", "channel_6",
+                                     "channel_7", "channel_8", "is_subject_anxious", "collection_instance", "order"])
+    df.to_sql(name=CollectedData.__tablename__, con=db.engine, if_exists="append")

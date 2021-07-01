@@ -17,7 +17,7 @@ class CollectedData(db.Model):
     channel_7 = db.Column(db.Float)
     channel_8 = db.Column(db.Float)
     is_subject_anxious = db.Column(db.Boolean)
-    collection_instance = db.Column(db.Integer, db.ForeignKey("collection_instance.id"))
+    collection_instance_id = db.Column(db.Integer, db.ForeignKey("collection_instance.id"))
     order = db.Column(db.Integer)
 
     def __repr__(self):

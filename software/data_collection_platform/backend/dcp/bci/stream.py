@@ -56,6 +56,6 @@ def stream_bci():
             if is_video_playing.value:
 
                 with is_subject_anxious.get_lock():
-                    q.put_nowait((samples, bool(is_subject_anxious.value)))
+                    q.put_nowait((samples, is_subject_anxious.value))
 
                 logger.info(samples)
