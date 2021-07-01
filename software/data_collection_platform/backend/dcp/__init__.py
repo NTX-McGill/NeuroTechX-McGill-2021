@@ -2,18 +2,23 @@ from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
+from celery import Celery
+
+from dcp.cfg.config import app_configs
 
 # FLASK EXTENSIONS
 # global database object
 db = SQLAlchemy()
 migrate = Migrate()
+celery = Celery(__name__, broker=app_configs.CELERY_BROKER_URL)
 
 
 def create_app():
     app = Flask(__name__)
 
-    from dcp.cfg.config import app_configs
     app.config.from_object(app_configs)
+
+    celery.conf.update(app.config)
 
     CORS(app)
 
