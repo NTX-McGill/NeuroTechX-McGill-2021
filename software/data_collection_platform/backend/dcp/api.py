@@ -15,6 +15,8 @@ from dcp.tasks import store_stream_data, add
 
 import numpy as np
 
+from celery.result import AsyncResult
+
 bp = Blueprint('api', __name__, url_prefix='/api')
 
 
@@ -191,10 +193,21 @@ def get_task_status(task_id: str):
     Returns:
         response: dictionary containing the status and the response code.
     """
-    return {"result": celery.AsyncResult(task_id).state}, 200
+
+
+<< << << < HEAD
+return {"result": celery.AsyncResult(task_id).state}, 200
 
 
 @bp.route('/task_result/<string:task_id>', methods=['GET'])
+== == == =
+return {"result": AsyncResult(task_id).state}, 200
+
+
+@bp.route('/task_result/{str:task_id}', methods=['GET'])
+>>>>>> > Celery test
+
+
 def get_task_result(task_id: str):
     """Given a task_id, this route returns the result of the job.
 
@@ -204,7 +217,13 @@ def get_task_result(task_id: str):
     Returns:
         response: dictionary containing the result and the response code.
     """
-    return {"result": celery.AsyncResult(task_id).result}, 200
+
+
+<< << << < HEAD
+return {"result": celery.AsyncResult(task_id).result}, 200
+== == == =
+return {"result": AsyncResult(task_id).result}, 200
+>>>>>> > Celery test
 
 
 @bp.route('/test', methods=['GET'])
