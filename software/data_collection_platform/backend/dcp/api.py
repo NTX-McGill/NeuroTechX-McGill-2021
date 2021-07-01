@@ -98,17 +98,15 @@ def feedback():
 
     # empty queue
     while not q.empty():
-
         stream_data, is_anxious = q.pop()
 
-        # create a numpy array with
         data = np.asarray(stream_data, dtype=np.float32)
 
         # add is_suject_anxious column
         is_subject_anxious = np.full((data.shape[0], 1), is_anxious)
         collection_instance_id = np.full((data.shape[0], 1), collection.id)
         order = np.arange(order, order + data.shape[0]).reshape(data.shape[0], 1)
-        data = np.hstack((data, is_subject_anxious, collection_instance_id))
+        data = np.hstack((data, is_subject_anxious, collection_instance_id, order))
 
         # update new value for order
         order += data.shape[0]
