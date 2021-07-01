@@ -122,14 +122,13 @@ def feedback():
 
 @bp.route('/videos', methods=['GET'])
 def get_videos():
-    videos = []
-    for video in Video.query.all():
-        video_dict = {
-            "start": video.start,
-            "end": video.end,
-            "is_stressful": video.is_stressful,
-            "keywords": video.keywords,
-            "youtube_id": video.youtube_id,
-        }
-        videos.append(video_dict)
-    return {"data": videos}, 200
+    return {"data":
+            [{
+                "id": video.id,
+                "start": video.start.strftime("%M:%S") if video.start else None,
+                "end": video.end.strftime("%M:%S") if video.end else None,
+                "is_stressful": video.is_stressful,
+                "keywords": video.keywords,
+                "youtube_id": video.youtube_id,
+                "youtube_url": video.youtube_url,
+            } for video in Video.query.all()]}, 200
