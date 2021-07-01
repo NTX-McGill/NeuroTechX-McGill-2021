@@ -15,8 +15,6 @@ from dcp.tasks import store_stream_data, add
 
 import numpy as np
 
-from celery.result import AsyncResult
-
 bp = Blueprint('api', __name__, url_prefix='/api')
 
 
