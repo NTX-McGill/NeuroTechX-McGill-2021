@@ -1,9 +1,9 @@
 from functools import wraps
 from flask import Blueprint, request
-import dateutil.parser
 from dcp.mp.shared import *
 
 bp = Blueprint('api', __name__, url_prefix='/api')
+
 
 def validate_json(*fields):
     """Decorator to validate JSON body.
@@ -35,22 +35,24 @@ def video_start():
     with video_playing_status.get_lock():
         # set the variable to 1 to indicate that the video started
         video_playing_status.value = 1
-    
+
     return {}, 200
+
 
 @bp.route('/video/stop', methods=['POST'])
 @validate_json('time')
 def video_stop():
     if not request.is_json:
         return {}, 400
-    
+
     # acquire lock to modify shared variable
     with video_playing_status.get_lock():
         # set the variable to 0 to indicate that the video ended
         if video_playing_status.value:
             video_playing_status.value = 0
-    
+
     return {}, 200
+
 
 @bp.route('/feedback', methods=['POST'])
 @validate_json('url', 'stress_level')
@@ -63,6 +65,7 @@ def feedback():
     print(f'Feedback for {url} is {feedback}')
     return {}, 200
 
+
 @bp.route('/anxious/start', methods=['POST'])
 @validate_json()
 def anxious_start():
@@ -70,8 +73,9 @@ def anxious_start():
     with spacebar_status.get_lock():
         # set the variable to 1 to indicate that the space bar is held
         spacebar_status.value = 1
-    
+
     return {}, 200
+
 
 @bp.route('/anxious/stop', methods=['POST'])
 @validate_json()
@@ -81,5 +85,5 @@ def anxious_stop():
         # set the variable to 0 to indicate that the space bar is released
         if spacebar_status.value:
             spacebar_status.value = 0
-    
+
     return {}, 200
