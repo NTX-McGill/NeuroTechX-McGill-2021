@@ -3,10 +3,10 @@ import pandas as pd
 
 from dcp import celery, db
 
-from models.data import CollectedData
+from dcp.models.data import CollectedData
 
 
-@celery.task
+@celery.task()
 def store_stream_data(data: np.ndarray):
     """Celery task responsible for storing a chunk of streamed data to the database.
 
