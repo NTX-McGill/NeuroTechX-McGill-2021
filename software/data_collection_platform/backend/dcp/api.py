@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import Blueprint, request
-from dcp.mp.shared import *
+from dcp.mp.shared import is_subject_anxious, is_video_playing, q
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
