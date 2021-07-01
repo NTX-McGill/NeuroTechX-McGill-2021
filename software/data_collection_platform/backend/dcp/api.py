@@ -13,7 +13,9 @@ import numpy as np
 from dcp.models.collection import CollectionInstance
 from dcp.models.video import Video
 
-from dcp.tasks import store_stream_data
+from dcp.tasks import store_stream_data, add
+
+from celery.result import AsyncResult
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -142,3 +144,39 @@ def get_videos():
                 "youtube_id": video.youtube_id,
                 "youtube_url": video.youtube_url,
             } for video in Video.query.all()]}, 200
+
+@bp.route('/task_status/{str:task_id}', methods=['GET'])
+def get_task_status(task_id: str):
+    """Given a task_id, this route returns the state of the job.
+
+    Args:
+        task_id ([str]): Celery task id
+
+    Returns:
+        response: dictionary containing the status and the response code.
+    """
+    return {"result": AsyncResult(task_id).state}, 200
+
+
+@bp.route('/task_result/{str:task_id}', methods=['GET'])
+def get_task_result(task_id: str):
+    """Given a task_id, this route returns the result of the job.
+
+    Args:
+        task_id ([str]): Celery task id
+
+    Returns:
+        response: dictionary containing the result and the response code.
+    """
+    return {"result": AsyncResult(task_id).result}, 200
+
+
+@bp.route('/test', methods=['GET'])
+def test():
+    """Method to test Celery task queue setup
+    """
+    import random
+    a = random.randrange(1000)
+    b = random.randrange(1000)
+    r = add.delay(a, b)
+    return r.id
