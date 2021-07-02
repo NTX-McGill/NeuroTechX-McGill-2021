@@ -1,6 +1,9 @@
 # Data Collection Platform Backend
 
 ## Setup environment
+
+If you are setting up on Linux/Mac install the package `sudo apt install libpq-dev`
+
 1. Create environment using virtualvenv (Python 3.8):
     - For Linux: `python -m venv dcp-env`
     - For Windows: `py -3 -m venv dcp-env`
@@ -29,8 +32,6 @@ $ python run.py
 
 
 ## Connecting to the database
-
-If you are setting up on Linux/Mac install the package `sudo apt install libpq-dev`
 
 The database credentials can be found on the software channel on Slack.
 One can use the `psql` CLI to connect to the database: `psql --host=neurotech-db.postgres.database.azure.com --port=5432 --username=neurotech@neurotech-db --dbname=postgres`
