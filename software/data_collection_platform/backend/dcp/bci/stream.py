@@ -7,7 +7,8 @@ from models.configurations import OpenBCIConfig
 
 from dcp.mp.shared import bci_config_id, is_video_playing, is_subject_anxious, q
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(name)s %(levelname)s %(message)s")
+logging.basicConfig(level=logging.INFO,
+                    format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
 logger = logging.getLogger(__name__)
 
@@ -20,7 +21,8 @@ def stream_bci():
     that are initialized in shared memory.
     """
     # first resolve an EEG stream on the lab network
-    logger.info("Attempting to connect to OpenBCI. Please make sure OpenBCI is open with LSL enabled.")
+    logger.info(
+        "Attempting to connect to OpenBCI. Please make sure OpenBCI is open with LSL enabled.")
 
     # Set up streaming over lsl from OpenBCI.
     streams = resolve_stream('type', 'EEG')
@@ -47,7 +49,8 @@ def stream_bci():
     while True:
 
         # get a chunk of samples
-        samples, _timestamps = inlet.pull_chunk()  # ignoring the timestamps for now...
+        # ignoring the timestamps for now...
+        samples, _timestamps = inlet.pull_chunk()
 
         if not samples:
             continue
