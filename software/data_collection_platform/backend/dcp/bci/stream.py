@@ -16,9 +16,10 @@ logger = logging.getLogger(__name__)
 def stream_bci():
     """
     Method in charge of pulling data from the Open BCI device.
-    This method will run in a separate process in parallel to the flask web application.
-    Note that it is communicating with the flask application through 3 shared variables
-    that are initialized in shared memory.
+    This method will run in a separate process in parallel
+    to the flask web application.
+    Note that it is communicating with the flask application
+    through 3 shared variables that are initialized in shared memory.
     """
     # first resolve an EEG stream on the lab network
     logger.info(
@@ -43,8 +44,10 @@ def stream_bci():
     db.session.add(config)
     db.session.commit()
 
-    # retrieve estimated time correction offset for the given stream - this is the number that needs to be added to a
-    # time stamp that was remotely generated via local_clock() to map it into the local clock domain fo this machine
+    # retrieve estimated time correction offset for the given stream - this is
+    # the number that needs to be added to a timestamp that was remotely
+    # generated via local_clock() to map it into the local clock domain for
+    # this machine
     inlet.time_correction()
     while True:
 

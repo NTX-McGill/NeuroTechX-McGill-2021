@@ -13,7 +13,8 @@ class CollectionInstance(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     stress_level = db.Column(db.Integer, nullable=False)
     video_id = db.Column(db.Integer, db.ForeignKey("video.id"))
-    collection_time = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+    collection_time = db.Column(db.DateTime(
+        timezone=True), default=datetime.utcnow)
     config_id = db.Column(db.Integer, db.ForeignKey("bci_config.id"))
 
     @validates("stress_level")

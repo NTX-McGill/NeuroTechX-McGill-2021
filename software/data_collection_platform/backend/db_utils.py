@@ -2,6 +2,7 @@ from dcp import db, create_app
 import pandas as pd
 from datetime import datetime
 
+# although not used, important to import them in order to create the tables
 from dcp.models.collection import CollectionInstance
 from dcp.models.configurations import OpenBCIConfig
 from dcp.models.data import CollectedData
@@ -16,11 +17,13 @@ def populate_videos(app):
         # read data team's google sheet using pandas
         SHEET_ID = "14f6uBw0FRok1X4-EnSj-A5HVW1AGEZDWvIRnwCLnOh8"
         df = pd.read_csv(
-            f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv", dtype={"start": str,
-                                                                                           "end": str,
-                                                                                           "link": str,
-                                                                                           "stressful": int,
-                                                                                           "keywords": str})
+            f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/\
+                export?format=csv",
+            dtype={"start": str,
+                   "end": str,
+                   "link": str,
+                   "stressful": int,
+                   "keywords": str})
 
         # preprocess empty cells
         df.fillna("", inplace=True)
@@ -48,8 +51,10 @@ def populate_videos(app):
 
 
 def create_tables(app):
-    """We can either create all tables in our backend using this function or use Flask-Migrate.
-    By running:
+    """We can either create all tables in our backend using this function
+    or use Flask-Migrate.
+
+    Instead of running this function, we could create the tables by running:
         - flask db upgrade
     """
     # use dcp app context to create all db tables
