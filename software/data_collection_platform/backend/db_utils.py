@@ -12,18 +12,19 @@ from dcp.models.video import Video
 def populate_videos(app):
     """Populate videos table in the database.
     """
+    # read data team's google sheet using pandas
+    SHEET_ID = "14f6uBw0FRok1X4-EnSj-A5HVW1AGEZDWvIRnwCLnOh8"
+    URL = "https://docs.google.com/spreadsheets/d/{}/export?format=csv".format(
+        SHEET_ID)
+
     with app.app_context():
 
-        # read data team's google sheet using pandas
-        SHEET_ID = "14f6uBw0FRok1X4-EnSj-A5HVW1AGEZDWvIRnwCLnOh8"
-        df = pd.read_csv(
-            f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/\
-                export?format=csv",
-            dtype={"start": str,
-                   "end": str,
-                   "link": str,
-                   "stressful": int,
-                   "keywords": str})
+        df = pd.read_csv(URL,
+                         dtype={"start": str,
+                                "end": str,
+                                "link": str,
+                                "stressful": int,
+                                "keywords": str})
 
         # preprocess empty cells
         df.fillna("", inplace=True)
