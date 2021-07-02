@@ -135,8 +135,8 @@ def get_videos():
     return {"data":
             [{
                 "id": video.id,
-                "start": video.start and video.start.total_seconds(),
-                "end": video.end and video.end.total_seconds(),
+                "start": video.start.total_seconds() if video.start else None,
+                "end":  video.end.total_seconds() if video.end else None,
                 "is_stressful": video.is_stressful,
                 "keywords": video.keywords,
                 "youtube_id": video.youtube_id,
