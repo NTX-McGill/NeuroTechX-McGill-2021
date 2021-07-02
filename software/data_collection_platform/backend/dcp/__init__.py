@@ -9,7 +9,7 @@ from dcp.cfg.config import app_configs
 # FLASK EXTENSIONS
 # global database object
 db = SQLAlchemy()
-migrate = Migrate()
+migrate = Migrate(compare_type=True)
 celery = Celery(__name__, broker=app_configs.CELERY_BROKER_URL,
                 backend=app_configs.CELERY_RESULT_BACKEND)
 

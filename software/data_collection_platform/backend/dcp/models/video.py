@@ -10,8 +10,8 @@ class Video(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     youtube_id = db.Column(db.String(50), nullable=False)
-    start = db.Column(db.Time, nullable=True)
-    end = db.Column(db.Time, nullable=True)
+    start = db.Column(db.Interval, nullable=True)
+    end = db.Column(db.Interval, nullable=True)
     is_stressful = db.Column(db.Boolean, nullable=False)
     keywords = db.Column(ARRAY(db.String), nullable=True)
     youtube_url = db.Column(db.String(2048), nullable=False)

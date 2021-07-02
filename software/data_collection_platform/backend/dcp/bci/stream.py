@@ -3,7 +3,7 @@ import logging
 
 from dcp import db
 
-from models.configurations import OpenBCIConfig
+from dcp.models.configurations import OpenBCIConfig
 
 from dcp.mp.shared import (
     bci_config_id,
