@@ -17,7 +17,6 @@ class Config(object):
     CELERY_BROKER_URL = os.environ["MESSAGE_QUEUE_URL"]
     CELERY_RESULT_BACKEND = os.environ["MESSAGE_QUEUE_BACKEND"]
 
-
 class DevelopmentConfig(Config):
     ENV = "development"
 
@@ -27,7 +26,6 @@ class DevelopmentConfig(Config):
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ['DEV_DATABASE_URL']
     CELERY_BROKER_URL = os.environ["DEV_MESSAGE_QUEUE_URL"]
-
 
 class TestingConfig(Config):
     TESTING = True

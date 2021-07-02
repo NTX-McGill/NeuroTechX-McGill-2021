@@ -129,7 +129,6 @@ def feedback():
     # whether the task has completed or not later
     return {"tasks_ids": tasks_ids}, 200
 
-
 @bp.route('/videos', methods=['GET'])
 def get_videos():
     return {"data":
