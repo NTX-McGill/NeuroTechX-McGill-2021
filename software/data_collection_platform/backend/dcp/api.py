@@ -7,6 +7,7 @@ from dcp import db
 import numpy as np
 
 from dcp.models.collection import CollectionInstance
+from dcp.models.video import Video
 
 from dcp.tasks import store_stream_data
 
@@ -118,3 +119,15 @@ def feedback():
     # returning the task_id for each task so that frontend can check back whether the task has completed or not later
     return {"tasks_ids": tasks_ids}, 200
 
+@bp.route('/videos', methods=['GET'])
+def get_videos():
+    return {"data":
+            [{
+                "id": video.id,
+                "start": video.start.strftime("%M:%S") if video.start else None,
+                "end": video.end.strftime("%M:%S") if video.end else None,
+                "is_stressful": video.is_stressful,
+                "keywords": video.keywords,
+                "youtube_id": video.youtube_id,
+                "youtube_url": video.youtube_url,
+            } for video in Video.query.all()]}, 200
