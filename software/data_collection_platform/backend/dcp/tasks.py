@@ -18,9 +18,24 @@ def store_stream_data(data: np.ndarray):
                                      "channel_4", "channel_5", "channel_6",
                                      "channel_7", "channel_8",
                                      "is_subject_anxious",
-                                     "collection_instance", "order"])
-    df.to_sql(name=CollectedData.__tablename__,
-              con=db.engine, if_exists="append")
+                                     "collection_instance_id", "order"])
+    collected_data = [CollectedData(
+        channel_1=row.channel_1,
+        channel_2=row.channel_2,
+        channel_3=row.channel_3,
+        channel_4=row.channel_4,
+        channel_5=row.channel_5,
+        channel_6=row.channel_6,
+        channel_7=row.channel_7,
+        channel_8=row.channel_8,
+        is_subject_anxious=row.is_subject_anxious,
+        collection_instance_id=row.collection_instance_id,
+        order=row.order,
+    )
+        for row in df.itertuples(index=False)
+    ]
 
-    # put message back onto the queue
-    return "write successful"
+    db.session.add_all(collected_data)
+    db.session.commit()
+
+    return "Successfully wrote {} samples.".format(len(collected_data))
