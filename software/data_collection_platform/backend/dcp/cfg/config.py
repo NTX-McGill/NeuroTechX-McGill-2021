@@ -22,7 +22,8 @@ class DevelopmentConfig(Config):
     ENV = "development"
 
     # although ENV = `development` automatically sets DEBUG to True, it is
-    # better to have it explicitly specified, as sometimes we want to deactivate Flask reloading
+    # better to have it explicitly specified, as sometimes we want to
+    # deactivate Flask reloading
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ['DEV_DATABASE_URL']
     CELERY_BROKER_URL = os.environ["DEV_MESSAGE_QUEUE_URL"]
