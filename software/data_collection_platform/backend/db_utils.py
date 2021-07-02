@@ -50,6 +50,9 @@ def populate_videos(app):
         db.session.add_all(videos)
         db.session.commit()
 
+    print("Successfully wrote {} videos from {} to the video table.".format(
+        len(df), URL))
+
 
 def create_tables(app):
     """We can either create all tables in our backend using this function
