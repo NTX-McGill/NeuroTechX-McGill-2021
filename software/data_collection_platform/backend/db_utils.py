@@ -1,6 +1,6 @@
 from dcp import db, create_app
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 
 # although not used, important to import them in order to create the tables
 from dcp.models.collection import CollectionInstance
@@ -36,11 +36,15 @@ def populate_videos(app):
         # clear video table's content
         db.session.query(Video).delete()
 
+        def parse_timedelta(t: str):
+            t = datetime.strptime(t, "%M:%S")
+            return timedelta(minutes=t.minute, seconds=t.second)
+
         # add rows
         videos = [Video(
             youtube_id=row.youtube_id,
-            start=datetime.strptime(row.start, "%M:%S") if row.start else None,
-            end=datetime.strptime(row.end, "%M:%S") if row.end else None,
+            start=parse_timedelta(row.start) if row.start != '' else None,
+            end=parse_timedelta(row.end) if row.end != '' else None,
             is_stressful=bool(row.stressful),
             keywords=[keyword.strip() for keyword in row.keywords.split(";")],
             youtube_url=row.link,
