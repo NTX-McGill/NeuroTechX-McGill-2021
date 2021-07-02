@@ -1,4 +1,8 @@
 import os
+from dotenv import load_dotenv
+
+# loading environment variables in .env
+load_dotenv()
 
 
 class Config(object):

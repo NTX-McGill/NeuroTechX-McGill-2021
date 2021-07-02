@@ -1,5 +1,4 @@
-from dcp import create_app, db
-from dotenv import load_dotenv
+from dcp import db, create_app
 import pandas as pd
 from datetime import datetime
 
@@ -27,7 +26,8 @@ def populate_videos(app):
         df.fillna("", inplace=True)
 
         # add the youtube_id column
-        df["youtube_id"] = df.apply(lambda row: row.link.split("/")[-1], axis=1)
+        df["youtube_id"] = df.apply(
+            lambda row: row.link.split("/")[-1], axis=1)
 
         # clear video table's content
         db.session.query(Video).delete()
@@ -57,7 +57,5 @@ def create_tables(app):
 
 
 if __name__ == "__main__":
-    # loading environment variables in .env
-    load_dotenv()
     app = create_app()
     populate_videos(app)

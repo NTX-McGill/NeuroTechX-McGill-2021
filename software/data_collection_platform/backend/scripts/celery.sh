@@ -1,4 +1,4 @@
 #! /bin/bash
 
 # starting a celery worker
-celery -A dcp.celery worker --loglevel=info
+celery -A celery worker --loglevel=info
