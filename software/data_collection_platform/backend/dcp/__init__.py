@@ -29,7 +29,7 @@ def create_app():
 
     # define application context
     with app.app_context():
-        from . import api
+        from dcp import api
         app.register_blueprint(api.bp)
 
         # initialize extensions
