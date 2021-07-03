@@ -1,6 +1,7 @@
 from flask import current_app
 import numpy as np
 import pandas as pd
+from typing import List
 
 from dcp import celery, db
 
@@ -12,12 +13,12 @@ logger = get_task_logger(__name__)
 
 
 @celery.task
-def store_stream_data(data: np.ndarray):
+def store_stream_data(data: List[float]):
     """Celery task responsible for storing a chunk of
     streamed data to the database.
 
     Args:
-        data (numpy.ndarray): OpenBCI data to store to the database.
+        data ([float]): OpenBCI data to store to the database.
     """
     df = pd.DataFrame(data, columns=["channel_1", "channel_2", "channel_3",
                                      "channel_4", "channel_5", "channel_6",
@@ -33,9 +34,9 @@ def store_stream_data(data: np.ndarray):
         channel_6=row.channel_6,
         channel_7=row.channel_7,
         channel_8=row.channel_8,
-        is_subject_anxious=row.is_subject_anxious,
-        collection_instance_id=row.collection_instance_id,
-        order=row.order,
+        is_subject_anxious=bool(row.is_subject_anxious),
+        collection_instance_id=int(row.collection_instance_id),
+        order=int(row.order),
     )
         for row in df.itertuples(index=False)
     ]
