@@ -2,9 +2,7 @@ from pylsl import StreamInlet, resolve_stream
 import logging
 
 from dcp import db
-
 from dcp.models.configurations import OpenBCIConfig
-
 from dcp.mp.shared import (
     bci_config_id,
     is_video_playing, is_subject_anxious, q)
@@ -29,7 +27,9 @@ def stream_bci():
              with LSL enabled.")
 
     # Set up streaming over lsl from OpenBCI.
+    # NOTE: this will block until a connection is established
     streams = resolve_stream('type', 'EEG')
+    logger.info("Successfully connected to LSL stream.")
 
     # 0 picks up the first of three streams
     inlet = StreamInlet(streams[0])
@@ -40,12 +40,12 @@ def stream_bci():
 
     # write configuration to database and store
     config = OpenBCIConfig(configuration=bci_config)
-    with bci_config_id.get_lock():
-        bci_config_id.value = config.id
 
     # save current configuration to database
     db.session.add(config)
     db.session.commit()
+    with bci_config_id.get_lock():
+        bci_config_id.value = config.id
 
     # retrieve estimated time correction offset for the given stream - this is
     # the number that needs to be added to a timestamp that was remotely
