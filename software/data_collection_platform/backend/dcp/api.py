@@ -59,7 +59,7 @@ def start_openbci():
 @validate_json()
 def stop_openbci():
     if "process_pid" not in session:
-        return {"message": "Process does not exist."}, 400
+        return {"message": "Process does not exist."}, 404
     else:
         pid = session.pop("process_pid")
         try:
