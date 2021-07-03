@@ -46,7 +46,7 @@ def validate_json(*fields):
 def start_openbci():
     # if there is already a process spawned for running openbci
     if "process_pid" in session:
-        return {"Process already started"}, 403
+        return "Process already started", 403
 
     # use a separate process to stream BCI data
     from dcp.bci.stream import stream_bci
@@ -64,7 +64,10 @@ def stop_openbci():
         return {"message": "Process does not exist."}, 400
     else:
         pid = session.pop("process_pid")
-        os.kill(pid, signal.SIGKILL)
+        try:
+            os.kill(pid, signal.SIGKILL)
+        except ProcessLookupError as e:
+            return str(e), 200
         return f"Process {pid} terminated.", 200
 
 
