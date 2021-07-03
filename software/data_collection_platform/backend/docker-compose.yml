@@ -1,0 +1,60 @@
+networks:
+    backend:
+        name: default
+        driver: default
+                
+services:
+    rabbitmq: 
+        container_name: rabbitmq
+        hostname: localhost
+        image: rabbitmq
+        restart: always
+        environment:
+            - RABBITMQ_USERNAME=user
+            - RABBITMQ_PASSWORD=password
+        ports:
+            - 5672:5672
+            - 15672:15672
+        networks:
+            - default
+      
+    celery:
+        container_name: celery
+        build: .
+        restart: always
+        env_file: 
+            - .env
+        networks:
+            - default
+        depends_on:
+            - rabbitmq
+        links: 
+            - rabbitmq
+        command: celery -A dcp.celery worker --loglevel=info
+
+    db:
+        container_name: db
+        image: postgres
+        restart: always
+        environment: 
+            - POSTGRES_USER=user
+            - POSTGRES_PASSWORD=password
+        ports:
+            - 9999:5432
+        networks:
+            - default
+        depends_on:
+            - celery    
+
+    webapp:
+        container_name: webapp
+        build: .
+        env_file:
+            - .env
+        ports:
+            - 16571-16604:16571-16604
+        networks:
+            - default
+        depends_on:
+            - db
+        command: python run.py
