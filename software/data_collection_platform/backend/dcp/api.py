@@ -39,8 +39,8 @@ def validate_json(*fields):
     return decorator
 
 
-@bp.route('/video/start', methods=['POST'])
-@validate_json('time')
+@bp.route('/video/start', methods=['PUT'])
+@validate_json()
 def video_start():
     with is_video_playing.get_lock():
         is_video_playing.value = 1
@@ -48,8 +48,8 @@ def video_start():
     return {}, 200
 
 
-@bp.route('/video/stop', methods=['POST'])
-@validate_json('time')
+@bp.route('/video/stop', methods=['PUT'])
+@validate_json()
 def video_stop():
     with is_video_playing.get_lock():
         is_video_playing.value = 0
@@ -57,7 +57,7 @@ def video_stop():
     return {}, 200
 
 
-@bp.route('/anxious/start', methods=['POST'])
+@bp.route('/anxious/start', methods=['PUT'])
 @validate_json()
 def anxious_start():
     with is_subject_anxious.get_lock():
@@ -66,7 +66,7 @@ def anxious_start():
     return {}, 200
 
 
-@bp.route('/anxious/stop', methods=['POST'])
+@bp.route('/anxious/stop', methods=['PUT'])
 @validate_json()
 def anxious_stop():
     with is_subject_anxious.get_lock():
@@ -129,13 +129,14 @@ def feedback():
     # whether the task has completed or not later
     return {"tasks_ids": tasks_ids}, 200
 
+
 @bp.route('/videos', methods=['GET'])
 def get_videos():
     return {"data":
             [{
                 "id": video.id,
                 "start": video.start.total_seconds() if video.start else None,
-                "end":  video.end.total_seconds() if video.end else None,
+                "end": video.end.total_seconds() if video.end else None,
                 "is_stressful": video.is_stressful,
                 "keywords": video.keywords,
                 "youtube_id": video.youtube_id,

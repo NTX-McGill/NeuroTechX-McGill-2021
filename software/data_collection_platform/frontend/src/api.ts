@@ -25,18 +25,19 @@ const query = async (endpoint: string, method: string, data: object = {}) => {
 //
 // prettier-ignore
 const api = {
-  videoStart: (d: { time: string }) =>
-    query("/api/video/start", "POST", d),
+  videoStart: () =>
+    query("/api/video/start", "PUT"),
 
-  videoStop: (d: { time: string }) =>
-    query("/api/video/stop", "POST", d),
+  videoStop: () =>
+    query("/api/video/stop", "PUT"),
 
-  anxiousStart: (d: { time: string }) =>
-    query("/api/anxious/start", "POST", d),
+  anxiousStart: () =>
+    query("/api/anxious/start", "PUT"),
 
-  anxiousStop: (d: { time: string }) =>
-    query("/api/anxious/stop", "POST", d),
+  anxiousStop: () =>
+    query("/api/anxious/stop", "PUT"),
 
+  // TODO: url: string should be changed to video_id: number, we want all feedback forms to be associated to a video
   sendFeedback: (d: { url: string; stress_level: FeedbackValue }) =>
     query("/api/feedback", "POST", d),
 };
