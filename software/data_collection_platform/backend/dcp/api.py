@@ -40,7 +40,6 @@ def validate_json(*fields):
 
 
 @bp.route("/openbci/start", methods=['POST'])
-@validate_json()
 def start_openbci():
     # if there is already a process spawned for running openbci
     if "process_pid" in session:
@@ -56,7 +55,6 @@ def start_openbci():
 
 
 @bp.route("/openbci/stop", methods=['POST'])
-@validate_json()
 def stop_openbci():
     if "process_pid" not in session:
         return {"message": "Process does not exist."}, 404
@@ -65,12 +63,11 @@ def stop_openbci():
         try:
             os.kill(pid, signal.SIGKILL)
         except ProcessLookupError as e:
-            return str(e), 200
+            return str(e), 404
         return f"Process {pid} terminated.", 200
 
 
 @bp.route('/video/start', methods=['PUT'])
-@validate_json()
 def video_start():
     with is_video_playing.get_lock():
         is_video_playing.value = 1
@@ -79,7 +76,6 @@ def video_start():
 
 
 @bp.route('/video/stop', methods=['PUT'])
-@validate_json()
 def video_stop():
     with is_video_playing.get_lock():
         is_video_playing.value = 0
@@ -88,7 +84,6 @@ def video_stop():
 
 
 @bp.route('/anxious/start', methods=['PUT'])
-@validate_json()
 def anxious_start():
     with is_subject_anxious.get_lock():
         is_subject_anxious.value = 1
@@ -97,7 +92,6 @@ def anxious_start():
 
 
 @bp.route('/anxious/stop', methods=['PUT'])
-@validate_json()
 def anxious_stop():
     with is_subject_anxious.get_lock():
         is_subject_anxious.value = 0
