@@ -1,5 +1,7 @@
 from functools import wraps
-from flask import Blueprint, request, current_app
+from flask import Blueprint, request, current_app, session
+import signal
+import os
 
 from dcp.mp.shared import (
     is_subject_anxious,
@@ -35,6 +37,33 @@ def validate_json(*fields):
             return f(*args, **kwargs)
         return decorated
     return decorator
+
+
+@bp.route("/openbci/start", methods=['POST'])
+@validate_json()
+def start_openbci():
+    # if there is already a process spawned for running openbci
+    if "process_pid" in session:
+        return {"Process already started"}, 403
+
+    # use a separate process to stream BCI data
+    from dcp.bci.stream import stream_bci
+    from multiprocessing import Process
+    p = Process(target=stream_bci)
+    p.start()
+    session["process_pid"] = p.pid
+    return {"message": "Process started.", "pid": p.pid}, 200
+
+
+@bp.route("/openbci/stop", methods=['POST'])
+@validate_json()
+def stop_openbci():
+    if "process_pid" not in session:
+        return {"message": "Process does not exist."}, 400
+    else:
+        pid = session.pop("process_pid")
+        os.kill(pid, signal.SIGKILL)
+        return f"Process {pid} terminated.", 200
 
 
 @bp.route('/video/start', methods=['PUT'])
@@ -85,6 +114,13 @@ def feedback():
     video_id = request.json['video_id']
     feedback = request.json['stress_level']
 
+    if not Video.query.get(video_id):
+        return {"error_message": "Video is not in the database"}, 400
+
+    if feedback < 0 or feedback > 3:
+        return {"error_message":
+                "Stress level must be between 0 and 3 inclusively."}, 400
+
     # create the collection instance
     with bci_config_id.get_lock():
         configuration_id = bci_config_id.value
@@ -103,23 +139,24 @@ def feedback():
     # empty queue
     tasks_ids = []
     while not q.empty():
-        stream_data, is_anxious = q.pop()
+        stream_data, is_anxious = q.get()
 
         data = np.asarray(stream_data, dtype=np.float32)
 
         # add is_suject_anxious column
         is_subject_anxious = np.full((data.shape[0], 1), is_anxious)
         collection_instance_id = np.full((data.shape[0], 1), collection.id)
-        order = np.arange(
+        sample_order = np.arange(
             order, order + data.shape[0]).reshape(data.shape[0], 1)
         data = np.hstack(
-            (data, is_subject_anxious, collection_instance_id, order))
+            (data, is_subject_anxious, collection_instance_id, sample_order))
 
         # update new value for order
         order += data.shape[0]
 
         try:
-            tasks_ids.append(store_stream_data.delay(data).id)
+            tasks_ids.append(store_stream_data.apply_async(
+                kwargs={"data": data.tolist()}).id)
         except store_stream_data.OperationalError as exc:
             current_app.logger.exception("Sending task raised: %r", exc)
 
