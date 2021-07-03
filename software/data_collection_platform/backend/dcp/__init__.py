@@ -27,19 +27,17 @@ def create_app():
     # configure celery tasks to run within app context
     init_celery(app=app, celery=celery)
 
-    # define application context
-    with app.app_context():
-        from dcp import api
-        app.register_blueprint(api.bp)
+    from dcp import api
+    app.register_blueprint(api.bp)
 
-        # initialize extensions
-        db.init_app(app)
+    # initialize extensions
+    db.init_app(app)
 
-        # importing models so that Flask-Migrate can detect them
-        from dcp.models.collection import CollectionInstance
-        from dcp.models.configurations import OpenBCIConfig
-        from dcp.models.data import CollectedData
-        from dcp.models.video import Video
-        migrate.init_app(app, db)
+    # importing models so that Flask-Migrate can detect them
+    from dcp.models.collection import CollectionInstance
+    from dcp.models.configurations import OpenBCIConfig
+    from dcp.models.data import CollectedData
+    from dcp.models.video import Video
+    migrate.init_app(app, db)
 
     return app
