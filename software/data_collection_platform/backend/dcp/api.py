@@ -6,16 +6,12 @@ from dcp.mp.shared import (
     is_video_playing,
     q,
     bci_config_id)
-from dcp import db
-
-import numpy as np
-
+from dcp import db, celery
 from dcp.models.collection import CollectionInstance
 from dcp.models.video import Video
-
 from dcp.tasks import store_stream_data, add
 
-from celery.result import AsyncResult
+import numpy as np
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -145,7 +141,10 @@ def get_videos():
                 "youtube_url": video.youtube_url,
             } for video in Video.query.all()]}, 200
 
-@bp.route('/task_status/{str:task_id}', methods=['GET'])
+# CELERY TEST ROUTES
+
+
+@bp.route('/task_status/<string:task_id>', methods=['GET'])
 def get_task_status(task_id: str):
     """Given a task_id, this route returns the state of the job.
 
@@ -155,10 +154,10 @@ def get_task_status(task_id: str):
     Returns:
         response: dictionary containing the status and the response code.
     """
-    return {"result": AsyncResult(task_id).state}, 200
+    return {"result": celery.AsyncResult(task_id).state}, 200
 
 
-@bp.route('/task_result/{str:task_id}', methods=['GET'])
+@bp.route('/task_result/<string:task_id>', methods=['GET'])
 def get_task_result(task_id: str):
     """Given a task_id, this route returns the result of the job.
 
@@ -168,7 +167,7 @@ def get_task_result(task_id: str):
     Returns:
         response: dictionary containing the result and the response code.
     """
-    return {"result": AsyncResult(task_id).result}, 200
+    return {"result": celery.AsyncResult(task_id).result}, 200
 
 
 @bp.route('/test', methods=['GET'])
@@ -178,5 +177,9 @@ def test():
     import random
     a = random.randrange(1000)
     b = random.randrange(1000)
-    r = add.delay(a, b)
-    return r.id
+    r = add.apply_async(kwargs={"x": a, "y": b})
+
+    # wait for messages by adding this line we make the call synchronous and
+    # keep listening to messages
+    r.get(on_message=lambda x: current_app.logger.info(x), propagate=False)
+    return r.id, 200

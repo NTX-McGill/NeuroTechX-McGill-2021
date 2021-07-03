@@ -6,8 +6,12 @@ from dcp import celery, db
 
 from dcp.models.data import CollectedData
 
+from celery.utils.log import get_task_logger
 
-@celery.task()
+logger = get_task_logger(__name__)
+
+
+@celery.task
 def store_stream_data(data: np.ndarray):
     """Celery task responsible for storing a chunk of
     streamed data to the database.
@@ -35,18 +39,35 @@ def store_stream_data(data: np.ndarray):
     )
         for row in df.itertuples(index=False)
     ]
+    logger.info(f"Collected data: {collected_data}")
 
     db.session.add_all(collected_data)
     db.session.commit()
 
     return "Successfully wrote {} samples.".format(len(collected_data))
 
+# CELERY TEST TASK
+# bind=True means the first argument to the task will always be the
+# task instance (self)
 
-@celery.task()
-def add(x, y):
-    current_app.logger.info('Got Request - Starting work ')
+
+@celery.task(bind=True)
+def add(self, x, y):
+    from celery.states import state, PENDING, SUCCESS
+    self.update_state(state=state(PENDING), meta='Got Request - Starting work')
     import random
     import time
-    time.sleep(random.randrange(60))
-    current_app.logger.info('Work Finished!')
+    num = random.randrange(5, 10)
+    self.update_state(task_id=self.id,
+                      state=state(PENDING),
+                      meta='Starting to sleep {}s'.format(num))
+    time.sleep(num)
+    num = random.randrange(5, 10)
+    self.update_state(task_id=self.id,
+                      state=state(PENDING),
+                      meta='Continuing to sleep {}s'.format(num))
+    time.sleep(num)
+    self.update_state(task_id=self.id, state=state(
+        SUCCESS), meta="Work finished!")
+    logger.info("hello")
     return x + y
