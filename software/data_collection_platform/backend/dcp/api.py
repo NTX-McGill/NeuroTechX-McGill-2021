@@ -40,7 +40,6 @@ def validate_json(*fields):
 
 
 @bp.route('/video/start', methods=['PUT'])
-@validate_json()
 def video_start():
     with is_video_playing.get_lock():
         is_video_playing.value = 1
