@@ -184,9 +184,6 @@ def get_task_status(task_id: str):
 
     Args:
         task_id ([str]): Celery task id
-
-    Returns:
-        response: dictionary containing the status and the response code.
     """
     return {"result": celery.AsyncResult(task_id).state}, 200
 
