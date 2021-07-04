@@ -40,7 +40,6 @@ def validate_json(*fields):
 
 
 @bp.route("/openbci/start", methods=['POST'])
-@validate_json()
 def start_openbci():
     # if there is already a process spawned for running openbci
     if "process_pid" in session:
