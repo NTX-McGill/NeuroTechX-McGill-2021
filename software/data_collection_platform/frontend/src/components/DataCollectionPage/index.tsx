@@ -52,23 +52,23 @@ const DataCollectionPage = ({ videos }: { videos: VideoInfo[] }) => {
   };
 
   const onStart = () => {
-    api.videoStart({ time: new Date().toISOString() });
+    api.videoStart();
   };
 
   const onEnded = () => {
-    api.videoStop({ time: new Date().toISOString() });
+    api.videoStop();
     setVideoEnded(true);
   };
 
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
       if (e.code === "Space") {
-        api.anxiousStart({ time: new Date().toISOString() });
+        api.anxiousStart();
       }
     };
     const keyup = (e: KeyboardEvent) => {
       if (e.code === "Space") {
-        api.anxiousStop({ time: new Date().toISOString() });
+        api.anxiousStop();
       }
     };
     document.addEventListener("keydown", keydown);

@@ -8,13 +8,13 @@ const AnxietyPrompt = () => {
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
       if (e.code === "Space") {
-        api.anxiousStart({ time: new Date().toISOString() });
+        api.anxiousStart();
         setAnxious(true);
       }
     };
     const keyup = (e: KeyboardEvent) => {
       if (e.code === "Space") {
-        api.anxiousStop({ time: new Date().toISOString() });
+        api.anxiousStop();
         setAnxious(false);
       }
     };
