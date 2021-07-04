@@ -12,10 +12,11 @@ class CollectionInstance(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     stress_level = db.Column(db.Integer, nullable=False)
-    video_id = db.Column(db.Integer, db.ForeignKey("video.id"))
+    video_id = db.Column(db.Integer, db.ForeignKey("video.id"), nullable=False)
     collection_time = db.Column(db.DateTime(
-        timezone=True), default=datetime.utcnow)
-    config_id = db.Column(db.Integer, db.ForeignKey("bci_config.id"))
+        timezone=True), default=datetime.utcnow, nullable=False)
+    config_id = db.Column(db.Integer, db.ForeignKey(
+        "bci_config.id"), nullable=False)
 
     @validates("stress_level")
     def validates_stress_level(self, key, stress_lv):
