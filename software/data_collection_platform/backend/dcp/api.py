@@ -193,7 +193,7 @@ def get_task_status(task_id: str):
 
 @bp.route('/task_result/<string:task_id>', methods=['GET'])
 def get_task_result(task_id: str):
-    """Given a task_id, this route returns the result of the job.
+    """Return the result of a job given a task_id.
 
     Args:
         task_id ([str]): Celery task id
