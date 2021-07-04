@@ -1,17 +1,21 @@
 import React, { useState, useEffect } from "react";
+import { useSelector } from "../../hooks";
 import { IconButton } from "@material-ui/core";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import { logo } from "../../assets";
 import api from "../../api";
 import "./index.scss";
 import { VideoInfo, FeedbackValue } from "../../types";
-
+import VideoSelectionPage from "../VideoSelectionPage";
 import Welcome from "./Welcome";
 import Video from "./Video";
 import Feedback from "./Feedback";
 import Final from "./Final";
 
-const DataCollectionPage = ({ videos }: { videos: VideoInfo[] }) => {
+const DataCollectionPage = () => {
+  const videos: VideoInfo[] = useSelector(
+    (state) => state.videos.videosToWatch,
+  );
   // Highest possible integer value for status.
   const endIndex = 2 * videos.length;
 
@@ -21,15 +25,16 @@ const DataCollectionPage = ({ videos }: { videos: VideoInfo[] }) => {
   // Otherwise, we are either on a video or feedback page.
   // Status 2n corresponds to nth video, and 2n+1 corresponds
   // to nth feedback page.
-  const [status, setStatus] = useState<number>(-1);
+  const [status, setStatus] = useState<number>(-2);
 
   const [feedback, setFeedback] = useState<FeedbackValue | null>(null);
   const [videoEnded, setVideoEnded] = useState<boolean>(false);
 
-  const isWelcome = status === -1;
+  const isWelcome = status === -2;
+  const isSelection = status === -1;
   const isFinal = status === endIndex;
-  const isFeedback = !isWelcome && !isFinal && status % 2 !== 0;
-  const isVideo = !isWelcome && !isFinal && status % 2 === 0;
+  const isFeedback = 0 <= status && !isFinal && status % 2 !== 0;
+  const isVideo = 0 <= status && !isFinal && status % 2 === 0;
   const index = Math.floor(status / 2);
 
   const nextDisabled =
@@ -44,7 +49,10 @@ const DataCollectionPage = ({ videos }: { videos: VideoInfo[] }) => {
   };
   const onClickNext = () => {
     if (isFeedback && feedback !== null) {
-      api.sendFeedback({ url: videos[index].url, stress_level: feedback });
+      api.sendFeedback({
+        video_id: videos[index].id,
+        stress_level: feedback,
+      });
       setFeedback(null);
     }
     setStatus(Math.min(endIndex, status + 1));
@@ -84,6 +92,8 @@ const DataCollectionPage = ({ videos }: { videos: VideoInfo[] }) => {
       timeEstimate={`${videos.length * 2} minutes`}
       videoCount={`${videos.length}`}
     />
+  ) : isSelection ? (
+    <VideoSelectionPage />
   ) : isFinal ? (
     <Final />
   ) : status % 2 === 0 ? (

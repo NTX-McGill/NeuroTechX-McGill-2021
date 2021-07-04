@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { IconButton } from "@material-ui/core";
 import NavigateNextIcon from "@material-ui/icons/NavigateNext";
-import { youtubeLinks } from "./utils/links";
+import { youtubeLinks } from "../utils/links";
 
 const VideoBox = () => {
   const [currVideoIndex, setCurrVideoIndex] = useState<number>(0);
