@@ -56,7 +56,6 @@ def video_stop():
 
 
 @bp.route('/anxious/start', methods=['PUT'])
-@validate_json()
 def anxious_start():
     with is_subject_anxious.get_lock():
         is_subject_anxious.value = 1
