@@ -188,7 +188,7 @@ def get_task_status(task_id: str):
     return {"result": celery.AsyncResult(task_id).state}, 200
 
 
-@bp.route('/task_result/<string:task_id>', methods=['GET'])
+@bp.route('/tasks/<string:task_id>/result', methods=['GET'])
 def get_task_result(task_id: str):
     """Return the result of a job given a task_id.
 
