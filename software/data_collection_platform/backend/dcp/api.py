@@ -55,7 +55,6 @@ def start_openbci():
 
 
 @bp.route("/openbci/stop", methods=['POST'])
-@validate_json()
 def stop_openbci():
     if "process_pid" not in session:
         return {"message": "Process does not exist."}, 400
