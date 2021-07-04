@@ -178,7 +178,7 @@ def get_videos():
 # CELERY TEST ROUTES
 
 
-@bp.route('/task_status/<string:task_id>', methods=['GET'])
+@bp.route('/tasks/<string:task_id>/status', methods=['GET'])
 def get_task_status(task_id: str):
     """Given a task_id, this route returns the state of the job.
 
