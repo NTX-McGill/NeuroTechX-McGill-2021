@@ -101,4 +101,15 @@ def load_visualise(ecg, peaks, zoom=[]):
     
     return ecg
 
+def transform_y(data): 
+    low_stress_threshold = np.percentile(np.array(data['foot GSR']), 25) 
+    med_stress_threshold = np.percentile(np.array(data['foot GSR']), 50)
+    high_stress_threshold = np.percentile(np.array(data['foot GSR']), 75)
+    print(low_stress_threshold, med_stress_threshold, high_stress_threshold)
+    no_stress_data = data[data['foot GSR']<low_stress_threshold] #(0,25)
+    low_data = data[(data['foot GSR']>=low_stress_threshold) & (data['foot GSR']<med_stress_threshold)] 
+    med_data = data[(data['foot GSR']>=med_stress_threshold) & (data['foot GSR']<high_stress_threshold)] 
+    high_data = data[data['foot GSR']>=high_stress_threshold] 
+    print(len(no_stress_data), len(low_data), len(med_data), len(high_data))
 
+    return no_stress_data, low_data, med_data, high_data
