@@ -66,7 +66,7 @@ def stop_openbci():
             return str(e), 200
         return f"Process {pid} terminated.", 200
 
-
+      
 @bp.route('/video/start', methods=['PUT'])
 def video_start():
     with is_video_playing.get_lock():
@@ -175,9 +175,8 @@ def get_videos():
                 "youtube_url": video.youtube_url,
             } for video in Video.query.all()]}, 200
 
+
 # CELERY TEST ROUTES
-
-
 @bp.route('/tasks/<string:task_id>/status', methods=['GET'])
 def get_task_status(task_id: str):
     """Return the state of a job given a task_id.
