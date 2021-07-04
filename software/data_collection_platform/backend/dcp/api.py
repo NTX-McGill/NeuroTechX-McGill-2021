@@ -76,7 +76,6 @@ def video_start():
 
 
 @bp.route('/video/stop', methods=['PUT'])
-@validate_json()
 def video_stop():
     with is_video_playing.get_lock():
         is_video_playing.value = 0
