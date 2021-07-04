@@ -180,7 +180,7 @@ def get_videos():
 
 @bp.route('/tasks/<string:task_id>/status', methods=['GET'])
 def get_task_status(task_id: str):
-    """Given a task_id, this route returns the state of the job.
+    """Return the state of a job given a task_id.
 
     Args:
         task_id ([str]): Celery task id
