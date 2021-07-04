@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from dcp.models.utils import auto_str
+from dcp.models.configurations import OpenBCIConfig
 from dcp import db
 
 from sqlalchemy.orm import validates
@@ -14,8 +15,9 @@ class CollectionInstance(db.Model):
     stress_level = db.Column(db.Integer, nullable=False)
     video_id = db.Column(db.Integer, db.ForeignKey("video.id"))
     collection_time = db.Column(db.DateTime(
-        timezone=True), default=datetime.utcnow)
-    config_id = db.Column(db.Integer, db.ForeignKey("bci_config.id"))
+        timezone=True), default=datetime.utcnow, nullable=False)
+    config_id = db.Column(db.Integer, db.ForeignKey(
+        OpenBCIConfig.id), nullable=False)
 
     @validates("stress_level")
     def validates_stress_level(self, key, stress_lv):
