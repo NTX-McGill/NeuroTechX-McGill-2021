@@ -51,24 +51,17 @@ services:
         build:
             context: .
             dockerfile: docker/dev/app/Dockerfile
-        command: ["flask", "run"]
+        command: ["python -m debugpy --wait-for-client --listen 0.0.0.0:5678 flask run --no-debugger"] # --no-reload
         env_file:
             - .env
-        # use host's network
-        network_mode: "host"
-        privileged: true
-        # ports:
-            # - "1-65535:1-65535"
-            # - "5000:5000"
-            # - "16571-16604:16571-16604"
+        ports:
+            - "5000:5000"
+            - "5678:5678"
+            - "16571-16604:16571-16604"
         depends_on:
             - db
             - rabbitmq
             - celery
-        devices: 
-            - "/dev/ttyUSB0:/dev/ttyUSB0"
         volumes:
-            # changes in current directory will be automatically reflected inside the container
+            # changes in current directly are automatically reflected inside the container
             - .:/usr/src/dcp/backend
-            - /dev:/dev
-            - /dev/bus/usb:/dev/bus/usb
