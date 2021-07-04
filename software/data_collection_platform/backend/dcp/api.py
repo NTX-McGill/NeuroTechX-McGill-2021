@@ -136,7 +136,7 @@ def feedback():
     # empty queue
     tasks_ids = []
     while not q.empty():
-        stream_data, is_anxious = q.get()
+        stream_data, is_anxious = q.get_nowait()
 
         data = np.asarray(stream_data, dtype=np.float32)
 
