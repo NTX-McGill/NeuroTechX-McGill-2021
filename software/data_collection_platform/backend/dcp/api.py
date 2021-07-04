@@ -203,7 +203,7 @@ def get_task_result(task_id: str):
 
 @bp.route('/test', methods=['GET'])
 def test():
-    """Method to test Celery task queue setup
+    """Test Celery task queue setup.
     """
     import random
     a = random.randrange(1000)
