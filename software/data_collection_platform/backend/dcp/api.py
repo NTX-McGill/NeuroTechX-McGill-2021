@@ -92,7 +92,6 @@ def anxious_start():
 
 
 @bp.route('/anxious/stop', methods=['PUT'])
-@validate_json()
 def anxious_stop():
     with is_subject_anxious.get_lock():
         is_subject_anxious.value = 0
