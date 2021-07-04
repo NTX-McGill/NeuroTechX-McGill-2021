@@ -15,13 +15,13 @@ migrate = Migrate(compare_type=True)
 celery = Celery(__name__, broker=app_configs.broker_url,
                 backend=app_configs.result_backend,
                 include=["dcp.tasks"])
+cors = CORS()
 
 
 def create_app():
     app = Flask(__name__)
 
     app.config.from_object(app_configs)
-    CORS(app)
 
     celery.conf.update(app.config)
     # configure celery tasks to run within app context
@@ -34,6 +34,8 @@ def create_app():
         # initialize extensions
         db.init_app(app)
         db.create_all()  # NOTE: will not recreate tables that already exist
+
+        cors.init_app(app)
 
         # importing models so that Flask-Migrate can detect them
         from dcp.models.collection import CollectionInstance
