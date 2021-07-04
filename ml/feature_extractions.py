@@ -145,26 +145,36 @@ class Feature_Extractor():
         # print("TIME DOMAIN FEATURES EXTRACTED")
 
         #extracting frequency domain features: vlf, lf, hf, lf_hf 
-        wd, m = calc_fd_measures(method = 'periodogram', welch_wsize=20, measures = m, working_data = wd) #240
+        wd, m = calc_fd_measures(method = 'periodogram', welch_wsize=self.wsize, measures = m, working_data = wd) #240
         vlf, lf, hf, lf_hf = m["vlf"], m["lf"], m["hf"], m["lf/hf"] 
         # print("FREQ DOMAIN FEATURES EXTRACTED")
     
         features = [nfd, nsd, hrv, avNN, sdNN, rMSSD, pNN20, pNN50, vlf, lf, hf, lf_hf]
         if gsr.any(): features.append(gsr.mean())
         
+        
         return np.array(features)
 
-    def feature_matrix_from_whole_sample(self, gsr=None): 
-        windows, n_windows = window(self.data, self.sr, windowsize=10, overlap=0, min_size=0, filter=self.apply_bandpass)
+    def feature_matrix_from_whole_sample(self, gsr=None, to_bin = False, to_csv=False): 
+        windows, n_windows = window(self.data, self.sr, windowsize=self.wsize, overlap=0, min_size=0, filter=self.apply_bandpass)
         features_mat = []
+        feat_names = ['nfd', 'nsd', 'hrv', 'avNN', 'sdNN', 'rMSSD', 'pNN20', 'pNN50', 'vlf', 'lf', 'hf', 'lf_hf']
         if gsr.any(): 
-            gsr_windows, _ = window(gsr, self.sr, windowsize=10, overlap=0, min_size=0, filter=False)
+            print('gsr included')
+            feat_names.append('foot GSR')
+            gsr_windows, _ = window(gsr, self.sr, windowsize=self.wsize, overlap=0, min_size=0, filter=False)
             for i in range(len(windows)): 
                 ecg, n_ecg, gsr = windows[i], n_windows[i], gsr_windows[i]
                 features_mat.append(self.get_all_features(win = ecg, n_win = n_ecg, gsr=gsr)) 
         else: 
             for win,n_win in zip(windows,n_windows):
-                features_mat.append(self.get_all_features(win, n_win)) 
+                features_mat.append(self.get_all_features(win, n_win))  
+        if to_bin: 
+            np.save('Feature_Extraction.npy', features_mat)
+        if to_csv: 
+            df = pd.DataFrame(features_mat, columns=feat_names)
+            df.to_csv('Feature_Extraction.csv')
+            # np.savetxt('Feature_Extraction.csv', features_mat)
         return np.array(features_mat)
     
     
