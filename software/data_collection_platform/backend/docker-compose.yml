@@ -55,20 +55,20 @@ services:
         env_file:
             - .env
         # use host's network
-        network_mode: "host"
-        privileged: true
-        # ports:
+        # network_mode: "host"
+        # privileged: true
+        ports:
             # - "1-65535:1-65535"
-            # - "5000:5000"
-            # - "16571-16604:16571-16604"
+            - "5000:5000"
+            - "16571-16604:16571-16604"
         depends_on:
             - db
             - rabbitmq
             - celery
-        devices: 
-            - "/dev/ttyUSB0:/dev/ttyUSB0"
+        # devices: 
+            # - "/dev/ttyUSB0:/dev/ttyUSB0"
         volumes:
             # changes in current directory will be automatically reflected inside the container
             - .:/usr/src/dcp/backend
-            - /dev:/dev
-            - /dev/bus/usb:/dev/bus/usb
+            # - /dev:/dev
+            # - /dev/bus/usb:/dev/bus/usb
