@@ -114,7 +114,7 @@ def feedback():
     feedback = request.json['stress_level']
 
     if not Video.query.get(video_id):
-        return {"error_message": "Video is not in the database"}, 400
+        return {"error": "Video is not in the database"}, 404
 
     if feedback < 0 or feedback > 3:
         return {"error_message":
