@@ -116,7 +116,7 @@ def feedback():
         return {"error": "Video is not in the database"}, 404
 
     if feedback < 0 or feedback > 3:
-        return {"error_message":
+        return {"error":
                 "Stress level must be between 0 and 3 inclusively."}, 400
 
     # create the collection instance
