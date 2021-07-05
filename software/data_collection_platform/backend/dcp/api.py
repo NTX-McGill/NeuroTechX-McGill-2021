@@ -1,5 +1,6 @@
 from functools import wraps
 from flask import Blueprint, request, current_app, session
+from flask_cors import cross_origin
 import signal
 import os
 
@@ -100,6 +101,7 @@ def anxious_stop():
 
 
 @bp.route('/feedback', methods=['POST'])
+@cross_origin()
 @validate_json('video_id', 'stress_level')
 def feedback():
     """Clear the buffer containing OpenBCI data once the feedback form is received.
