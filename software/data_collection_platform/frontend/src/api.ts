@@ -42,5 +42,11 @@ const api = {
   fetchVideos: () =>
     query("/api/videos", "GET")
     .then((d) => d.data as VideoInfo[]),
+
+  openBciStart: () =>
+    query("/api/openbci/start", "POST"),
+
+  openBciStop: () =>
+    query("/api/openbci/stop", "POST"),
 };
 export default api;

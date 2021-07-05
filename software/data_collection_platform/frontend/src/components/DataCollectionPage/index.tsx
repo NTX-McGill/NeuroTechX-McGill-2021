@@ -72,6 +72,14 @@ const DataCollectionPage = () => {
   };
 
   useEffect(() => {
+    api.openBciStart();
+  }, []);
+
+  useEffect(() => {
+    if (isFinal) api.openBciStop();
+  }, [isFinal]);
+
+  useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
       if (e.code === "Space") {
         api.anxiousStart();
