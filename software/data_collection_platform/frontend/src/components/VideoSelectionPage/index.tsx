@@ -17,7 +17,10 @@ const VideoSelectionPage = () => {
   const dispatch = useDispatch();
 
   useEffect(() => {
-    if (!videos.length) dispatch(api.fetchVideos());
+    if (!videos.length) {
+      dispatch(api.fetchVideos());
+      api.startOpenBCI();
+    }
   }, [dispatch, videos.length]);
 
   const handleOnCheckChange = (video: VideoInfo, checked: boolean) => {

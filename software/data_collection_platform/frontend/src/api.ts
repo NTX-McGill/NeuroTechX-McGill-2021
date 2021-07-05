@@ -46,5 +46,7 @@ const api = {
       .catch((err) => {
         throw err;
       }),
+
+  startOpenBCI: () => query("api/openbci/start", "POST")
 };
 export default api;
