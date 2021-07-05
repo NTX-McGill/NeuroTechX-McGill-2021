@@ -1,4 +1,5 @@
 from dcp.models.utils import auto_str
+from dcp.models.collection import CollectionInstance
 from dcp import db
 
 
@@ -18,7 +19,7 @@ class CollectedData(db.Model):
     channel_8 = db.Column(db.Float, nullable=False)
     is_subject_anxious = db.Column(db.Boolean, nullable=False)
     collection_instance_id = db.Column(
-        db.Integer, db.ForeignKey("collection_instance.id"), nullable=False)
+        db.Integer, db.ForeignKey(CollectionInstance.id), nullable=False)
     order = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):

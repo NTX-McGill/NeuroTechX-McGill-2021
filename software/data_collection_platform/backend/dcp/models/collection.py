@@ -2,6 +2,7 @@ from datetime import datetime
 
 from dcp.models.utils import auto_str
 from dcp.models.configurations import OpenBCIConfig
+from dcp.models.video import Video
 from dcp import db
 
 from sqlalchemy.orm import validates
@@ -13,7 +14,7 @@ class CollectionInstance(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     stress_level = db.Column(db.Integer, nullable=False)
-    video_id = db.Column(db.Integer, db.ForeignKey("video.id"), nullable=False)
+    video_id = db.Column(db.Integer, db.ForeignKey(Video.id), nullable=False)
     collection_time = db.Column(db.DateTime(
         timezone=True), default=datetime.utcnow, nullable=False)
     config_id = db.Column(db.Integer, db.ForeignKey(

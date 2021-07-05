@@ -57,18 +57,6 @@ def populate_videos(app):
     print("Successfully wrote {} videos from {} to the video table.".format(
         len(df), URL))
 
-
-def create_tables(app):
-    """We can either create all tables in our backend using this function
-    or use Flask-Migrate.
-
-    Instead of running this function, we could create the tables by running:
-        - flask db upgrade
-    """
-    # use dcp app context to create all db tables
-    db.create_all(app=app)
-
-
 if __name__ == "__main__":
     app = create_app()
     populate_videos(app)

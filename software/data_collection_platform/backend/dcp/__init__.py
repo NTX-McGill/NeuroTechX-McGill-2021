@@ -31,17 +31,16 @@ def create_app():
         from dcp import api
         app.register_blueprint(api.bp)
 
-        # initialize extensions
-        db.init_app(app)
-        db.create_all()  # NOTE: will not recreate tables that already exist
-
-        cors.init_app(app)
-
         # importing models so that Flask-Migrate can detect them
         from dcp.models.collection import CollectionInstance
         from dcp.models.configurations import OpenBCIConfig
         from dcp.models.data import CollectedData
         from dcp.models.video import Video
+
+        # initialize extensions
+        cors.init_app(app)
+        db.init_app(app)
+        db.create_all()  # NOTE: will not recreate tables that already exist
         migrate.init_app(app, db)
 
     return app
