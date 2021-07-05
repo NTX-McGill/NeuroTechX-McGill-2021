@@ -55,6 +55,9 @@ const DataCollectionPage = () => {
       });
       setFeedback(null);
     }
+
+    if (isFinal) api.stopOpenBCI();
+
     setStatus(Math.min(endIndex, status + 1));
     setVideoEnded(false);
   };
