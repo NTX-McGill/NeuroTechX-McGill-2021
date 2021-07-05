@@ -28,6 +28,9 @@ echo "Database started"
 echo "Applying database migrations"
 flask db upgrade
 
+echo "Populating video table with videos from Data Team Google Sheet"
+python db_utils.py
+
 # starting a celery worker
 celery -A dcp.run_celery.celery worker --loglevel=info > celery.log 2>&1 &
 flask run
