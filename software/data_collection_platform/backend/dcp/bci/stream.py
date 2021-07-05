@@ -7,7 +7,8 @@ from dcp.mp.shared import (
     bci_config_id,
     is_video_playing, is_subject_anxious, q)
 
-logging.basicConfig(level=logging.INFO,
+logging.basicConfig(filename="../../logs/bci.log",
+                    level=logging.INFO,
                     format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
 logger = logging.getLogger(__name__)
