@@ -57,7 +57,7 @@ def start_openbci():
 @bp.route("/openbci/stop", methods=['POST'])
 def stop_openbci():
     if "process_pid" not in session:
-        return {"message": "Process does not exist."}, 404
+        return {"error": "Process does not exist."}, 404
     else:
         pid = session.pop("process_pid")
         try:
