@@ -45,11 +45,10 @@ def store_stream_data(data: List[float]):
 
     return "Successfully wrote {} samples.".format(len(collected_data))
 
+
 # CELERY TEST TASK
 # bind=True means the first argument to the task will always be the
 # task instance (self)
-
-
 @celery.task(bind=True)
 def add(self, x, y):
     from celery.states import state, PENDING, SUCCESS

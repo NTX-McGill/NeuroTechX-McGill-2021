@@ -44,7 +44,7 @@ def stream_bci():
     # save current configuration to database
     db.session.add(config)
     db.session.commit()
-    
+
     # an id is only assigned to an object after it is committed or flushed
     with bci_config_id.get_lock():
         bci_config_id.value = config.id

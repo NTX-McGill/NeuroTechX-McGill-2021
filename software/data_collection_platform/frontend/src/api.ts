@@ -37,7 +37,6 @@ const api = {
 
   anxiousStop: () => query("/api/anxious/stop", "PUT"),
 
-  // TODO: url: string should be changed to video_id: number, we want all feedback forms to be associated to a video
   sendFeedback: (d: { video_id: number; stress_level: FeedbackValue }) =>
     query("/api/feedback", "POST", d),
 

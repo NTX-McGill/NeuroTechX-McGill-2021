@@ -57,16 +57,16 @@ def start_openbci():
 @bp.route("/openbci/stop", methods=['POST'])
 def stop_openbci():
     if "process_pid" not in session:
-        return {"message": "Process does not exist."}, 400
+        return {"error": "Process does not exist."}, 404
     else:
         pid = session.pop("process_pid")
         try:
             os.kill(pid, signal.SIGKILL)
         except ProcessLookupError as e:
-            return str(e), 200
+            return str(e), 404
         return f"Process {pid} terminated.", 200
 
-      
+
 @bp.route('/video/start', methods=['PUT'])
 def video_start():
     with is_video_playing.get_lock():
