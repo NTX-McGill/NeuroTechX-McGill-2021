@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useSelector, useDispatch } from "../../hooks";
-import api from "../../api";
 import { videos as videosActions } from "../../state";
 import { VideoInfo } from "../../types";
 import Thumbnail from "./Thumbnail";
@@ -10,14 +9,11 @@ import {
 } from "./__styled__/VideoSelectionPage";
 
 const VideoSelectionPage = () => {
-  // fetch list of videos and map them in return
-  const videos = useSelector((state) => state.videos.videos);
-  const videosToWatch = useSelector((state) => state.videos.videosToWatch);
-
   const dispatch = useDispatch();
+  const { videos, videosToWatch } = useSelector((state) => state.videos);
 
   useEffect(() => {
-    if (!videos.length) dispatch(api.fetchVideos());
+    if (!videos.length) dispatch(videosActions.fetch());
   }, [dispatch, videos.length]);
 
   const handleOnCheckChange = (video: VideoInfo, checked: boolean) => {

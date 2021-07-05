@@ -1,11 +1,15 @@
-import anxiousPeriodsSlice from "./anxiousPeriods";
-import VideosSlice from "./videoInfo";
+import { configureStore } from "@reduxjs/toolkit";
 
-export const anxiousPeriods = anxiousPeriodsSlice.actions;
-export const videos = VideosSlice.actions;
+// Import reducers and default export the store.
+import videos from "./videos";
 
-const reducer = {
-  anxiousPeriods: anxiousPeriodsSlice.reducer,
-  videos: VideosSlice.reducer,
-};
-export default reducer;
+const store = configureStore({
+  reducer: {
+    videos,
+  },
+  devTools: true,
+});
+export default store;
+
+// Export actions.
+export * as videos from "./videos";

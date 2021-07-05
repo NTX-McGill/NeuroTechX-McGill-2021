@@ -1,3 +1,7 @@
+import store from './state';
+export type State = ReturnType<typeof store.getState>;
+export type Dispatch = typeof store.dispatch;
+
 export interface VideoInfo {
   end?: number;
   id: number;
