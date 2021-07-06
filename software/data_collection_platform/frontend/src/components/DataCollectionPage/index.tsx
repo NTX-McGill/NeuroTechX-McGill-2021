@@ -5,7 +5,7 @@ import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import { logo } from "../../assets";
 import api from "../../api";
 import "./index.scss";
-import { VideoInfo, FeedbackValue } from "../../types";
+import { FeedbackValue } from "../../types";
 import VideoSelectionPage from "../VideoSelectionPage";
 import Welcome from "./Welcome";
 import Video from "./Video";
@@ -13,9 +13,8 @@ import Feedback from "./Feedback";
 import Final from "./Final";
 
 const DataCollectionPage = () => {
-  const videos: VideoInfo[] = useSelector(
-    (state) => state.videos.videosToWatch,
-  );
+  const videos = useSelector((st) => st.videos.videosToWatch);
+
   // Highest possible integer value for status.
   const endIndex = 2 * videos.length;
 
@@ -30,6 +29,11 @@ const DataCollectionPage = () => {
   const [feedback, setFeedback] = useState<FeedbackValue | null>(null);
   const [videoEnded, setVideoEnded] = useState<boolean>(false);
 
+  const clearState = () => {
+    setFeedback(null);
+    setVideoEnded(false);
+  };
+
   const isWelcome = status === -2;
   const isSelection = status === -1;
   const isFinal = status === endIndex;
@@ -38,14 +42,13 @@ const DataCollectionPage = () => {
   const index = Math.floor(status / 2);
 
   const nextDisabled =
-    (isFeedback && feedback == null) || (isVideo && !videoEnded);
-
-  console.log(isVideo);
-  console.log(nextDisabled);
+    (isSelection && videos.length === 0) ||
+    (isFeedback && feedback == null) ||
+    (isVideo && !videoEnded);
 
   const onClickPrev = () => {
-    setStatus(Math.max(-1, status - 1));
-    setVideoEnded(false);
+    setStatus(Math.max(-2, status - 1));
+    clearState();
   };
   const onClickNext = () => {
     if (isFeedback && feedback !== null) {
@@ -56,7 +59,7 @@ const DataCollectionPage = () => {
       setFeedback(null);
     }
     setStatus(Math.min(endIndex, status + 1));
-    setVideoEnded(false);
+    clearState();
   };
 
   const onStart = () => {
@@ -69,8 +72,16 @@ const DataCollectionPage = () => {
   };
 
   useEffect(() => {
+    api.openBciStart();
+  }, []);
+
+  useEffect(() => {
+    if (isFinal) api.openBciStop();
+  }, [isFinal]);
+
+  useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
-      if (e.code === "Space") {
+      if (e.code === "Space" && !e.repeat) {
         api.anxiousStart();
       }
     };

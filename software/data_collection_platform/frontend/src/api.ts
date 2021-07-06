@@ -1,11 +1,6 @@
-import { FeedbackValue } from "./types";
-import { videos } from "./state";
+import { FeedbackValue, VideoInfo } from "./types";
 
-const query = async (
-  endpoint: string,
-  method: string,
-  data?: object | undefined,
-) => {
+const query = async (endpoint: string, method: string, data?: object) => {
   if (process.env.REACT_APP_SERVER_URL === undefined)
     throw new Error("$REACT_APP_SERVER_URL is undefined");
 
@@ -29,22 +24,29 @@ const query = async (
 //
 // prettier-ignore
 const api = {
-  videoStart: () => query("/api/video/start", "PUT"),
+  videoStart: () =>
+    query("/api/video/start", "PUT"),
 
-  videoStop: () => query("/api/video/stop", "PUT"),
+  videoStop: () =>
+    query("/api/video/stop", "PUT"),
 
-  anxiousStart: () => query("/api/anxious/start", "PUT"),
+  anxiousStart: () =>
+    query("/api/anxious/start", "PUT"),
 
-  anxiousStop: () => query("/api/anxious/stop", "PUT"),
+  anxiousStop: () =>
+    query("/api/anxious/stop", "PUT"),
 
   sendFeedback: (d: { video_id: number; stress_level: FeedbackValue }) =>
     query("/api/feedback", "POST", d),
 
-  fetchVideos: () => (dispatch) =>
+  fetchVideos: () =>
     query("/api/videos", "GET")
-      .then((res) => dispatch(videos.setVideos(res.data)))
-      .catch((err) => {
-        throw err;
-      }),
+    .then((d) => d.data as VideoInfo[]),
+
+  openBciStart: () =>
+    query("/api/openbci/start", "POST"),
+
+  openBciStop: () =>
+    query("/api/openbci/stop", "POST"),
 };
 export default api;
