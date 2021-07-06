@@ -81,7 +81,7 @@ const DataCollectionPage = () => {
 
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
-      if (e.code === "Space") {
+      if (e.code === "Space" && !e.repeat) {
         api.anxiousStart();
       }
     };

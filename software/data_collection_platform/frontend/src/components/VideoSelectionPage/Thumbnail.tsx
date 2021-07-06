@@ -1,45 +1,30 @@
-import React, { useState } from "react";
-import { useSelector } from "../../hooks";
+import React from "react";
 import { VideoInfo } from "../../types";
 import Checkbox from "@material-ui/core/Checkbox";
-import {
-  ThumbnailContainer,
-  InfoContainer,
-} from "./__styled__/VideoSelectionPage";
 
 const Thumbnail = ({
   video,
+  checked,
   onCheckChange,
 }: {
   video: VideoInfo;
+  checked: boolean;
   onCheckChange: (video: VideoInfo, checked: boolean) => void;
 }) => {
-  const videosToWatch = useSelector((state) => state.videos.videosToWatch);
-
-  const [checked, setChecked] = useState(
-    videosToWatch.filter((vid) => vid.id === video.id).length > 0,
-  );
-
-  const handleOnCheckChange = () => {
+  const onChange = () => {
     onCheckChange(video, !checked);
-    setChecked(!checked);
   };
 
   return (
-    <ThumbnailContainer>
-      <Checkbox checked={checked} onChange={handleOnCheckChange} />
+    <div className="Thumbnail">
+      <Checkbox {...{ checked, onChange }} />
       <img alt="" src={`http://img.youtube.com/vi/${video.youtube_id}/0.jpg`} />
 
-      <InfoContainer>
-        <p>Stressful: {`${video.is_stressful}`}</p>
-        <p>
-          Keywords:{" "}
-          {video.keywords.map((kw, i) =>
-            i !== video.keywords.length - 1 ? `${kw}, ` : kw,
-          )}
-        </p>
-      </InfoContainer>
-    </ThumbnailContainer>
+      <div className="Info">
+        <p>Stressful: {video.is_stressful ? "yes" : "no"}</p>
+        <p>Keywords: {video.keywords.join(", ")}</p>
+      </div>
+    </div>
   );
 };
 
