@@ -1,33 +1,46 @@
-import os
 from flask import Flask
-from flask_cors import CORS 
+from flask_cors import CORS
+from flask_sqlalchemy import SQLAlchemy
+from flask_migrate import Migrate
+from celery import Celery
 
-from . import openbci
+from dcp.utils.celery import init_celery
 
-def create_app(test_config=None):
-    """ 
-    Initialize the application in this function following application factory pattern.
-    Any configuration, registration, and other setup for the application needs will happen inside this function, then the application will be returned.
-    """
+from dcp.cfg.config import app_configs
 
-    # create and configure the app
+# FLASK EXTENSIONS
+# global database object
+db = SQLAlchemy()
+migrate = Migrate(compare_type=True)
+celery = Celery(__name__, broker=app_configs.broker_url,
+                backend=app_configs.result_backend,
+                include=["dcp.tasks"])
+cors = CORS()
+
+
+def create_app():
     app = Flask(__name__)
-    CORS(app)
-    
-    # loading application configuration
-    app.config.from_object("config.DefaultConfig")
 
-    # set environment variables according to app.config
-    os.environ["FLASK_APP"] = os.path.dirname(__file__)
-    os.environ["FLASK_ENV"] = app.config["ENV"]
-    os.environ["FLASK_DEBUG"] = str(app.config["DEBUG"])
+    app.config.from_object(app_configs)
 
-    # example of routes, but better use blueprints for more modularized code..
-    @app.route('/')
-    def hello_world():
-        return "Hello yolo world", 200
+    celery.conf.update(app.config)
+    # configure celery tasks to run within app context
+    init_celery(app=app, celery=celery)
 
-    # register blueprints from the factory
-    app.register_blueprint(openbci.openbci_bp)
+    with app.app_context():
+        from dcp import api
+        app.register_blueprint(api.bp)
+
+        # importing models so that Flask-Migrate can detect them
+        from dcp.models.collection import CollectionInstance
+        from dcp.models.configurations import OpenBCIConfig
+        from dcp.models.data import CollectedData
+        from dcp.models.video import Video
+
+        # initialize extensions
+        cors.init_app(app)
+        db.init_app(app)
+        db.create_all()  # NOTE: will not recreate tables that already exist
+        migrate.init_app(app, db)
 
     return app
