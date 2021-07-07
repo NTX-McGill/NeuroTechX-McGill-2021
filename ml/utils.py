@@ -54,7 +54,7 @@ def window(data, sample_rate, windowsize, overlap, min_size, filter=True):
     n_windowed_data = np.array([n_filtered[i[0] : i[1]] for i in window_inds])
     return windowed_data , n_windowed_data 
 
-def RR_intervals(data, sample_rate, windowsize = .75, ma_perc = 20, bpmmin=40, bpmmax=180): 
+def RR_intervals(data, sample_rate, windowsize, ma_perc = 20, bpmmin=40, bpmmax=180): 
     
     working_data = {}
     bl_val = np.percentile(data, 0.1)
@@ -75,13 +75,11 @@ def RR_intervals(data, sample_rate, windowsize = .75, ma_perc = 20, bpmmin=40, b
     working_data = check_peaks(working_data['RR_list'], working_data['peaklist'], working_data['ybeat'],
                                False, working_data=working_data)
 
-    return working_data
+    return [],[]
 
-def clean_nans(df): 
-    # df = df.replace([np.inf, -np.inf], np.nan)
-    # df[~np.isfinite(df)] = np.nan
-    df.dropna(inplace=True)
-    return df
+def clean_nans(data): 
+    data = np.where(data > 180, data, 180)
+    return data 
 
 def load_visualise(ecg, peaks, zoom=[]):
     if zoom: #explore signal
@@ -113,3 +111,18 @@ def transform_y(data):
     print(len(no_stress_data), len(low_data), len(med_data), len(high_data))
 
     return no_stress_data, low_data, med_data, high_data
+
+def bandpass(self, fs, fc_low=5, fc_high=20):
+        bounds = [float(fc_low) * 2 / fs,
+                                 float(fc_high) * 2 / fs] 
+        print(bounds)
+        b, a = signal.butter(2, [float(fc_low) * 2 / fs,
+                                 float(fc_high) * 2 / fs], 'pass')
+
+        # sig_f = signal.filtfilt(b, a, sig[sampfrom:sampto],
+        #                              axis=0)
+        # # Save the passband gain (x2 due to double filtering)
+        # filter_gain = get_filter_gain(b, a, np.mean([fc_low, fc_high]),
+        #                                    fs) * 2
+
+        
