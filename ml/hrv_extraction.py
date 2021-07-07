@@ -7,16 +7,50 @@ from wfdb import processing
 from heartpy.datautils import rolling_mean, _sliding_window
 from heartpy.peakdetection import detect_peaks
 from feature_extractions import Feature_Extractor #get_features_matrix, 
-from utils import window, transform_Y
+from utils import window, transform_y, load_visualise, calculate_peaks_wfdb, bandpass, RR_intervals
 from heartpy.analysis import calc_rr, calc_fd_measures 
+from scipy.signal import resample
 
 
-# signals, fields = wfdb.rdsamp('drive03', pn_dir='drivedb') #Loading Auto Stress Data for Driver 3 from Physionet
-# patient_data = pd.DataFrame(signals, columns=fields['sig_name'], dtype='float') #Store it into Dataframe
-# patient_data.dropna(inplace=True) #Clean data by removing nans
-# data = np.asarray(patient_data['ECG']) #Transform into numpy array 
-# sr = fields['fs'] #Isolate sample_rate for later processing
-# extractor = Feature_Extractor(data, sr, []) #Initialize Extractor
+def load_physiodata(instance, db): 
+    signals, fields = wfdb.rdsamp(instance, pn_dir=db) #Loading Auto Stress Data for Driver 3 from Physionet
+    patient_data = pd.DataFrame(signals, columns=fields['sig_name'], dtype='float') #Store it into Dataframe
+    patient_data.dropna(inplace=True) #Clean data by removing nans
+    ecg = np.asarray(patient_data['ECG']) #Transform into numpy array 
+    gsr = np.asarray(patient_data['foot GSR'])
+    sr = fields['fs'] #Isolate sample_rate for later processing
+    return ecg, gsr, sr
+    
+ecg, gsr, sr = load_physiodata('drive01', 'drivedb')
+# wd, m = hp.process(ecg[60000:65000], sr)
+# peaks = [ecg[i] for i in wd['peaklist']]
+load_visualise(ecg, [])
+
+# patient_data = pd.read_csv('/Users/Owner/Desktop/School/NT/e0103.csv')
+# patient_data.dropna(inplace=True)
+# ecg = np.asarray(patient_data).flatten() 
+# wd, m = RR_intervals(ecg.flatten(), sr, 30)
+# print(wd['peaklist'])
+# load_visualise(ecg, wd['peaklist'])
+
+# peaks = calculate_peaks_wfdb(ecg, sr)
+
+
+# ##Convert Entire dataset to collection of CSVs
+# ppl = wfdb.io.get_record_list(db_dir = 'drivedb', records='all') #drivedb
+# for p in ppl: 
+#     try: 
+#         print("LOADING DATA FOR", p)
+#         ecg, gsr, sr = load_physiodata(p)
+#         # print(sr)
+#         wd, m = hp.process(ecg, sample_rate = sr)
+#         peaks = wd['RR_list']
+#         data = load_visualise(ecg, peaks)
+#     #     extractor = Feature_Extractor(ecg, sr, [], apply_bandpass=False) #Initialize Extractor
+#     #     features = extractor.feature_matrix_from_whole_sample(gsr = gsr, to_csv=p)
+#     #     print("LOADED DATA FOR", p, "SIZE", features.shape)
+    # except():
+    #     print(p, "DIDNT WORK")
 
 # #You can either apply the extractor to each window manually 
 # windows, n_windows = window(data, sr, windowsize=20, overlap=0, min_size=20, filter=True) #Apply a window function 
@@ -35,18 +69,10 @@ from heartpy.analysis import calc_rr, calc_fd_measures
 # gsr_windows, _ = window(gsr, sr, windowsize=20, overlap=10, min_size=20, filter=False)
 # features = extractor.get_all_features(windows[0], n_windows[0], gsr_windows[0])
 
-# print(features)
-
 # #Or using the entire sample 
 # features = extractor.feature_matrix_from_whole_sample(gsr = gsr)
 # print(features.shape)
 
-#If you want to save all the extracted data in a binary file (takes less space on computer)
-# features = extractor.feature_matrix_from_whole_sample(gsr = gsr, to_bin=True)
 #If you want to save all the extracted data in a csv
 # features = extractor.feature_matrix_from_whole_sample(gsr = gsr, to_csv=True)
 # print(features.shape)
-
-
-
-
