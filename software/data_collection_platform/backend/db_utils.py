@@ -57,7 +57,7 @@ def populate_videos(app):
         db.session.commit()
 
     print("Successfully wrote {} videos from {} to the video table.".format(
-        len(df), URL))
+        len(videos), URL))
 
 
 if __name__ == "__main__":
