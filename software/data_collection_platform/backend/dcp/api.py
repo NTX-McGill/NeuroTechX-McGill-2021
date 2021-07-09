@@ -49,8 +49,9 @@ def start_openbci():
     # use a separate process to stream BCI data
     from dcp.bci.stream import stream_bci
     from multiprocessing import Process
-    p = Process(target=stream_bci)
-    p.start()
+    with current_app.app_context():
+        p = Process(target=stream_bci)
+        p.start()
     session["process_pid"] = p.pid
     return {"message": "Process started.", "pid": p.pid}, 200
 
