@@ -9,7 +9,8 @@ from dcp.mp.shared import (
 
 import os
 
-log_path = "logs/bci.log"
+log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))), "logs",
+                        "bci.log")
 
 if not os.path.isfile(log_path):
     open(log_path, "w").close()
