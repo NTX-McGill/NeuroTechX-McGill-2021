@@ -13,12 +13,8 @@ from heartpy.analysis import calc_rr, calc_fd_measures
 from scipy.signal import resample
 
 
-<<<<<<< HEAD
-def load_physiodata(instance, db, x_name='ECG', y_name = 'foot GSR'): 
-=======
 
 def load_physiodata(instance, db): 
->>>>>>> 5060a3988792f1ee02a08d7ce890790d14fc1346
     signals, fields = wfdb.rdsamp(instance, pn_dir=db) #Loading Auto Stress Data for Driver 3 from Physionet
     patient_data = pd.DataFrame(signals, columns=fields['sig_name'], dtype='float') #Store it into Dataframe
     patient_data.dropna(inplace=True) #Clean data by removing nans
