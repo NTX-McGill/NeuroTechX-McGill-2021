@@ -1,0 +1,3 @@
+[flake8]
+select = B,C,E,F,P,T4,W,B9
+exclude = .git

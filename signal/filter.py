@@ -8,8 +8,11 @@ Created on Wed May  26 11:09:43 2021
 import numpy as np
 import matplotlib.pyplot as plt
 import mne
+from scipy.signal import butter, filtfilt
 
-SAMPLE_RATE = 250 # Hz
+SAMPLE_RATE = 250  # Hz
+REVERSE_SIGNAL = True  # voltage reversed in some samples TODO determine programmatically
+CONVERT_TO_VOLTS = True  # /voltage by 1000 for readability
 
 def load_virgin_file(file_path,channels=[1,2,3,4,5,6,7,8]):
     """
@@ -24,6 +27,100 @@ def load_virgin_file(file_path,channels=[1,2,3,4,5,6,7,8]):
 def load_ecg(file_path):
     # loads just the heartbeats channel
     return load_virgin_file(file_path,channels=[1])
+
+def butter_filter(data, cutoff, order, btype):
+    """
+    Applies the Butterworth filter to 2D array of signals dim: nchan * len_timeseries
+
+    Input:
+    - data : 2D array of raw signals from ECG or EEG
+    - cutoff : cutoff frequency
+    - order : order at which to apply filter
+    - btype : filter type; 'lowpass' or 'highpass'
+
+    Output:
+        2D array of filtered signals from ECG or EEG
+    """
+    [b,a] = butter(order, cutoff, btype=btype, analog=False)
+    return filtfilt(b, a, data, padlen=3*(max(len(b),len(a))-1))
+
+def filter_ecg(data, lowpass=0.17,lp_order=6,highpass=0.01,hp_order=3):
+    """
+    Filters 1D array of signals dim: len_timeseries
+
+    Input:
+    - data : 1D array of raw signals from ECG
+    - lowpass : frequencies below this are discarded
+    - lp_order : order for the lowpass Butterworth filter
+    - highpass : frequencies above this are discarded
+    - hp_order : order for the highpass Butterworth filter
+
+    Output:
+        1D array, filtered ECG signal to remove noise
+    """
+
+    # Configurations
+    initial_samples_to_trim = 100  # trimmed after filtering to remove filter artifacts
+
+    # Correct the signal
+    if REVERSE_SIGNAL:
+        data = (-data + np.max(data))
+    if CONVERT_TO_VOLTS:
+        data /= 1000
+
+    # Normalize the data
+    n_samples = data.shape[0]
+    time = np.array(range(n_samples)) / SAMPLE_RATE
+    fit = np.polyfit(time, data, 1)
+    normalized_data = data - (fit[0] * time + fit[1])
+
+    # Apply the lowpass filter
+    lp_filtered_data = butter_filter(normalized_data, lowpass, lp_order, 'lowpass')
+    
+    # Apply the highpass filter
+    filtered_data = butter_filter(lp_filtered_data, highpass, hp_order, 'highpass')
+
+    # Trim the beginning to remove any filter artifacts
+    return filtered_data[initial_samples_to_trim:]
+
+def filter_qrs(data,lowpass=0.016,lp_order=5,highpass=0.001,hp_order=4):
+    """
+    Filters 1D array of signals dim: len_timeseries
+
+    Input:
+    - data : 1D array of raw signals from ECG
+    - lowpass : frequencies below this are discarded
+    - lp_order : order for the lowpass Butterworth filter
+    - highpass : frequencies above this are discarded
+    - hp_order : order for the highpass Butterworth filter
+
+    Output:
+        1D array, filtered ECG signal to have exactly one peak for each QRS complex
+    """
+
+    # Configurations
+    initial_samples_to_trim = 100  # trimmed after filtering to remove filter artifacts
+
+    # Correct the signal
+    if REVERSE_SIGNAL:
+        data = (-data + np.max(data))
+    if CONVERT_TO_VOLTS:
+        data /= 1000
+
+    # Normalize the data
+    n_samples = data.shape[0]
+    time = np.array(range(n_samples)) / SAMPLE_RATE
+    fit = np.polyfit(time, data, 1)
+    normalized_data = data - (fit[0] * time + fit[1])
+
+    # Apply the lowpass filter
+    lp_filtered_data = butter_filter(normalized_data, lowpass, lp_order, 'lowpass')
+    
+    # Apply the highpass filter
+    filtered_data = butter_filter(lp_filtered_data, highpass, hp_order, 'highpass')
+
+    # Trim the beginning to remove any filter artifacts
+    return filtered_data[initial_samples_to_trim:]
 
 def filter_signal_mne_uniform_band(data,bp_lowcut=8,bp_highcut=20):
     """
@@ -82,9 +179,6 @@ def filter_signal_mne_8chan(data,bp_lowcut_ecg=8,bp_highcut_ecg=20,bp_lowcut_eeg
     # recombine into 2D array and return
     return np.concatenate([filtered_ecg,filtered_eeg])
 
-    
-
-
 def epoch_data(data, window_length = 2,overlap=0.5):
         """
         Separates the data into equal sized windows
@@ -125,7 +219,7 @@ def plot_epoched(epoched,maxdisp=50):
 
 
 if __name__ == "__main__":
-    file_path = "../data/2021-05-20/01-1_video_OpenBCI-RAW-2021-05-20_19-59-47.txt"
+    file_path = "../data/2021-05-27/01-5_guitar_OpenBCI-RAW-2021-05-27_20-56-18.txt"
     # load only the ECG signal i.e. channel 1
     raw_signal = load_ecg(file_path)
     print("The raw ECG signal looks like this \n")
@@ -157,3 +251,31 @@ if __name__ == "__main__":
     # display the epochs
     print("\nHere are the first 5 epochs")
     plot_epoched(epochs,maxdisp=5) 
+
+    # display the butterworth-only filtered signal
+    butter_data = filter_ecg(raw_signal)
+    plt.figure(figsize=(9,6))
+    plt.plot(butter_data)
+    plt.title("butterworth-filtered signal")
+    plt.xlabel("Time")
+    plt.ylabel("micro volts")
+    plt.show()
+
+    butter_epochs = epoch_data(butter_data,win_len,overlap)
+    # display the epochs
+    print("\nHere are the first 5 epochs")
+    plot_epoched(butter_epochs,maxdisp=5) 
+
+    # plot the QRS-filtered data
+    qrs_data = filter_qrs(raw_signal)
+    plt.figure(figsize=(9,6))
+    plt.plot(qrs_data)
+    plt.title("filtered qrs complexes")
+    plt.xlabel("Time")
+    plt.ylabel("micro volts")
+    plt.show()
+
+    qrs_epochs = epoch_data(qrs_data,win_len,overlap)
+    # display the epochs
+    print("\nHere are the first 5 epochs")
+    plot_epoched(qrs_epochs,maxdisp=5) 

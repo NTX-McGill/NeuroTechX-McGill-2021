@@ -1,1 +1,6 @@
 *env/
+
+# environment files
+*.env
+
+logs/
