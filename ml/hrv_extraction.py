@@ -12,19 +12,20 @@ from heartpy.analysis import calc_rr, calc_fd_measures
 from scipy.signal import resample
 
 
-def load_physiodata(instance, db): 
+def load_physiodata(instance, db, x_name='ECG', y_name = 'foot GSR'): 
     signals, fields = wfdb.rdsamp(instance, pn_dir=db) #Loading Auto Stress Data for Driver 3 from Physionet
     patient_data = pd.DataFrame(signals, columns=fields['sig_name'], dtype='float') #Store it into Dataframe
     patient_data.dropna(inplace=True) #Clean data by removing nans
-    ecg = np.asarray(patient_data['ECG']) #Transform into numpy array 
-    gsr = np.asarray(patient_data['foot GSR'])
+    ecg = np.asarray(patient_data[x_name]) #Transform into numpy array 
+    gsr = np.asarray(patient_data[y_name])
     sr = fields['fs'] #Isolate sample_rate for later processing
     return ecg, gsr, sr
     
-ecg, gsr, sr = load_physiodata('drive01', 'drivedb')
+
+# ecg, gsr, sr = load_physiodata('drive01', 'drivedb')
 # wd, m = hp.process(ecg[60000:65000], sr)
 # peaks = [ecg[i] for i in wd['peaklist']]
-load_visualise(ecg, [])
+# load_visualise(ecg, [])
 
 # patient_data = pd.read_csv('/Users/Owner/Desktop/School/NT/e0103.csv')
 # patient_data.dropna(inplace=True)
@@ -34,7 +35,6 @@ load_visualise(ecg, [])
 # load_visualise(ecg, wd['peaklist'])
 
 # peaks = calculate_peaks_wfdb(ecg, sr)
-
 
 # ##Convert Entire dataset to collection of CSVs
 # ppl = wfdb.io.get_record_list(db_dir = 'drivedb', records='all') #drivedb
