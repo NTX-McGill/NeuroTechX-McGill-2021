@@ -9,7 +9,7 @@ from heartpy.peakdetection import detect_peaks, make_windows, check_peaks, fit_p
 from heartpy import process_segmentwise
 from heartpy.analysis import calc_rr, calc_fd_measures 
 import heartpy as hp
-from utils import window 
+import utils
 class Feature_Extractor(): 
     def __init__(self, data, sample_rate, feat_list, window_size = 20, overlap = 0, apply_bandpass = True) : 
         self.data = data 
@@ -72,17 +72,17 @@ class Feature_Extractor():
         features = [nfd, nsd, hrv, avNN, sdNN, rMSSD, pNN20, pNN50, vlf, lf, hf, lf_hf]
         if gsr.any(): features.append(gsr.mean())
         
-        
         return np.array(features)
 
     def feature_matrix_from_whole_sample(self, gsr=None, to_csv=None): 
-        windows, n_windows = window(self.data, self.sr, windowsize=self.wsize, overlap=0, min_size=0, filter=self.apply_bandpass)
+        prep = utils.Preprocessing_Utils()
+        windows, n_windows = prep.window(self.data, self.sr, windowsize=self.wsize, overlap=0, min_size=0, filter=self.apply_bandpass)
         features_mat = []
         feat_names = ['nfd', 'nsd', 'hrv', 'avNN', 'sdNN', 'rMSSD', 'pNN20', 'pNN50', 'vlf', 'lf', 'hf', 'lf_hf']
         if gsr.any(): 
             print('gsr included')
             feat_names.append('foot GSR')
-            gsr_windows, _ = window(gsr, self.sr, windowsize=self.wsize, overlap=0, min_size=0, filter=False)
+            gsr_windows, _ = prep.window(gsr, self.sr, windowsize=self.wsize, overlap=0, min_size=0, filter=False)
             for i in range(len(windows)): 
                 ecg, n_ecg, gsr = windows[i], n_windows[i], gsr_windows[i]
                 features_mat.append(self.get_all_features(win = ecg, n_win = n_ecg, gsr=gsr)) 
