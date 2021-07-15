@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react";
-import { useSelector } from "../../hooks";
+import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from "../../hooks";
 import { IconButton } from "@material-ui/core";
 import { ArrowBack, ArrowForward } from "@material-ui/icons";
 import { logo } from "../../assets";
+import { bci } from "../../state";
 import api from "../../api";
 import "./index.scss";
 import { FeedbackValue } from "../../types";
@@ -13,7 +14,11 @@ import Feedback from "./Feedback";
 import Final from "./Final";
 
 const DataCollectionPage = () => {
+  const dispatch = useDispatch();
+
   const videos = useSelector((st) => st.videos.videosToWatch);
+  const bciReady = useSelector((st) => st.bci.ready);
+  const bciPending = useSelector((st) => st.bci.pending);
 
   // Highest possible integer value for status.
   const endIndex = 2 * videos.length;
@@ -28,6 +33,7 @@ const DataCollectionPage = () => {
 
   const [feedback, setFeedback] = useState<FeedbackValue | null>(null);
   const [videoEnded, setVideoEnded] = useState<boolean>(false);
+  const [welcomeError, setWelcomeError] = useState<string | undefined>();
 
   const clearState = () => {
     setFeedback(null);
@@ -42,6 +48,7 @@ const DataCollectionPage = () => {
   const index = Math.floor(status / 2);
 
   const nextDisabled =
+    (isWelcome && bciPending) ||
     (isSelection && videos.length === 0) ||
     (isFeedback && feedback == null) ||
     (isVideo && !videoEnded);
@@ -50,6 +57,7 @@ const DataCollectionPage = () => {
     setStatus(Math.max(-2, status - 1));
     clearState();
   };
+
   const onClickNext = () => {
     if (isFeedback && feedback !== null) {
       api.sendFeedback({
@@ -58,6 +66,12 @@ const DataCollectionPage = () => {
       });
       setFeedback(null);
     }
+
+    if (isWelcome && !bciReady) {
+      dispatch(bci.ready());
+      return;
+    }
+
     setStatus(Math.min(endIndex, status + 1));
     clearState();
   };
@@ -72,11 +86,29 @@ const DataCollectionPage = () => {
   };
 
   useEffect(() => {
-    api.openBciStart();
-  }, []);
+    dispatch(bci.start());
+    return () => {
+      dispatch(bci.stop());
+    };
+  }, [dispatch]);
 
   useEffect(() => {
-    if (isFinal) api.openBciStop();
+    if (bciReady) {
+      setWelcomeError("BCI device detected! Proceed to the next page.");
+      return;
+    }
+
+    if (bciPending) {
+      setWelcomeError("Checking for BCI device...");
+    } else {
+      setWelcomeError(
+        "Could not find BCI device, make sure it's connected and click next.",
+      );
+    }
+  }, [bciReady, bciPending]);
+
+  useEffect(() => {
+    if (isFinal) dispatch(bci.stop());
   }, [isFinal]);
 
   useEffect(() => {
@@ -100,6 +132,7 @@ const DataCollectionPage = () => {
 
   const Main = isWelcome ? (
     <Welcome
+      error={welcomeError}
       timeEstimate={`${videos.length * 2} minutes`}
       videoCount={`${videos.length}`}
     />

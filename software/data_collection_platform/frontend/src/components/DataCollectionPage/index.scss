@@ -27,6 +27,11 @@
   p {
     margin-bottom: 1.5rem;
     font-size: 1.5rem;
+
+    &.error {
+      color: red;
+      font-style: italic;
+    }
   }
 
   > header,

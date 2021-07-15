@@ -1,9 +1,11 @@
+import os
 from pylsl import StreamInlet, resolve_stream
 import logging
 
 from dcp import db
 from dcp.models.configurations import OpenBCIConfig
 from dcp.mp.shared import (
+    is_bci_ready,
     bci_config_id,
     is_video_playing, is_subject_anxious, q)
 
@@ -30,6 +32,10 @@ def stream_bci():
     # Set up streaming over lsl from OpenBCI.
     # NOTE: this will block until a connection is established
     streams = resolve_stream('type', 'EEG')
+
+    with is_bci_ready.get_lock():
+        is_bci_ready.value = 1;
+
     logger.info("Successfully connected to LSL stream.")
 
     # 0 picks up the first of three streams
