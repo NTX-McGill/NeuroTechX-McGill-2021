@@ -7,7 +7,13 @@ from dcp.mp.shared import (
     bci_config_id,
     is_video_playing, is_subject_anxious, q)
 
-logging.basicConfig(filename="../../logs/bci.log",
+from pathlib import Path
+
+log_file_path = Path("../../logs/bci.log")
+log_file_path.mkdir(exist_ok=True, parents=True)
+
+
+logging.basicConfig(filename=log_file_path,
                     level=logging.INFO,
                     format="%(asctime)s %(name)s %(levelname)s %(message)s")
 

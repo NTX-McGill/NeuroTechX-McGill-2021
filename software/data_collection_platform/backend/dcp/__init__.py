@@ -1,20 +1,15 @@
 from flask import Flask
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from celery import Celery
-
+from dcp.extensions import celery, db
 from dcp.utils.celery import init_celery
 
 from dcp.cfg.config import app_configs
 
 # FLASK EXTENSIONS
 # global database object
-db = SQLAlchemy()
 migrate = Migrate(compare_type=True)
-celery = Celery(__name__, broker=app_configs.broker_url,
-                backend=app_configs.result_backend,
-                include=["dcp.tasks"])
+
 cors = CORS()
 
 
