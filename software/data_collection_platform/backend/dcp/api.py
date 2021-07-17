@@ -47,11 +47,11 @@ def openbci_start():
 
 @bp.route("/openbci/<int:process_id>/stop", methods=['POST'])
 def openbci_stop(process_id: int):
-    # TODO: Might kill the wrong process (!!).
+    # TODO: Might terminate the wrong process (!!).
     # We need some kind of process manager, and call
     # mp.Process.terminate() and mp.Process.kill() directly.
     # This would also allow us to use mp.Process.is_alive().
-    os.kill(process_id, signal.SIGKILL)
+    os.kill(process_id, signal.SIGTERM)
     return {}, 200
 
 

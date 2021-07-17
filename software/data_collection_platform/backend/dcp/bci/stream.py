@@ -1,6 +1,7 @@
 import os
-from pylsl import StreamInlet, resolve_stream
 import logging
+import signal
+from pylsl import StreamInlet, resolve_stream
 
 from dcp import db
 from dcp.models.configurations import OpenBCIConfig
@@ -61,7 +62,16 @@ def stream_bci():
     # generated via local_clock() to map it into the local clock domain for
     # this machine
     inlet.time_correction()
-    while True:
+
+    running = True
+    def on_exit(_sig, _stackframe):
+        nonlocal running
+        running = False
+
+    signal.signal(signal.SIGINT, on_exit)
+    signal.signal(signal.SIGTERM, on_exit)
+
+    while running:
 
         # get a chunk of samples
         # ignoring the timestamps for now...
