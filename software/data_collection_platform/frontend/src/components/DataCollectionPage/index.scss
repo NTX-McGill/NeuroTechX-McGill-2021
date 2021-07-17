@@ -112,6 +112,10 @@
     }
   }
 
+  .ReactPlayer {
+    pointer-events: none;
+  }
+
   .Final {
     display: grid;
     grid-template-columns: 1fr auto;
