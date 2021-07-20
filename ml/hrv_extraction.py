@@ -12,6 +12,11 @@ import utils
 from heartpy.analysis import calc_rr, calc_fd_measures 
 from scipy.signal import resample
 
+def upsample(ecg, sr, new_sr = 250, gsr = None): 
+    time = len(ecg)/sr/60 
+    new_samp_num = new_sr * time * 60 
+    resampled_data = resample(ecg, int(new_samp_num))
+    return resampled_data
 
 class Spider_Data_Loader: 
     def __init__(self) -> None:
@@ -44,4 +49,35 @@ class Spider_Data_Loader:
                 print(p, "DIDNT WORK")
 
 
+spider = Spider_Data_Loader()
+ecg, gsr, sr = spider.load_physiodata('drive01')
+# time = len(ecg)/sr/60 
+# sr = len(ecg)/time/60
+# samp_num = time * sr * 60 
+# # print("sr:{}, time:{}, samp#:{}".format(sr, time, samp_num))
+# new_sr = 250 
+# new_samp_num = new_sr * time * 60  
+# # print(len(ecg), samp_num, new_samp_num)
+# resampled_data = resample(ecg, int(new_samp_num))
+# print(len(resampled_data))
 
+
+resampled_data = upsample(ecg, sr)
+
+# peak_det = utils.Peak_Detection_Options() 
+# peaks = peak_det.calculate_peaks_wfdb(resampled_data, 250)
+# peaks = peak_det.RR_intervals(resampled_data, 250, 30)['RR_list']
+# print(peaks)
+# utils.load_visualise(resampled_data, peaks)
+filtered = hp.filter_signal(resampled_data, cutoff = 0.05, sample_rate = 250, filtertype='notch')
+scaled = hp.scale_data(filtered)
+wd, m = hp.process(hp.scale_data(filtered), 250)
+peaks = wd['peaklist']
+utils.load_visualise(ecg = scaled, peaks=[])
+
+# hp.plot_poincare(wd, m)
+
+# #visualise in plot of custom size
+# plt.figure(figsize=(12,4))
+# hp.plotter(wd, m)
+# plt.show() 
