@@ -9,6 +9,7 @@ from heartpy.peakdetection import detect_peaks, make_windows, check_peaks, fit_p
 from heartpy import process_segmentwise
 from heartpy.analysis import calc_rr
 import heartpy as hp
+from scipy.signal import resample
 
 
 def make_windowed_dataset(data, sample_rate, windowsize=120, overlap=0, min_size=20, to_csv=False): 
@@ -57,7 +58,7 @@ class Peak_Detection_Options:
         peaks = xqrs.qrs_inds 
         return peaks 
 
-    def RR_intervals(data, sample_rate, windowsize, ma_perc = 20, bpmmin=40, bpmmax=180): 
+    def RR_intervals(self, data, sample_rate, windowsize, ma_perc = 20, bpmmin=40, bpmmax=180): 
     
         working_data = {}
         bl_val = np.percentile(data, 0.1)
@@ -80,7 +81,6 @@ class Peak_Detection_Options:
 
         return working_data
 
-
 class PostProcessing_Utils:
     def __init__(self) -> None:
         pass
@@ -99,20 +99,23 @@ class PostProcessing_Utils:
         return no_stress_data, low_data, med_data, high_data
 
 
-def load_visualise(ecg, peaks, zoom=[]):
+def load_visualise(ecg, peaks, filtered = None, scaled = None, zoom=[]):
+    plt.figure(figsize=(12,3))
+    plt.scatter(peaks, [ecg[int(x)] for x in peaks], color='red')
+    plt.plot(ecg)
+    if filtered(): 
+        plt.plot(filtered)
     if zoom: #explore signal
-        plt.figure(figsize=(12,3))
-        plt.scatter(peaks, [ecg[int(x)] for x in peaks], color='red')
-        plt.title("Filtering:{}, Zoom:{}".format(filter, zoom))
-        plt.plot(ecg)
         plt.xlim(zoom[0], zoom[1])
-        plt.show()
-    else: 
-    #and zoom in
-        plt.figure(figsize=(12,3))
-        plt.scatter(peaks, [ecg[int(x)] for x in peaks], color='red')
-        plt.plot(ecg)
-        plt.title("Filtering:{}, Zoom:{}".format(filter, zoom))
-        plt.show()
+        
     
+    plt.title("Filtering:{}, Zoom:{}".format(filter, zoom))
+    plt.show()
     return ecg
+
+
+def upsample(ecg, sr, new_sr = 250, gsr = None): 
+    time = len(ecg)/sr/60 
+    new_samp_num = new_sr * time * 60 
+    resampled_data = resample(ecg, int(new_samp_num))
+    return resampled_data
