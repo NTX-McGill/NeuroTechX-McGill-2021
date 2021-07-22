@@ -30,6 +30,9 @@ def stream_bci():
     Note that it is communicating with the flask application
     through 3 shared variables that are initialized in shared memory.
     """
+    # ensure any remaining connections are flushed
+    db.engine.dispose()
+
     # first resolve an EEG stream on the lab network
     logger.info(
         "Attempting to connect to OpenBCI. Please make sure OpenBCI is open\
