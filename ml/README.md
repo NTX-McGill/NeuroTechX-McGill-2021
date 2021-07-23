@@ -3,6 +3,12 @@
 
 # Using hrv_extraction.py 
 
+If you just want to load the data: 
+``` python 
+spider = Spider_Data_Loader()
+ecg, gsr, sr = spider.load_physiodata('drive01') #this gives you data from one driver (1/17) 
+```
+
 To start extracting the Spider DataSet and it's features into csv files:  
 ``` python 
 spider = Spider_Data_Loader()
