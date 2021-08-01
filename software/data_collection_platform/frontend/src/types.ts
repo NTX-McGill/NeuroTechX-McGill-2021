@@ -1,6 +1,11 @@
-import store from './state';
+import store from "./state";
 export type State = ReturnType<typeof store.getState>;
 export type Dispatch = typeof store.dispatch;
+
+export interface ThunkApiConfig {
+  state: State;
+  dispatch: Dispatch;
+}
 
 export interface VideoInfo {
   end?: number;
@@ -13,3 +18,5 @@ export interface VideoInfo {
 }
 
 export type FeedbackValue = 1 | 2 | 3;
+
+export type ProcessId = number;

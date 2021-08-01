@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { useSelector, useDispatch } from "../../hooks";
 import { videos as videosActions } from "../../state";
 import { VideoInfo } from "../../types";
@@ -11,7 +11,7 @@ const VideoSelectionPage = () => {
 
   const checked = videosToWatch.reduce(
     (acc, v) => acc.add(v.id),
-    new Set<number>()
+    new Set<number>(),
   );
 
   useEffect(() => {
