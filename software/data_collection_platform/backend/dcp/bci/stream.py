@@ -33,7 +33,7 @@ def stream_bci():
     Note that it is communicating with the flask application
     through 3 shared variables that are initialized in shared memory.
     """
-    # ensure any remaining connections are flushed
+    # ensure any remaining connections are flushed to avoid racing conditions
     db.engine.dispose()
 
     # first resolve an EEG stream on the lab network
