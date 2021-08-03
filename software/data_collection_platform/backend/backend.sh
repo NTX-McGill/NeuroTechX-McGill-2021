@@ -1,5 +1,7 @@
 #!/bin/bash
 
+source .env
+
 # NOTE: make sure your virtual environment is activated
 # apply database migrations
 echo "Applying database migrations"
