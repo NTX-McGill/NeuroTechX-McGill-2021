@@ -7,46 +7,41 @@ from wfdb import processing
 from heartpy.datautils import rolling_mean, _sliding_window
 from heartpy.peakdetection import detect_peaks
 from feature_extractions import Feature_Extractor #get_features_matrix, 
-from utils import window, transform_Y
+import utils
+# from utils import window, transform_y, load_visualise, calculate_peaks_wfdb, bandpass, RR_intervals
 from heartpy.analysis import calc_rr, calc_fd_measures 
+from scipy.signal import resample
 
 
-# signals, fields = wfdb.rdsamp('drive03', pn_dir='drivedb') #Loading Auto Stress Data for Driver 3 from Physionet
-# patient_data = pd.DataFrame(signals, columns=fields['sig_name'], dtype='float') #Store it into Dataframe
-# patient_data.dropna(inplace=True) #Clean data by removing nans
-# data = np.asarray(patient_data['ECG']) #Transform into numpy array 
-# sr = fields['fs'] #Isolate sample_rate for later processing
-# extractor = Feature_Extractor(data, sr, []) #Initialize Extractor
-
-# #You can either apply the extractor to each window manually 
-# windows, n_windows = window(data, sr, windowsize=20, overlap=0, min_size=20, filter=True) #Apply a window function 
-# features = extractor.get_all_features(windows[0], n_windows[0]) #Get Features for first window 
-# print(features.shape)
-
-# #Or you can pass the entire dataset and it will output a matrix of shape sample slices x features 
-# features = extractor.feature_matrix_from_whole_sample()
-# print(features.shape)
-
-#Lastly, you can use each of these function to also include y_values
-# gsr = patient_data['foot GSR']
-
-# #Window by window
-# windows, n_windows = window(data, sr, windowsize=20, overlap=10, min_size=20, filter=True) #Apply a window function
-# gsr_windows, _ = window(gsr, sr, windowsize=20, overlap=10, min_size=20, filter=False)
-# features = extractor.get_all_features(windows[0], n_windows[0], gsr_windows[0])
-
-# print(features)
-
-# #Or using the entire sample 
-# features = extractor.feature_matrix_from_whole_sample(gsr = gsr)
-# print(features.shape)
-
-#If you want to save all the extracted data in a binary file (takes less space on computer)
-# features = extractor.feature_matrix_from_whole_sample(gsr = gsr, to_bin=True)
-#If you want to save all the extracted data in a csv
-# features = extractor.feature_matrix_from_whole_sample(gsr = gsr, to_csv=True)
-# print(features.shape)
-
+class Spider_Data_Loader: 
+    def __init__(self) -> None:
+        pass
+    
+    #Loading the spider data 
+    def load_physiodata(self, instance, db = 'drivedb'): 
+        signals, fields = wfdb.rdsamp(instance, pn_dir=db) #Loading Auto Stress Data for Driver 3 from Physionet
+        patient_data = pd.DataFrame(signals, columns=fields['sig_name'], dtype='float') #Store it into Dataframe
+        patient_data.dropna(inplace=True) #Clean data by removing nans
+        ecg = np.asarray(patient_data['ECG']) #Transform into numpy array 
+        gsr = np.asarray(patient_data['foot GSR'])
+        sr = fields['fs'] #Isolate sample_rate for later processing
+        return ecg, gsr, sr
+    
+    def runner(self): 
+        ppl = wfdb.io.get_record_list(db_dir = 'drivedb', records='all') #drivedb
+        for p in ppl: 
+            try: 
+                print("LOADING DATA FOR", p)
+                ecg, gsr, sr = self.load_physiodata(p)
+                # print(sr)
+                wd, m = hp.process(ecg, sample_rate = sr)
+                peaks = wd['RR_list']
+                data = utils.load_visualise(ecg, peaks)
+                extractor = Feature_Extractor(ecg, sr, [], apply_bandpass=False) #Initialize Extractor
+                features = extractor.feature_matrix_from_whole_sample(gsr = gsr, to_csv=p)
+                print("LOADED DATA FOR", p, "SIZE", features.shape)
+            except():
+                print(p, "DIDNT WORK")
 
 
 

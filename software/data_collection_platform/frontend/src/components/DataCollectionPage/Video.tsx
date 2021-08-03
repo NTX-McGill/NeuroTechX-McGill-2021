@@ -1,4 +1,3 @@
-import React from "react";
 import ReactPlayer, { ReactPlayerProps } from "react-player";
 import { VideoInfo } from "../../types";
 
@@ -18,12 +17,15 @@ const Video = ({ index, videos, ...rest }: Readonly<Props>) => {
       </h1>
 
       <ReactPlayer
+        className="ReactPlayer"
         url={youtube_url}
         config={{
           youtube: {
             playerVars: {
               start,
               end,
+              autoplay: 1,
+              disablekb: 1,
             },
           },
         }}
