@@ -18,7 +18,7 @@ def store_stream_data(data: List[float]):
     Args:
         data ([float]): OpenBCI data to store to the database.
     """
-    # ensure any remaining connections are flushed
+    # ensure any remaining connections are flushed to avoid racing conditions
     db.engine.dispose()
     df = pd.DataFrame(data, columns=["channel_1", "channel_2", "channel_3",
                                      "channel_4", "channel_5", "channel_6",
