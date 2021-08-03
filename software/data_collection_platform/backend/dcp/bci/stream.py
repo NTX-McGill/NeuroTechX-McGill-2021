@@ -10,7 +10,12 @@ from dcp.mp.shared import (
     bci_config_id,
     is_video_playing, is_subject_anxious, q)
 
-logging.basicConfig(filename="../../logs/bci.log",
+import os
+
+log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))), "logs",
+                        "bci.log")
+
+logging.basicConfig(filename=log_path,
                     level=logging.INFO,
                     format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
@@ -25,6 +30,9 @@ def stream_bci():
     Note that it is communicating with the flask application
     through 3 shared variables that are initialized in shared memory.
     """
+    # ensure any remaining connections are flushed to avoid racing conditions
+    db.engine.dispose()
+
     # first resolve an EEG stream on the lab network
     logger.info(
         "Attempting to connect to OpenBCI. Please make sure OpenBCI is open\

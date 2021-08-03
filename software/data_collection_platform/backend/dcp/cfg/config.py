@@ -12,6 +12,7 @@ class Config(object):
     SECRET_KEY = os.getenv('SECRET_KEY', default='not_so_secret')
     SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
     SQLALCHEMY_TRACK_MODIFICATIONS = False
+    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
 
     # cloudamqp Rabbit MQ
     broker_url = os.environ["MESSAGE_QUEUE_URL"]

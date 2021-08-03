@@ -40,10 +40,12 @@ def openbci_start():
     # use a separate process to stream BCI data
     from dcp.bci.stream import stream_bci
     from multiprocessing import Process
-    p = Process(target=stream_bci)
-    p.start()
-    return {"data": p.pid}, 201
-
+    with current_app.app_context():
+        p = Process(target=stream_bci)
+        p.start()
+    session["process_pid"] = p.pid
+    return {"message": f"Process {p.pid} started.", "pid": p.pid}, 201
+  
 
 @bp.route("/openbci/<int:process_id>/stop", methods=['POST'])
 def openbci_stop(process_id: int):
