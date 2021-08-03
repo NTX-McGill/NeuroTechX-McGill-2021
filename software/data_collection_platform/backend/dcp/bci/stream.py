@@ -15,9 +15,6 @@ import os
 log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))), "logs",
                         "bci.log")
 
-if not os.path.isfile(log_path):
-    open(log_path, "w").close()
-
 logging.basicConfig(filename=log_path,
                     level=logging.INFO,
                     format="%(asctime)s %(name)s %(levelname)s %(message)s")
