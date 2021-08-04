@@ -43,7 +43,6 @@ def openbci_start():
     with current_app.app_context():
         p = Process(target=stream_bci)
         p.start()
-    session["process_pid"] = p.pid
     return {"data": {"pid": p.pid}}, 201
 
 
