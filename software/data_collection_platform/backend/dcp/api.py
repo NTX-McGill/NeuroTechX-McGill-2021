@@ -44,8 +44,8 @@ def openbci_start():
         p = Process(target=stream_bci)
         p.start()
     session["process_pid"] = p.pid
-    return {"message": f"Process {p.pid} started.", "pid": p.pid}, 201
-  
+    return {"data": {"pid": p.pid}}, 201
+
 
 @bp.route("/openbci/<int:process_id>/stop", methods=['POST'])
 def openbci_stop(process_id: int):
