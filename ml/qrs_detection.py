@@ -27,8 +27,8 @@ lo, hi = 5, 15
 lb, la = signal.butter(order, [lo,hi], btype='band', fs=FS)
 filtered_ecg = signal.lfilter(lb, la, notched_ecg)
 
-def ms_to_pts(ms, fs=250):
-    return int(ms / 1000 * fs)
+def sec_to_pts(s, fs=250):
+    return int(s * fs)
 
 def LT(x, C=100, w=130):
     def _LTi(x, i, C, w_len):
@@ -37,34 +37,72 @@ def LT(x, C=100, w=130):
 
         return np.sum(np.sqrt(C + delta_y**2))
 
-    w_len = ms_to_pts(w, fs=FS)
+    w_len = sec_to_pts(w, fs=FS)
     _LTi_vect = np.vectorize(lambda i: _LTi(x, i, C, w_len))
     return _LTi_vect(np.arange(w_len, x.shape[0]))
 
 LT_ecg = LT(filtered_ecg)
 
-plt.plot(LT_ecg[5100:5200])
+MIN_T = 100 #Default min threshold value
+EYE_CLOSE = 0.25 #Eye close period duration
+NDP = 2.5 #Adjust threshold if no QRS found in NDP seconds
+LP2n = 2 * FS / notch_freq
 
-MIN_THRESH = 100 #Default min threshold value
-EYE_CLOSE = 250 #Eye close period duration
-NDP = 2.5 * 1000 #Adjust threshold if no QRS found in NDP seconds
+eye_closing = sec_to_pts(EYE_CLOSE, FS)
+expect_period = sec_to_pts(NDP, FS)
 
-base_threshold = 3 * np.mean(LT_ecg[:ms_to_pts(10, FS)])
+FROM, TO = 0, len(LT_ecg)
+LEARNING_PERIOD = 8
+t1 = FROM + sec_to_pts(LEARNING_PERIOD)
 
-def decision_rule(lt, i, T, fs=250):
-    '''
-    lt : LT transform of ECG signal
-    i : current index of signal
-    T : base threshold value for decision decision rule
-    fs : signal sampling frequency
+learning_actual_T = np.mean(LT_ecg[FROM:t1])
+base_T = 3 * learning_actual_T
 
-    Returns qrs_detected, [qrs_start, qrs_end], new_base_thresh
-    '''
+qrs_detected = []
+for t in range(FROM, TO):
+    IS_LEARNING = True
 
-    actual_T = T / 3
+    if IS_LEARNING:
+        if t > t1:
+            IS_LEARNING = False
+            actual_T = learning_actual_T
+            t = 0
+        else:
+            actual_T = learning_actual_T
 
-    if lt[i] < actual_T:
-        return False, [-1, -1], T
+    if LT_ecg[t] > actual_T: #Found a possible QRS near t
+        timer = 0
+        ltmax = np.max(LT_ecg[t+1: t + eye_closing//2])
+        ltmin = np.min(LT_ecg[t - eye_closing//2 + 1 : t])
 
-    Lmin = np.min(lt[i-ms_to_pts(125):i])
-    Lmax = np.max(lt[i:i+ms])
+        if ltmax > ltmin + 10: #There's a QRS near t
+            onset = ltmax / 100 + 2
+            tpq = t - 5
+
+            #Search backwards for monotonic change near ltmin
+            #Vectorize this part later
+            for tt in range(t-1, t - eye_closing//2, -1):
+                if (LT_ecg[tt]   - LT_ecg[tt-1] < onset and
+                    LT_ecg[tt-1] - LT_ecg[tt-2] < onset and
+                    LT_ecg[tt-2] - LT_ecg[tt-3] < onset and
+                    LT_ecg[tt-3] - LT_ecg[tt-4] < onset):
+
+                    tpq = tt - LP2n
+                    break
+
+            if not IS_LEARNING:
+                qrs_detected.append(tpq)
+
+        #Adjust thresholds
+        base_T += (ltmax - base_T) / 10
+        actual_T = base_T / 3
+
+        #Lock out further detections during the eye-closing period
+        t += eye_closing
+    elif not IS_LEARNING:
+        #Once past the learning period, decrease threhold if no QRS was recently detected
+        timer += 1
+
+        if timer > expect_period and base_T > MIN_T:
+            base_T -= 1
+            actual_T = base_T / 3
