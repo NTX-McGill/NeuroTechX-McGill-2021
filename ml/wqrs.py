@@ -7,9 +7,16 @@ import numpy as np
 from math import ceil, sqrt
 
 '''
-OPEN ISSUES: 
-- How to decide on BUFLN?  
+FIXES I MADE: 
+- Make the main loop a while loop so you can actually go back to first 8 sec
+- Put learning outside of loop so it's not set to True forever
+- Put timer outside of main loop 
 
+OPEN ISSUES: 
+- How to decide on BUFLN?  --> Look into the Mod thing 
+- Roland is missing a constant in one of his if loops 
+- Roland's values are wayyyy higher than mine 
+- Speed mine up like a lot 
 '''
 
 
@@ -22,13 +29,29 @@ def upsample(ecg, sr, fs=250):
 def sec_to_pts(s, fs=250):
     return int(s * fs)
 
-def ltsamp(sig, t):  
+def ltsamp_mod(sig, t): 
     Yn = Yn1 = Yn2 = 0 
-    ebuf, lbuf = np.array([np.sqrt(lfsc) for i in range(LTwindow+1)]),  np.zeros(LTwindow+1) #8192
-    tt =  -1 
+     
     aet = 0
+    ebuf, lbuf = np.array([np.sqrt(lfsc) for i in range(LTwindow+1)]),  np.zeros(LTwindow+1) 
+    
+    for tt in range(t-LTwindow, t): 
+        Yn2, Yn1 = Yn1, Yn
+        v0, v1, v2 = sig[tt], sig[tt-LPn], sig[tt-LP2n]
+        Yn = 2*Yn1 - Yn2 + v0 - 2*v1 + v2
+        dy = (Yn-Yn1)/LP2n #Lowpass derivative of input 
+        et =  np.sqrt(lfsc + dy * dy)
+        ebuf[tt%LTwindow] = et 
+        aet += et - ebuf[(tt-LTwindow)%LTwindow]
+        lbuf[tt%LTwindow] = aet 
+    return lbuf[t%LTwindow]
+
+def ltsamp_og(sig, t):  
+    Yn = Yn1 = Yn2 = 0 
+    aet = 0
+    ebuf, lbuf = np.array([np.sqrt(lfsc) for i in range(8192)]),  np.zeros(8192)
+    tt = t - LTwindow 
     while(t > tt): 
-        print(tt)
         Yn2 = Yn1 
         Yn1 = Yn
         v0, v1, v2 = sig[tt], sig[tt-LPn], sig[tt-LP2n]
@@ -61,7 +84,7 @@ def LT(x, C=1, w=.13):
 
 def detect(sig, LT_func): 
     FROM = 0 
-    to = len(sig)
+    to = len(sig)-1
     timer = 0 
     next_minute = FROM + spm 
     peaks = [] 
@@ -70,18 +93,18 @@ def detect(sig, LT_func):
     t1 = FROM + sec_to_pts(8)
 
     #My Init Threshold    
-    T0 = 0  
-    for t in range(FROM, t1): 
-        T0 += LT_func(sig, t)
-    T0 /= t1 - FROM 
-    Ta = 3 * T0 
+    # T0 = 0  
+    # for t in range(FROM, t1): 
+    #     T0 += LT_func(sig, t)
+    # T0 /= t1 - FROM 
+    # Ta = 3 * T0 
 
     #MY other init threshold 
-    # LT_vals = [] 
-    # for t in range(FROM, t1): 
-    #     LT_vals.append(LT2(sig, t))
-    # T0 = np.mean(LT_vals)
-    # Ta = T0 * 3
+    LT_vals = [] 
+    for t in range(FROM, t1): 
+        LT_vals.append(LT2(sig, t))
+    T0 = np.mean(LT_vals)
+    Ta = T0 * 3
     
     #ROLAND's Init threshold 
     # LT_ecg = LT(sig, C=1, w=.13)
@@ -93,14 +116,20 @@ def detect(sig, LT_func):
      
     print("***Initial Threshold Set to: {}".format(Ta)) 
 
+    learning = True # MODIFICATION 
+
     # Main loop 
-    for t in range(FROM, to): 
-        learning = 1
+    t = 0 
+    tpq = 0 
+    while t < to-1: 
+    # for t in range(FROM, to): #OG VERSION 
+        # learning = True #OG POSITION 
+        second = t/250 
         if t % 250  == 0:  
-            print('***Running Values for: {} sec / {}, learning: {}'.format(t/250, int(to-FROM)/250), learning)
+            print('***Running Values for: {} sec / {}, learning: {}'.format(t/250, int(to-FROM)/250, learning))
         if learning: 
             if t > t1: 
-                learning = 0 
+                learning = False 
                 T1 = T0 
                 t = FROM #start over 
             else: 
@@ -110,14 +139,13 @@ def detect(sig, LT_func):
             # print("***Potential QRS Found***")
             timer = 0 #Used for counting time after previous QRS 
             max = min = LT_func(sig, t) 
-            # print("***Finding Max***")
             for tt in range(t+1,t + EyeClosing//2): 
                 if LT_func(sig, tt) > max: max = LT_func(sig, tt) 
-            # print("***Finding Min***")
             for tt in range(t-1, t - EyeClosing//2, -1): 
                 if LT_func(sig, tt) < min: min = LT_func(sig, tt) 
             if (max > min+10): #There is a QRS near tt
                 #Find QRS onset (PQ Junction)
+                print("***Potential QRS Found***")
                 onset = max/100 + 2 
                 tpq = t - 5 
                 for tt in range(t, t-EyeClosing//2, -1): 
@@ -128,9 +156,10 @@ def detect(sig, LT_func):
                         tpq = tt - LP2n # account for phase shift 
                         break 
                 if (not learning): 
-                    print("Peak found at : {}".format(t))
+                    print("***QRS PEAK FOUND at: {}, value: {}***".format(t, tpq))
                     peaks.append(tpq) 
                 #Adjust Thresholds 
+                print("***Adjusting Threshold (Down)***")
                 Ta += (max - Ta)/10 
                 T1 = Ta/3 
 
@@ -138,6 +167,7 @@ def detect(sig, LT_func):
                 t += EyeClosing
         elif (not learning): 
             #Once we get past the learning period, decrease threshold if no QRS was detected recently 
+            print("***Incrementing Timer: {}***".format(timer))
             timer += 1 
             if (timer > ExpectPeriod):
                 Ta -= 1 
@@ -145,7 +175,9 @@ def detect(sig, LT_func):
         if (t >= next_minute): 
             next_minute += spm 
             print(".") 
+        t += 1 
     load_visualise(sig, peaks)
+    print("***PEAKS CALCULATED***\n",peaks)
 
 print("***Loading Data***")
 spider = Spider_Data_Loader()
@@ -156,7 +188,6 @@ upsampled_ecg = upsample(ecg, sr, fs=250)
 
 print("***Init for Global Vars***")
 FS = sps = 250 #Sampling Frequency 
-# BUFLN = 16384 #must be a power of 2, see ltsamp() 
 EYE_CLS = 0.25 #eye-closing period is set to 0.25 sec (250 ms)
 MaxQRSw = 0.13 #maximum QRS width 0.13 sec (130ms)
 NDP	 = 2.5 #adjust threshold if no QRS found in NDP seconds 
@@ -173,7 +204,8 @@ ExpectPeriod = int(sps * NDP)	#maximum expected RR interval (in samples)
 LTwindow = int(sps * MaxQRSw)  #length transform window size (in samples)
 
 
-detect(upsampled_ecg[:10000], ltsamp)
+detect(upsampled_ecg[:5000], LT2)
+
 
 # /******************************************************************************
 
