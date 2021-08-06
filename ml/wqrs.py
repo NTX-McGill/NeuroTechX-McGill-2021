@@ -4,125 +4,70 @@ import heartpy as hp
 import matplotlib.pyplot as plt 
 import numpy as np 
 
-##DONT FORGET TO PAD WITH 0 at start  
+def upsample(ecg): 
+    data_length = int(ecg.shape[0] / sr)
+    og_sample_pts = np.arange(0, data_length, 1/sr)
+    new_sample_pts = np.arange(0, data_length, 1/FS)
+    return np.interp(new_sample_pts, og_sample_pts, ecg[:og_sample_pts.shape[0]])
 
-# spider = Spider_Data_Loader()
-# ecg, gsr, sr = spider.load_physiodata('drive01')
+def sec_to_pts(s, fs=250):
+    return int(s * fs)
 
-# n_signal = np.array([0, 1,7,5])
-# s2 = n_signal[1:] - n_signal[:-1]
-
-# print(s2)
-
-def LT(signal, w, i, sr): 
-    L = 0 
-    for k in range(i-w, i): 
-        C = 0 #1/sr
-        delta_y = np.power(signal[k] - signal[k-1], 2)
-        print(delta_y)
-        L += np.sqrt(C + delta_y)
-    return L 
-
-def LT2(signal, w, i, C): 
-    wind = signal[i-w:i+1]
-    delta_y = np.power(wind - np.flip(wind), 2)
-    print(delta_y)
-    L = np.sum(delta_y + [C for i in range(len(wind))]) 
-    return L 
-
-# print(np.flip(n_signal))
-
-# print(LT(n_signal, 3, 3, 0), LT2(n_signal, 3,3,0)) 
-
-# upsampled = upsample(ecg, 15.5)
-# wd, m = hp.process(upsampled[:300], 250) 
-# peaks = wd['peaklist']
-# load_visualise(upsampled[:300], peaks)
-
-
-
-#Define Global Variables 
-
-BUFLN = 16384 #must be a power of 2, see ltsamp() 
-EYE_CLS = 0.25 #eye-closing period is set to 0.25 sec (250 ms)
-MaxQRSw = 0.13 #maximum QRS width (130ms)
-NDP	 = 2.5 #adjust threshold if no QRS found in NDP seconds 
-PWFreqDEF = 60 #power line (mains) frequency, in Hz (default)
-TmDEF	=  100 #minimum threshold value (default)
-
-# sig = -1 
-
-
-# /* ltsamp() returns a sample of the length transform of the input at time t.
-#    Since this program analyzes only one signal, ltsamp() does not have an
-#    input argument for specifying a signal number; rather, it always filters
-#    and returns samples from the signal designated by the global variable
-#    'sig'.  The caller must never "rewind" by more than BUFLN samples (the
-#    length of ltsamp()'s buffers). */
-
-def ltsamp(sig, t, LPn, LP2n, lfsc, LTwindow): 
-    # BUFLN , LTWindow = 8, 2 
+def ltsamp(sig, t, LPn, LP2n, lfsc, LTwindow):  
     Yn = Yn1 = Yn2 = 0 
-    ebuf, lbuf = np.array([i for i in range(BUFLN)]), np.zeros(BUFLN)
+    print(int(LTwindow))
+    ebuf, lbuf = np.array([np.sqrt(lfsc) for i in range(int(LTwindow))]), np.zeros(int(LTwindow)) 
     tt =  -1 
     aet = 0
-    # print("lbuf before", lbuf)
+    
     while(t > tt): 
         # print("tt: {}, t: {}".format(tt, t))
         # print("ebuf: {}, lbuf: {}".format(ebuf, lbuf))
-        print("tt: {}, tt-LPn: {}, LP2n:{} ".format(tt, tt-LPn, tt-LP2n))
+        # print("tt: {}, tt-LPn: {}, LP2n:{} ".format(tt, tt-LPn, tt-LP2n))
         v0, v1, v2 = sig[tt], sig[int(tt-LPn)], sig[int(tt-LP2n)]
         Yn = 2*Yn1 - Yn2 + v0 - 2*v1 + v2
         dy = (Yn-Yn1)/LP2n #Lowpass derivative of input 
         tt += 1
-        et =  40 #np.sqrt(lfsc + dy * dy)
+        et =  np.sqrt(lfsc + dy * dy)
         # print("VALUE1: {} of ebuf".format(tt))
         ebuf[tt] = et 
         aet += et - ebuf[int(tt-LTwindow)]
         # print("VALUE2: {} of lbuf".format(tt-LTWindow))
         lbuf[tt] = aet 
-        # print("ebuf: {}, lbuf: {}".format(ebuf, lbuf))
+        print("ebuf: {}, lbuf: {}".format(ebuf, lbuf))
     return lbuf[-1]
 
-def main(record, sr): 
+def detect(sig, sr): 
     print("***Setting Global Vars***")
     sps = sr
-    samplingInterval = 1000.0/sps
-    pname = record  
-    lfsc = 1 # FIX THIS EVENTUALLY TO BE : 1.25*gain*gain/sps
-    spm = 60 * sps
-    LPn = sps/PWFreqDEF; 	#The LP filter will have a notch at the power line (mains) frequency 
-    if (LPn > 8):  LPn = 8	# avoid filtering too agressively 
-    LP2n = 2 * LPn
-    EyeClosing = sps * EYE_CLS # set eye-closing period */
-    ExpectPeriod = sps * NDP	#maximum expected RR interval */
-    LTwindow = sps * MaxQRSw  #length transform window size */
-    from_ = 0 
-    to = len(record)
-    next_minute = from_ + spm
-    peaks = [] 
-    sig = record 
+    FROM = 0 
+    to = len(sig)
+    next_minute = FROM + spm 
+    
+    v = ltsamp(sig, 0, LPn, LP2n, lfsc, LTwindow)
+    print(v)
+    exit() 
 
-    '''/* Average the first 8 seconds of the length-transformed samples
-       to determine the initial thresholds Ta and T0. The number of samples
-       in the average is limited to half of the ltsamp buffer if the sampling
-       frequency exceeds about 2 KHz. */'''
     print("***Calculating Average***")
-    t1 = 8 + from_    
+    t1 = FROM + sec_to_pts(8)   
     T0 = 0 
-    for t in range(from_, 8): 
+    for t in range(FROM, t1): 
+        print("LOADING INFO FOR SAMPLE: {}".format(t))
         T0 += ltsamp(sig, t, LPn, LP2n, lfsc, LTwindow)
-    T0 /= t1 - from_ 
+    T0 /= t1 - FROM 
     Ta = 3 * T0 
+
+     
+
     # Main loop 
-    for t in range(from_, to): 
+    for t in range(FROM, to): 
         print('***Running Values for Time: {}'.format(t))
         learning = 1
         if learning: 
             if t > t1: 
                 learning = 0 
                 T1 = T0 
-                t = from_ #start over 
+                t = FROM #start over 
             else: 
                 T1 = 2*T0 
 	    #Compare a length-transformed sample against T1.
@@ -163,24 +108,36 @@ def main(record, sr):
             print(".") 
 
 
+#Define Global Variables 
+FS = 250 #Sampling Frequency 
+BUFLN = 16384 #must be a power of 2, see ltsamp() 
+EYE_CLS = 0.25 #eye-closing period is set to 0.25 sec (250 ms)
+MaxQRSw = 0.13 #maximum QRS width (130ms)
+NDP	 = 2.5 #adjust threshold if no QRS found in NDP seconds 
+PWFreqDEF = 60 #power line (mains) frequency, in Hz (default)
+TmDEF	=  100 #minimum threshold value (default)
+
+
 print("***Loading Data***")
 spider = Spider_Data_Loader()
 ecg, gsr, sr = spider.load_physiodata('drive01')
 # print("***Loaded Data***")
 
 print("***Upsampling Data***")
-data_length = int(ecg.shape[0] / sr)
-FS = 250
-og_sample_pts = np.arange(0, data_length, 1/sr)
-new_sample_pts = np.arange(0, data_length, 1/FS)
-upsampled_ecg = np.interp(new_sample_pts, og_sample_pts, ecg[:og_sample_pts.shape[0]])
-# print("***Upsampled Data***")
+upsampled_ecg = upsample(ecg)
 
-main(upsampled_ecg, 250)
+sps = sr
+samplingInterval = 1000.0/sps  
+lfsc = 1 # FIX THIS EVENTUALLY TO BE : 1.25*gain*gain/sps
+spm = 60 * sps
+LPn = sps/PWFreqDEF; 	#The LP filter will have a notch at the power line (mains) frequency 
+if (LPn > 8):  LPn = 8	# avoid filtering too agressively 
+LP2n = 2 * LPn
+EyeClosing = sps * EYE_CLS # set eye-closing period */
+ExpectPeriod = sps * NDP	#maximum expected RR interval */
+LTwindow = sps * MaxQRSw  #length transform window size */
 
-
-
-
+detect(upsampled_ecg, 250)
 
 # /******************************************************************************
 
