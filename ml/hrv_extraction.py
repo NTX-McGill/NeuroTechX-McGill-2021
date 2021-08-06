@@ -73,7 +73,7 @@ filtered = hp.filter_signal(resampled_data, cutoff = 0.05, sample_rate = 250, fi
 scaled = hp.scale_data(filtered)
 wd, m = hp.process(hp.scale_data(filtered), 250)
 peaks = wd['peaklist']
-utils.load_visualise(ecg = scaled, peaks=[])
+# utils.load_visualise(ecg = scaled, peaks=[])
 
 # hp.plot_poincare(wd, m)
 
