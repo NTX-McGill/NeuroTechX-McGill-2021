@@ -99,16 +99,12 @@ class PostProcessing_Utils:
         return no_stress_data, low_data, med_data, high_data
 
 
-def load_visualise(ecg, peaks, filtered = None, scaled = None, zoom=[]):
+def load_visualise(ecg, peaks, zoom=[]):
     plt.figure(figsize=(12,3))
     plt.scatter(peaks, [ecg[int(x)] for x in peaks], color='red')
     plt.plot(ecg)
-    if filtered(): 
-        plt.plot(filtered)
     if zoom: #explore signal
         plt.xlim(zoom[0], zoom[1])
-        
-    
     plt.title("Filtering:{}, Zoom:{}".format(filter, zoom))
     plt.show()
     return ecg
