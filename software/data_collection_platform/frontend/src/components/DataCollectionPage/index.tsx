@@ -109,7 +109,7 @@ const DataCollectionPage = () => {
 
   useEffect(() => {
     if (isFinal) dispatch(bci.stop());
-  }, [isFinal]);
+  }, [isFinal, dispatch]);
 
   useEffect(() => {
     const keydown = (e: KeyboardEvent) => {
