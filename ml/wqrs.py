@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from math import ceil, sqrt
 
+
 '''
 FIXES I MADE: 
 - Make the main loop a while loop so you can actually go back to first 8 sec
@@ -29,24 +30,22 @@ def upsample(ecg, sr, fs=250):
 def sec_to_pts(s, fs=250):
     return int(s * fs)
 
-def ltsamp_mod(sig, t): 
+def ltsamp_mod(sig, t): # My version of the their real time algorithm but with some tweaks --> 0 threshold 
     Yn = Yn1 = Yn2 = 0 
-     
     aet = 0
-    ebuf, lbuf = np.array([np.sqrt(lfsc) for i in range(LTwindow+1)]),  np.zeros(LTwindow+1) 
-    
+    ebuf, lbuf = np.array([np.sqrt(lfsc) for i in range(LTwindow)]),  np.zeros(LTwindow) 
     for tt in range(t-LTwindow, t): 
         Yn2, Yn1 = Yn1, Yn
-        v0, v1, v2 = sig[tt], sig[tt-LPn], sig[tt-LP2n]
-        Yn = 2*Yn1 - Yn2 + v0 - 2*v1 + v2
-        dy = (Yn-Yn1)/LP2n #Lowpass derivative of input 
-        et =  np.sqrt(lfsc + dy * dy)
-        ebuf[tt%LTwindow] = et 
-        aet += et - ebuf[(tt-LTwindow)%LTwindow]
-        lbuf[tt%LTwindow] = aet 
-    return lbuf[t%LTwindow]
+        v0, v1, v2 = sig[tt], sig[tt-LPn], sig[tt-LP2n] #(filter)
+        Yn = 2*Yn1 - Yn2 + v0 - 2*v1 + v2 #Delta Y preparation (filter)
+        dy = (Yn-Yn1) /LP2n #Delta y: Lowpass derivative of input 
+        et =  np.sqrt(lfsc + dy * dy) #Entire sum 
+        ebuf[tt%LTwindow] = et #Reset the default value with the real window value 
+        aet += et - ebuf[(tt-LTwindow)%LTwindow] #I think this is calculating average over the window 
+        lbuf[tt%LTwindow] = aet #Setting the average 
+    return lbuf[t%LTwindow] #Returning the average 
 
-def ltsamp_og(sig, t):  
+def ltsamp_og(sig, t):  #My interpretation of their original algorithm --> 0.034 threshold 
     Yn = Yn1 = Yn2 = 0 
     aet = 0
     ebuf, lbuf = np.array([np.sqrt(lfsc) for i in range(8192)]),  np.zeros(8192)
@@ -66,21 +65,20 @@ def ltsamp_og(sig, t):
         # lbuf.append(aet)
     return lbuf[t]
 
-def LT2(sig, t, C = 1): 
-    y = sig[t-LTwindow: t]
-    delta_y = y[1:] - y[:-1]
-    return np.sum(np.sqrt(C + delta_y**2))
+def LT2(sig, t, C = 1): # most basic 
+    y = sig[t-LTwindow: t] #Selects the slice of the signal that is in our window 
+    delta_y = y[1:] - y[:-1] # Calcualtes delta_y for every single value in window 
+    return np.sum(np.sqrt(C + delta_y**2)) #takes the square root and adds the scaling constant 
 
 def LT(x, C=1, w=.13):
     def _LTi(x, i, C, w_len):
         y = x[i-w_len: i]
-        delta_y = y[1:] - y[:-1] / LP2n #added this scaling constant 
+        delta_y = y[1:] - y[:-1] #added this scaling constant 
         return np.sum(np.sqrt(C + delta_y**2))
 
     w_len = sec_to_pts(w, fs=FS)
     _LTi_vect = np.vectorize(lambda i: _LTi(x, i, C, w_len))
     return _LTi_vect(np.arange(w_len, x.shape[0]))
-
 
 def detect(sig, LT_func): 
     FROM = 0 
@@ -93,25 +91,26 @@ def detect(sig, LT_func):
     t1 = FROM + sec_to_pts(8)
 
     #My Init Threshold    
-    # T0 = 0  
-    # for t in range(FROM, t1): 
-    #     T0 += LT_func(sig, t)
-    # T0 /= t1 - FROM 
-    # Ta = 3 * T0 
+    T0 = 0  
+    for t in range(FROM, t1): 
+        T0 += LT_func(sig, t)
+    T0 /= t1 - FROM 
+    Ta = 3 * T0 
 
     #MY other init threshold 
-    LT_vals = [] 
-    for t in range(FROM, t1): 
-        LT_vals.append(LT2(sig, t))
-    T0 = np.mean(LT_vals)
-    Ta = T0 * 3
+    # LT_vals = [] 
+    # for t in range(FROM, t1): 
+    #     LT_vals.append(LT2(sig, t))
+    # T0 = np.mean(LT_vals)
+    # Ta = T0 * 3
     
     #ROLAND's Init threshold 
-    # LT_ecg = LT(sig, C=1, w=.13)
-    # T02= np.mean(LT_ecg[FROM:t1]) 
-    # Ta2 = T02 * 3
+    LT_ecg = LT(sig, C=1, w=.13)
+    T02= np.mean(LT_ecg[FROM:t1+1]) 
+    Ta2 = T02 * 3
     
-    # print("compare thresholds: mine: {}, R: {}".format(Ta, Ta2))
+    print("compare thresholds: mine: {}, R: {}".format(Ta, Ta2))
+
     # load_visualise(sig[FROM:t1], [Ta2 for i in range(t1-FROM)]) 
      
     print("***Initial Threshold Set to: {}".format(Ta)) 
@@ -137,7 +136,7 @@ def detect(sig, LT_func):
 	    #Compare a length-transformed sample against T1.
         if (LT_func(sig, t) > T1): #Found possible QRS near t
             # print("***Potential QRS Found***")
-            timer = 0 #Used for counting time after previous QRS 
+            # timer = 0 OG POSITION #Used for counting time after previous QRS 
             max = min = LT_func(sig, t) 
             for tt in range(t+1,t + EyeClosing//2): 
                 if LT_func(sig, tt) > max: max = LT_func(sig, tt) 
@@ -158,18 +157,20 @@ def detect(sig, LT_func):
                 if (not learning): 
                     print("***QRS PEAK FOUND at: {}, value: {}***".format(t, tpq))
                     peaks.append(tpq) 
+
                 #Adjust Thresholds 
-                print("***Adjusting Threshold (Down)***")
+                print("***Adjusting Threshold (Up)***")
                 Ta += (max - Ta)/10 
                 T1 = Ta/3 
 
                 #Lock out further detections during eye closing period 
                 t += EyeClosing
-        elif (not learning): 
+        if (not learning): #used to be elif
             #Once we get past the learning period, decrease threshold if no QRS was detected recently 
-            print("***Incrementing Timer: {}***".format(timer))
+            # print("***Incrementing Timer: {}***".format(timer))
             timer += 1 
             if (timer > ExpectPeriod):
+                print("***Adjusting Threshold (Down)***")
                 Ta -= 1 
                 T1 = Ta / 3 
         if (t >= next_minute): 
@@ -203,8 +204,7 @@ EyeClosing = int(sps * EYE_CLS) # set eye-closing period (in samples)
 ExpectPeriod = int(sps * NDP)	#maximum expected RR interval (in samples)
 LTwindow = int(sps * MaxQRSw)  #length transform window size (in samples)
 
-
-detect(upsampled_ecg[:5000], LT2)
+detect(upsampled_ecg[:5000], ltsamp_og)
 
 
 # /******************************************************************************
