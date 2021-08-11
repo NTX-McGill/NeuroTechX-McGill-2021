@@ -19,7 +19,7 @@ def upsample(ecg, sr, new_sr = 250, gsr = None):
     return resampled_data
 
 class Spider_Data_Loader: 
-    def __init__(self) -> None:
+    def __init__(self):
         pass
     
     #Loading the spider data 
