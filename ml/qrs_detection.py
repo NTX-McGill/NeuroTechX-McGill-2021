@@ -25,7 +25,7 @@ nb, na = signal.iirnotch(notch_freq, Q=60, fs=FS)
 notched_ecg = signal.lfilter(nb, na, upsampled_ecg)
 
 lo, hi = 5, 15
-lb, la = signal.butter(order, [lo,hi], btype='band', fs=FS)
+lb, la = signal.butter(order, [lo,hi], btype='bandpass', fs=FS)
 filtered_ecg = signal.lfilter(lb, la, notched_ecg)
 
 #The functions needed to run the main loop
@@ -88,7 +88,7 @@ while t < TO:
         ltmin = np.min(LT_ecg[t - eye_closing//2 + 1 : t])
 
         '''This conditional is changed from original algorithm'''
-        if (ltmax - ltmin) * 100000 > 13:
+        if (ltmax - ltmin) * 100000 > 12:
             onset = ltmax / 100 + 2
             tpq = t - 5
 
@@ -126,3 +126,33 @@ while t < TO:
     if not IS_LEARNING and t // (FS * 60 * n_minutes) >= 1:
         print('{} minutes have passed'.format(n_minutes))
         n_minutes += 1
+
+
+from utils import load_visualise
+
+for k in range(5):
+    load_visualise(filtered_ecg, qrs_detected, zoom=[k*5000, (k+1)*5000])
+
+'''
+Algorithm notes:
+    -Mostly okay, there are still some smaller complexes that aren't being detected (about 4-5 in every length 5000 )
+0-5000:
+    -Mostly okay, there are 3 complexes that are missed
+    -1 complex is captured twice
+    -Not sure, but it seems like complexes are detected at one of two times: either at the very beginning or just before
+
+5000-10000:
+    -Mostly okay? There are 4 complexes that are missed
+    -Huge complex gets detected twice
+
+10000-15000:
+    -
+'''
+#
+# ltmax_vect = np.vectorize(lambda t : np.max(LT_ecg[t+1: t + eye_closing//2]))
+# ltmin_vect = np.vectorize(lambda t : np.min(LT_ecg[t - eye_closing//2 + 1 : t]))
+#
+# ltmaxes = ltmax_vect(np.arange(FROM+1000, TO-1000))
+# ltmins = ltmin_vect(np.arange(FROM+1000, TO-1000))
+#
+# np.mean(ltmaxes - ltmins) * 100000
