@@ -127,28 +127,6 @@ while t < TO:
         print('{} minutes have passed'.format(n_minutes))
         n_minutes += 1
 
-
-from utils import load_visualise
-
-for k in range(5):
-    load_visualise(filtered_ecg, qrs_detected, zoom=[k*5000, (k+1)*5000])
-
-'''
-Algorithm notes:
-    -Mostly okay, there are still some smaller complexes that aren't being detected (about 4-5 in every length 5000 )
-0-5000:
-    -Mostly okay, there are 3 complexes that are missed
-    -1 complex is captured twice
-    -Not sure, but it seems like complexes are detected at one of two times: either at the very beginning or just before
-
-5000-10000:
-    -Mostly okay? There are 4 complexes that are missed
-    -Huge complex gets detected twice
-
-10000-15000:
-    -
-'''
-#
 # ltmax_vect = np.vectorize(lambda t : np.max(LT_ecg[t+1: t + eye_closing//2]))
 # ltmin_vect = np.vectorize(lambda t : np.min(LT_ecg[t - eye_closing//2 + 1 : t]))
 #
@@ -156,3 +134,12 @@ Algorithm notes:
 # ltmins = ltmin_vect(np.arange(FROM+1000, TO-1000))
 #
 # np.mean(ltmaxes - ltmins) * 100000
+
+from utils import load_visualise
+
+for k in range(5):
+    load_visualise(filtered_ecg, qrs_detected, zoom=[k*5000, (k+1)*5000])
+
+qrs_detected = np.array(qrs_detected)
+qq_intervals = qrs_detected - np.insert(qrs_detected[:-1], 0, 0)
+np.savetxt('ml/qq_intervals.txt', qq_intervals, fmt='%d')
