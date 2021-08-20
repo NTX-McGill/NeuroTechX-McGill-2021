@@ -12,7 +12,8 @@ spider = Spider_Data_Loader()
 ecg, gsr, sr = spider.load_physiodata('drive01')
 
 #Upsample data to not have a horrible sampling rate
-data_length = int(ecg.shape[0] / sr)
+data_length = ecg.shape[0] // sr
+
 FS = 250
 og_sample_pts = np.arange(0, data_length, 1/sr)
 new_sample_pts = np.arange(0, data_length, 1/FS)
@@ -32,7 +33,7 @@ filtered_ecg = signal.lfilter(lb, la, notched_ecg)
 def sec_to_pts(s, fs=250):
     return int(s * fs)
 
-def LT(x, C=100, w=0.13):
+def LT(x, C=630, w=0.13):
     '''Computes the LT tranform of the entire time series'''
 
     def LTi(x, i, C, w_len):
@@ -127,19 +128,31 @@ while t < TO:
         print('{} minutes have passed'.format(n_minutes))
         n_minutes += 1
 
-# ltmax_vect = np.vectorize(lambda t : np.max(LT_ecg[t+1: t + eye_closing//2]))
-# ltmin_vect = np.vectorize(lambda t : np.min(LT_ecg[t - eye_closing//2 + 1 : t]))
-#
-# ltmaxes = ltmax_vect(np.arange(FROM+1000, TO-1000))
-# ltmins = ltmin_vect(np.arange(FROM+1000, TO-1000))
-#
-# np.mean(ltmaxes - ltmins) * 100000
+
+# Calculate the average max and min of the LT windows
+ltmax_vect = np.vectorize(lambda t : np.max(LT_ecg[t+1: t + eye_closing//2]))
+ltmin_vect = np.vectorize(lambda t : np.min(LT_ecg[t - eye_closing//2 + 1 : t]))
+
+ltmaxes = ltmax_vect(np.arange(FROM+1000, TO-1000))
+ltmins = ltmin_vect(np.arange(FROM+1000, TO-1000))
+
+np.mean(ltmaxes - ltmins) * 100000
 
 from utils import load_visualise
 
 for k in range(5):
     load_visualise(filtered_ecg, qrs_detected, zoom=[k*5000, (k+1)*5000])
 
+rr_intervals = np.loadtxt('01.8.rr') #Load actual intervals
+
 qrs_detected = np.array(qrs_detected)
-qq_intervals = qrs_detected - np.insert(qrs_detected[:-1], 0, 0)
-np.savetxt('ml/qq_intervals.txt', qq_intervals, fmt='%d')
+qq_intervals = qrs_detected - np.insert(qrs_detected[:-1], 0, 0) #Caclulate our interval lengths
+
+rr_intervals.mean() / sr #Average time between beats
+qq_intervals.mean() / FS #Average time between beats that we calculate
+qq_intervals[qq_intervals < qq_intervals.mean() + qq_intervals.std()].mean() / FS #Average time between beats that we calculate if we remove intervals that are too long/too short
+
+#Stupid conversion that probably doesn't mean anything
+np.abs(qq_intervals[np.abs(qq_intervals - qq_intervals.mean()) < qq_intervals.std()].mean() - (rr_intervals / sr * FS).mean()) / FS
+
+# np.savetxt('ml/qq_intervals.txt', qq_intervals, fmt='%d')
