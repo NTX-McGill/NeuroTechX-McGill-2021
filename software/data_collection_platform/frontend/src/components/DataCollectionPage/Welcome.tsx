@@ -1,11 +1,11 @@
-import React from "react";
-
 const Welcome = ({
   timeEstimate,
   videoCount,
+  error,
 }: Readonly<{
   timeEstimate: string;
   videoCount: string;
+  error?: string;
 }>) => (
   <div>
     <h1>Welcome!</h1>
@@ -47,6 +47,8 @@ const Welcome = ({
         during the video and if so, to rate your stress level from 1 to 5.
       </i>
     </p>
+
+    {error && <p className="error">{error}</p>}
   </div>
 );
 export default Welcome;

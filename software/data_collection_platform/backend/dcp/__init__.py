@@ -1,3 +1,5 @@
+import os
+
 from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
@@ -26,6 +28,9 @@ def create_app():
     celery.conf.update(app.config)
     # configure celery tasks to run within app context
     init_celery(app=app, celery=celery)
+
+    # create logs directory if not exists
+    os.makedirs(os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "logs"), exist_ok=True)
 
     with app.app_context():
         from dcp import api

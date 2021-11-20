@@ -14,4 +14,7 @@ is_video_playing = Value("i", 0)
 # current configuration id
 bci_config_id = Value("i", 0)
 
+# whether the BCI is ready
+is_bci_ready = Value("i", 0)
+
 # NOTE: anytime we want to write/read the shared variables, one must acquire and release the lock to avoid racing issues between processes/threads

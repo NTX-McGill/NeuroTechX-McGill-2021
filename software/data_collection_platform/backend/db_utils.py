@@ -34,7 +34,8 @@ def populate_videos(app):
             lambda row: row.link.split("/")[-1], axis=1)
 
         # clear video table's content
-        db.session.query(Video).delete()
+        videos = Video.query.all()
+        video_youtube_ids = [video.youtube_id for video in videos]
 
         def parse_timedelta(t: str):
             t = datetime.strptime(t, "%M:%S")
@@ -50,12 +51,14 @@ def populate_videos(app):
             youtube_url=row.link,
         )
             for row in df.itertuples(index=False)
+            if row.youtube_id not in video_youtube_ids
         ]
         db.session.add_all(videos)
         db.session.commit()
 
     print("Successfully wrote {} videos from {} to the video table.".format(
-        len(df), URL))
+        len(videos), URL))
+
 
 if __name__ == "__main__":
     app = create_app()
