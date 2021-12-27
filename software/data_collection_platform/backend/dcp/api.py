@@ -1,14 +1,9 @@
 from functools import wraps
-from flask import Blueprint, request, current_app, session
-from flask_cors import cross_origin
+from flask import Blueprint, request, current_app
 import signal
 import os
 
-from dcp.mp.shared import (
-    is_subject_anxious,
-    is_video_playing,
-    q,
-    bci_config_id)
+import dcp.mp.shared as shared
 from dcp import db, celery
 from dcp.models.collection import CollectionInstance
 from dcp.models.video import Video
@@ -27,7 +22,7 @@ def validate_json(*fields):
     def decorator(f):
         @wraps(f)
         def decorated(*args, **kwargs):
-            if not request.is_json:
+            if not request.is_json or not request.json:
                 return {}, 400
 
             missing_fields = fields - request.json.keys()
@@ -41,75 +36,72 @@ def validate_json(*fields):
 
 
 @bp.route("/openbci/start", methods=['POST'])
-def start_openbci():
-    # if there is already a process spawned for running openbci
-    if "process_pid" in session:
-        return "Process already started", 403
-
+def openbci_start():
     # use a separate process to stream BCI data
     from dcp.bci.stream import stream_bci
     from multiprocessing import Process
     with current_app.app_context():
         p = Process(target=stream_bci)
         p.start()
-    session["process_pid"] = p.pid
-    return {"message": "Process started.", "pid": p.pid}, 200
+    return {"data": {"pid": p.pid}}, 201
 
 
-@bp.route("/openbci/stop", methods=['POST'])
-def stop_openbci():
-    if "process_pid" not in session:
-        return {"error": "Process does not exist."}, 404
-    else:
-        pid = session.pop("process_pid")
-        try:
-            os.kill(pid, signal.SIGKILL)
-        except ProcessLookupError as e:
-            return str(e), 404
-        return f"Process {pid} terminated.", 200
+@bp.route("/openbci/<int:process_id>/stop", methods=['POST'])
+def openbci_stop(process_id: int):
+    # TODO: Might terminate the wrong process (!!).
+    # We need some kind of process manager, and call
+    # mp.Process.terminate() and mp.Process.kill() directly.
+    # This would also allow us to use mp.Process.is_alive().
+    os.kill(process_id, signal.SIGTERM)
+    return {}, 200
+
+
+@bp.route('/openbci/<int:process_id>/ready', methods=['GET'])
+def openbci_ready(process_id: int):
+    # NOTE: `pid` is currently ignored, see TODO in openbci_stop.
+    with shared.is_bci_ready.get_lock():
+        return {"data": bool(shared.is_bci_ready.value)}, 200
 
 
 @bp.route('/video/start', methods=['PUT'])
 def video_start():
-    with is_video_playing.get_lock():
-        is_video_playing.value = 1
+    with shared.is_video_playing.get_lock():
+        shared.is_video_playing.value = 1
 
     return {}, 200
 
 
 @bp.route('/video/stop', methods=['PUT'])
 def video_stop():
-    with is_video_playing.get_lock():
-        is_video_playing.value = 0
+    with shared.is_video_playing.get_lock():
+        shared.is_video_playing.value = 0
 
     return {}, 200
 
 
 @bp.route('/anxious/start', methods=['PUT'])
 def anxious_start():
-    with is_subject_anxious.get_lock():
-        is_subject_anxious.value = 1
+    with shared.is_subject_anxious.get_lock():
+        shared.is_subject_anxious.value = 1
 
     return {}, 200
 
 
 @bp.route('/anxious/stop', methods=['PUT'])
 def anxious_stop():
-    with is_subject_anxious.get_lock():
-        is_subject_anxious.value = 0
+    with shared.is_subject_anxious.get_lock():
+        shared.is_subject_anxious.value = 0
 
     return {}, 200
 
 
 @bp.route('/feedback', methods=['POST'])
-@cross_origin()
 @validate_json('video_id', 'stress_level')
 def feedback():
     """Clear the buffer containing OpenBCI data once the feedback form is received.
     Store this data to the database by creating celery tasks that \
         write to the database.
     """
-    # TODO: frontend needs to send video_id and feedback
 
     video_id = request.json['video_id']
     feedback = request.json['stress_level']
@@ -122,8 +114,8 @@ def feedback():
                 "Stress level must be between 0 and 3 inclusively."}, 400
 
     # create the collection instance
-    with bci_config_id.get_lock():
-        configuration_id = bci_config_id.value
+    with shared.bci_config_id.get_lock():
+        configuration_id = shared.bci_config_id.value
 
     # create a collection instance
     collection = CollectionInstance(
@@ -138,8 +130,8 @@ def feedback():
 
     # empty queue
     tasks_ids = []
-    while not q.empty():
-        stream_data, is_anxious = q.get_nowait()
+    while not shared.q.empty():
+        stream_data, is_anxious = shared.q.get_nowait()
 
         data = np.asarray(stream_data, dtype=np.float32)
 
