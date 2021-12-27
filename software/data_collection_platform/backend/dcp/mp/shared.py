@@ -11,6 +11,8 @@ q = Queue(maxsize=0)
 is_subject_anxious = Value("i", 0)
 is_video_playing = Value("i", 0)
 
+current_character = Value("u", '\u0000')
+
 # current configuration id
 bci_config_id = Value("i", 0)
 
