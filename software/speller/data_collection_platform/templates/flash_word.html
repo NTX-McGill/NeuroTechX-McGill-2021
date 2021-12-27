@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Highlight</title>
+    <script>
+        let x = 0;      // Counter for the values of the X-axis
+        let frequency;
+        let phase;
+
+        function start_flash(f, p) {
+            frequency = f;
+            phase = p;
+            window.requestAnimationFrame(flash);    // Initial call
+        }
+
+        function flash() {
+            let sine_value = Math.sin((frequency*x++) + phase); 
+            if (sine_value < 0) sine_value = 0;     // If the sine value is negative, then make the word transparent 
+            console.log(sine_value);
+            document.getElementById("word").style.opacity = sine_value;
+            window.requestAnimationFrame(flash);    
+        }
+
+    </script>
+
+
+<body>
+    <h1 style="font-size: 400px;"id="word">Hello</h1>
+   <input type="button" onclick="start_flash(1, 0)" value="Flash">
+</body>
+</html>
