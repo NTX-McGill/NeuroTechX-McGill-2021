@@ -6,6 +6,7 @@ If you are setting up on Linux/Mac install the package `sudo apt install libpq-d
 
 1. Create environment using conda: `conda env create -f environment.yml`
     - For Windows: `conda env create -f environment_windows.yml`
+    - *TODO create environment_windows.yml (for devs working on Windows)
 
 ## Running the application
 
