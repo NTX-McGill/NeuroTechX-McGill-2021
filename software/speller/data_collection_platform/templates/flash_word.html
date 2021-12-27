@@ -17,8 +17,7 @@
         }
 
         function flash() {
-            let sine_value = Math.sin((frequency*x++) + phase); 
-            if (sine_value < 0) sine_value = 0;     // If the sine value is negative, then make the word transparent 
+            let sine_value = 0.5*(1 + Math.sin((frequency*x++) + phase)); 
             console.log(sine_value);
             document.getElementById("word").style.opacity = sine_value;
             window.requestAnimationFrame(flash);    
@@ -29,6 +28,6 @@
 
 <body>
     <h1 style="font-size: 100px;"id="word">Hello</h1>
-   <input type="button" onclick="start_flash(1, 0)" value="Flash">
+   <input type="button" onclick="start_flash(1.6, 3.7)" value="Flash">
 </body>
 </html>
