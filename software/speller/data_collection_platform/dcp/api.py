@@ -46,6 +46,83 @@ def char_pressed():
         user_char_pressed = request.form['char_pressed']
 
 
+@bp.route('/collection/start', method=['POST'])
+def collection_start():
+    """
+    Starts the collection of data as the frontend
+    starts highlighting a character
+
+    Takes a JSON attachment with the following shape:
+    {
+        "data": {
+            "character":    <character>,
+            "phase":        <float>,
+            "frequency"     <float>:
+        }
+    }
+    """
+
+    # TODO ensure JSON data structure is compatible
+
+    json_data = request.get_json()
+
+    # TODO write function to validate datatype
+
+    with shared.collecting.get_lock():
+        shared.collecting.value = True
+
+    with shared.character.get_lock():
+        shared.character.value = json_data["data"]["character"]
+
+    with shared.frequency.get_lock():
+        shared.character.value = json_data["data"]["frequency"]
+
+    with shared.phase.get_lock():
+        shared.character.value = json_data["data"]["phase"]
+
+    return 200
+
+
+@bp.route('/collection/stop', methods=['POST'])
+def collection_stop():
+    """
+    Stops the collection of data as the frontend
+    stops highlighting a character
+
+    Takes a JSON attachment with the following shape:
+    {
+        "data": {
+            "character":    <character>,
+            "phase":        <float>,
+            "frequency"     <float>:
+        }
+    }
+    """
+
+    json_data = request.get_json()
+
+    with shared.collecting.get_lock():
+        shared.collecting.value = False 
+    
+    # TODO implement adding queue items to database
+    """
+    while not shared.q.empty():
+        # TODO verify that number of outputs is correct
+        stream_data, character, frequency, phase = shared.q.get_nowait() 
+
+        # TODO verify that collection object is correct
+        data = np.asarray(stream_data, dtype=np.float32)
+        data_point = CollectionInstance(stream_data, character, frequency, phase)
+        
+        # TODO verify placement of session commit() method
+        db.session.add(data_point)
+        db.session.commit()
+    """
+
+    # TODO change 501 to 200 when content is added to the database
+    return 501
+
+
 @bp.route("/openbci/start", methods=['POST'])
 def openbci_start():
     # use a separate process to stream BCI data
