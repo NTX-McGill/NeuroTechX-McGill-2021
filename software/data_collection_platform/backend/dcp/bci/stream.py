@@ -10,8 +10,6 @@ from dcp.mp.shared import (
     bci_config_id,
     is_video_playing, is_subject_anxious, q)
 
-import os
-
 log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))), "logs",
                         "bci.log")
 
@@ -43,7 +41,7 @@ def stream_bci():
     streams = resolve_stream('type', 'EEG')
 
     with is_bci_ready.get_lock():
-        is_bci_ready.value = 1;
+        is_bci_ready.value = 1
 
     logger.info("Successfully connected to LSL stream.")
 
@@ -72,6 +70,7 @@ def stream_bci():
     inlet.time_correction()
 
     running = True
+
     def on_exit(_sig, _stackframe):
         nonlocal running
         running = False
