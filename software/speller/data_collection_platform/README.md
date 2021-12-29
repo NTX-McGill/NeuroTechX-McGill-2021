@@ -2,11 +2,13 @@
 
 ## Setup environment
 
-If you are setting up on Linux/Mac install the package `sudo apt install libpq-dev`
+If you are setting up on Linux install the package `sudo apt install libpq-dev`
+If you are setting up on Mac install the package using Homebrew instead
 
-1. Create environment using conda: `conda env create -f environment.yml`
+1. For Linux, Create environment using conda: `conda env create -f environment.yml`
     - For Windows: `conda env create -f environment_windows.yml`
     - *TODO create environment_windows.yml (for devs working on Windows)
+    - For MacOS: `conda env create -f environment_macOS.yml`
 
 ## Running the application
 
@@ -25,6 +27,7 @@ $ flask run
 
 
 ## Connecting to the database
+TODO: Update this part
 
 The database credentials can be found on the `software` channel on Slack.
 One can use the `psql` CLI to connect to the database: `psql --host=neurotech-db.postgres.database.azure.com --port=5432 --username=neurotech@neurotech-db --dbname=postgres`
@@ -39,6 +42,7 @@ For example:
 ```
 
 ## Development database
+TODO: Update this part
 
 In order to not corrupt the production database, we should use a development database when developing the application. There are two options to setup such database locally: 
 1.  Using docker: ``docker run --name <my-db-name> -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres``
