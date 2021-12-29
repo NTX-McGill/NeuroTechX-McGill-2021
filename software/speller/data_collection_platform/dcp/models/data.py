@@ -20,6 +20,8 @@ class CollectedData(db.Model):
     collection_instance_id = db.Column(
         db.Integer, db.ForeignKey(CollectionInstance.id), nullable=False)
     character = db.Column(db.String, nullable = False)
+    frequency = db.Column(db.String, nullable = False)
+    phase = db.Column(db.String, nullable = False)
     # TODO Alex: Add Label (character), frequency (f) and phase.
     # is_subject_anxious = db.Column(db.Boolean, nullable=False)
     # order = db.Column(db.Integer, nullable=False)
