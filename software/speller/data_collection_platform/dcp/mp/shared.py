@@ -1,6 +1,7 @@
 """This file holds the shared variables between processes."""
 
 from multiprocessing import Queue, Value
+import ctypes
 
 # NOTE: anytime we want to write/read the shared variables, one must acquire and release the lock to avoid racing issues between processes/threads
 # NOTE: we could use another queue for message passing between processes would be more efficient
@@ -13,6 +14,7 @@ q = Queue(maxsize=0)
 character = Value("i", 0)
 frequency = Value("i", 0)
 phase = Value("i", 0)
+collecting = Value(ctypes.c_bool, False)
 
 # current BCI configuration id
 bci_config_id = Value("i", 0)
