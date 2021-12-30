@@ -1,0 +1,164 @@
+{
+    "a": {
+        "frequency": 8.0,
+        "phase": 0.0,
+        "row": 2,
+        "order": 12
+    },
+    "b": {
+        "frequency": 8.3,
+        "phase": 1.0995574287564276,
+        "row": 3,
+        "order": 25
+    },
+    "c": {
+        "frequency": 8.6,
+        "phase": 2.199114857512855,
+        "row": 3,
+        "order": 23
+    },
+    "d": {
+        "frequency": 8.9,
+        "phase": 3.2986722862692828,
+        "row": 2,
+        "order": 14
+    },
+    "e": {
+        "frequency": 9.2,
+        "phase": 4.39822971502571,
+        "row": 1,
+        "order": 3
+    },
+    "f": {
+        "frequency": 9.5,
+        "phase": 5.497787143782138,
+        "row": 2,
+        "order": 15
+    },
+    "g": {
+        "frequency": 9.8,
+        "phase": 0.3141592653589793,
+        "row": 2,
+        "order": 16
+    },
+    "h": {
+        "frequency": 10.1,
+        "phase": 1.413716694115407,
+        "row": 2,
+        "order": 17
+    },
+    "i": {
+        "frequency": 10.4,
+        "phase": 2.5132741228718345,
+        "row": 1,
+        "order": 8
+    },
+    "j": {
+        "frequency": 10.7,
+        "phase": 3.6128315516282616,
+        "row": 2,
+        "order": 18
+    },
+    "k": {
+        "frequency": 11.0,
+        "phase": 4.71238898038469,
+        "row": 2,
+        "order": 19
+    },
+    "l": {
+        "frequency": 11.3,
+        "phase": 5.811946409141117,
+        "row": 2,
+        "order": 20
+    },
+    "m": {
+        "frequency": 11.6,
+        "phase": 0.6283185307179586,
+        "row": 3,
+        "order": 27
+    },
+    "n": {
+        "frequency": 11.9,
+        "phase": 1.7278759594743864,
+        "row": 3,
+        "order": 26
+    },
+    "o": {
+        "frequency": 12.2,
+        "phase": 2.827433388230814,
+        "row": 1,
+        "order": 9
+    },
+    "p": {
+        "frequency": 12.5,
+        "phase": 3.9269908169872414,
+        "row": 1,
+        "order": 10
+    },
+    "q": {
+        "frequency": 12.8,
+        "phase": 5.026548245743669,
+        "row": 1,
+        "order": 1
+    },
+    "r": {
+        "frequency": 13.1,
+        "phase": 6.126105674500097,
+        "row": 1,
+        "order": 4
+    },
+    "s": {
+        "frequency": 13.4,
+        "phase": 0.9424777960769379,
+        "row": 2,
+        "order": 13
+    },
+    "t": {
+        "frequency": 13.7,
+        "phase": 2.0420352248333655,
+        "row": 1,
+        "order": 5
+    },
+    "u": {
+        "frequency": 14.0,
+        "phase": 3.141592653589793,
+        "row": 1,
+        "order": 7
+    },
+    "v": {
+        "frequency": 14.3,
+        "phase": 4.241150082346221,
+        "row": 3,
+        "order": 24
+    },
+    "w": {
+        "frequency": 14.6,
+        "phase": 5.340707511102648,
+        "row": 1,
+        "order": 2
+    },
+    "x": {
+        "frequency": 14.9,
+        "phase": 0.15707963267948966,
+        "row": 3,
+        "order": 22
+    },
+    "y": {
+        "frequency": 15.2,
+        "phase": 1.2566370614359172,
+        "row": 1,
+        "order": 6
+    },
+    "z": {
+        "frequency": 15.5,
+        "phase": 2.356194490192345,
+        "row": 3,
+        "order": 21
+    },
+    "\\s": {
+        "frequency": 15.8,
+        "phase": 3.455751918948773,
+        "row": 1,
+        "order": 11
+    }
+}
