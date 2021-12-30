@@ -1,0 +1,18 @@
+.key-button {
+    height: 45px;
+    width:45px;
+    border: none;
+    background: #000000;
+    color: #ffffff;
+    font-size: 1.05rem;
+    outline: none;
+    cursor: pointer;
+    display: inline-block;
+    align-items: center;
+    justify-content: center;
+    vertical-align: top;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+    position: relative;
+    margin: 10px;
+}
