@@ -2,7 +2,7 @@ from datetime import datetime
 
 from dcp.models.utils import auto_str
 from dcp.models.configurations import OpenBCIConfig
-from dcp.models.video import Video
+#from dcp.models.video import Video
 from dcp import db
 
 from sqlalchemy.orm import validates

@@ -4,7 +4,7 @@ import signal
 import os
 
 import dcp.mp.shared as shared
-from dcp import db, celery
+# from dcp import db, celery
 from dcp.models.collection import CollectionInstance
 from dcp.tasks import store_stream_data, add
 

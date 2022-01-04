@@ -1,5 +1,5 @@
-import pandas as pd
-from typing import List
+# import pandas as pd
+# from typing import List
 
 from dcp import celery, db
 
@@ -44,10 +44,10 @@ def store_stream_data(data: List[float]):
     ]
     logger.info(f"Collected data: {collected_data}")
 
-    db.session.add_all(collected_data)
-    db.session.commit()
+# #     db.session.add_all(collected_data)
+# #     db.session.commit()
 
-    return "Successfully wrote {} samples.".format(len(collected_data))
+# #     return "Successfully wrote {} samples.".format(len(collected_data))
 
 
 # CELERY TEST TASK
