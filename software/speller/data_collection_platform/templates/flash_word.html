@@ -11,13 +11,14 @@
         let phase;
 
         function start_flash(f, p) {
+            x = 0;     // Reset axis 
             frequency = f;
             phase = p;
             window.requestAnimationFrame(flash);    // Initial call
         }
 
         function flash() {
-            let sine_value = 0.5*(1 + Math.sin((frequency*x++) + phase)); 
+            let sine_value = 0.5*(1 + Math.sin((2 * Math.PI * frequency * x++) + phase));
             console.log(sine_value);
             document.getElementById("word").style.opacity = sine_value;
             window.requestAnimationFrame(flash);    
