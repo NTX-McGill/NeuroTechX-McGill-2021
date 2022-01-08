@@ -49,11 +49,12 @@ def char_pressed():
 @bp.route("/openbci/start", methods=['POST'])
 def openbci_start():
     # use a separate process to stream BCI data
-    from dcp.bci.stream import stream_bci
+    from dcp.bci.stream import stream_bci_api
     from multiprocessing import Process
     with current_app.app_context():
-        p = Process(target=stream_bci)
+        p = Process(target=stream_bci_api, args=(shared.bci_running,))
         p.start()
+        shared.bci_running[p.pid] = True
     return {"data": {"pid": p.pid}}, 201
 
 
@@ -70,6 +71,7 @@ def openbci_stop(process_id: int):
     # We need some kind of process manager, and call
     # mp.Process.terminate() and mp.Process.kill() directly.
     # This would also allow us to use mp.Process.is_alive().
+    shared.bci_running[process_id] = False
     os.kill(process_id, signal.SIGTERM)
     return {}, 200
 

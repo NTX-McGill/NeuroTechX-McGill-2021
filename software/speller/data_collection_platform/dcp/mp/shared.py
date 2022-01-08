@@ -1,6 +1,6 @@
 """This file holds the shared variables between processes."""
 
-from multiprocessing import Queue, Value
+from multiprocessing import Queue, Value, Manager
 
 # NOTE: anytime we want to write/read the shared variables, one must acquire and release the lock to avoid racing issues between processes/threads
 # NOTE: we could use another queue for message passing between processes would be more efficient
@@ -19,3 +19,8 @@ bci_config_id = Value("i", 0)
 
 # communicate whether the BCI device is ready (connected)
 is_bci_ready = Value("i", 0)
+
+# creating a manager that will allow processes to be communicated to from the flask app
+# the manager will control when processes can pull from the bci device
+manager = Manager()
+bci_running = manager.dict()
