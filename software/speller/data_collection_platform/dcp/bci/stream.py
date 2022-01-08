@@ -21,8 +21,6 @@ logging.basicConfig(filename=log_path,
 logger = logging.getLogger(__name__)
 logger.info('test logger')
 
-duration = 5
-
 def stream_bci_api(bci_running): 
     # Some imports are only in this section, to allow other functions to be tested outside of the flask app
     # The relative import paths make this difficult to test in isolation
@@ -91,7 +89,7 @@ def connect_to_bci():
     print(bci_config)
     return inlet
 
-def testLSLSamplingRate(inlet):
+def testLSLSamplingRate(inlet, duration):
     start = time.time()
     totalNumSamples = 0
     validSamples = 0
@@ -115,8 +113,9 @@ def testLSLSamplingRate(inlet):
     print( "Avg Sampling Rate == {}".format(validSamples / duration) )
 
 if __name__ == '__main__':
+    duration = 5
     inlet = connect_to_bci()
-    testLSLSamplingRate(inlet)
+    testLSLSamplingRate(inlet, duration)
     # while True:
     #     chunk, timestamp = inlet.pull_chunk()
     #     if chunk:
