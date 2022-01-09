@@ -1,7 +1,11 @@
-from dcp.models.utils import auto_str
-from dcp.models.collection import CollectionInstance
 from dcp import db
 
+from datetime import datetime
+
+from dcp.models.utils import auto_str
+from dcp.models.configurations import OpenBCIConfig
+
+from sqlalchemy.orm import validates
 
 @auto_str
 class CollectedData(db.Model):
@@ -17,8 +21,10 @@ class CollectedData(db.Model):
     channel_6 = db.Column(db.Float, nullable=False)
     channel_7 = db.Column(db.Float, nullable=False)
     channel_8 = db.Column(db.Float, nullable=False)
-    collection_instance_id = db.Column(
-        db.Integer, db.ForeignKey(CollectionInstance.id), nullable=False)
+    collection_time = db.Column(db.DateTime(
+        timezone=True), default=datetime.utcnow, nullable=False)
+    config_id = db.Column(db.Integer, db.ForeignKey(
+        OpenBCIConfig.id), nullable=False)
     character = db.Column(db.String, nullable=False)
     frequency = db.Column(db.Float, nullable=False)
     phase = db.Column(db.Float, nullable=False)
