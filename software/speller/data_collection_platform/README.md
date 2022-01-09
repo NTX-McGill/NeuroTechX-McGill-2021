@@ -3,7 +3,8 @@
 ## Setup environment
 
 If you are setting up on Linux install the package `sudo apt install libpq-dev`
-If you are setting up on Mac install the package using Homebrew instead
+
+If you are setting up on Mac install the package use Homebrew to install this package.
 
 1. For Linux, Create environment using conda: `conda env create -f environment.yml`
     - For Windows: `conda env create -f environment_windows.yml`
