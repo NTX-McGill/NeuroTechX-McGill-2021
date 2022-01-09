@@ -13,10 +13,7 @@ class Config(object):
     SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
-
-    # cloudamqp Rabbit MQ
-    broker_url = os.environ["MESSAGE_QUEUE_URL"]
-    result_backend = os.environ["MESSAGE_QUEUE_BACKEND"]
+    SQLALCHEMY_TRACK_MODIFICATIONS = False
 
 
 class DevelopmentConfig(Config):
@@ -27,7 +24,6 @@ class DevelopmentConfig(Config):
     # deactivate Flask reloading
     DEBUG = True
     SQLALCHEMY_DATABASE_URI = os.environ['DEV_DATABASE_URL']
-    broker_url = os.environ["DEV_MESSAGE_QUEUE_URL"]
 
 
 class TestingConfig(Config):

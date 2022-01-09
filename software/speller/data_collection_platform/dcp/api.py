@@ -4,9 +4,8 @@ import signal
 import os
 
 import dcp.mp.shared as shared
-from dcp import db, celery
+from dcp import db
 from dcp.models.collection import CollectionInstance
-from dcp.tasks import store_stream_data, add
 
 import numpy as np
 
@@ -72,42 +71,3 @@ def openbci_stop(process_id: int):
     # This would also allow us to use mp.Process.is_alive().
     os.kill(process_id, signal.SIGTERM)
     return {}, 200
-
-
-# CELERY TEST ROUTES
-@bp.route('/tasks/<string:task_id>/status', methods=['GET'])
-def get_task_status(task_id: str):
-    """Return the state of a job given a task_id.
-
-    Args:
-        task_id ([str]): Celery task id
-    """
-    return {"result": celery.AsyncResult(task_id).state}, 200
-
-
-@bp.route('/tasks/<string:task_id>/result', methods=['GET'])
-def get_task_result(task_id: str):
-    """Return the result of a job given a task_id.
-
-    Args:
-        task_id ([str]): Celery task id
-
-    Returns:
-        response: dictionary containing the result and the response code.
-    """
-    return {"result": celery.AsyncResult(task_id).result}, 200
-
-
-@bp.route('/test', methods=['GET'])
-def test():
-    """Test Celery task queue setup.
-    """
-    import random
-    a = random.randrange(1000)
-    b = random.randrange(1000)
-    r = add.apply_async(kwargs={"x": a, "y": b})
-
-    # wait for messages by adding this line we make the call synchronous and
-    # keep listening to messages
-    r.get(on_message=lambda x: current_app.logger.info(x), propagate=False)
-    return r.id, 200
