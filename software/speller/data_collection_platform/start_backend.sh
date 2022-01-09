@@ -1,5 +1,6 @@
 #!/bin/bash
 
+# NOTE: this script assumes that docker is installed and that the user is familiar with Docker.
 # NOTE: make sure your virtual environment is activated
 # starting for developer environ for developers
 source .env

@@ -4,9 +4,6 @@ from flask import Flask
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-from celery import Celery
-
-from dcp.utils.celery import init_celery
 
 from dcp.cfg.config import app_configs
 
