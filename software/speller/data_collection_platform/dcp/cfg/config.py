@@ -9,17 +9,11 @@ class Config(object):
     ENV = "production"
     DEBUG = False
     TESTING = False
-    # SECRET_KEY = os.getenv('SECRET_KEY', default='not_so_secret')
-    SQLALCHEMY_DATABASE_URI = (f'postgresql+psycopg2://{os.getenv("POSTGRES_USER")}:' + 
-                                f'{os.getenv("POSTGRES_PW")}@{os.getenv("POSTGRES_URL")}/{os.getenv("POSTGRES_DB")}'
-                                )
+    SECRET_KEY = os.getenv('SECRET_KEY', default='not_so_secret')
+    SQLALCHEMY_DATABASE_URI = os.environ['DATABASE_URL']
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True}
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-
-    # # cloudamqp Rabbit MQ
-    # broker_url = os.environ["MESSAGE_QUEUE_URL"]
-    # result_backend = os.environ["MESSAGE_QUEUE_BACKEND"]
 
 
 class DevelopmentConfig(Config):
@@ -29,10 +23,7 @@ class DevelopmentConfig(Config):
     # better to have it explicitly specified, as sometimes we want to
     # deactivate Flask reloading
     DEBUG = True
-    SQLALCHEMY_DATABASE_URI = (f'postgresql+psycopg2://{os.getenv("POSTGRES_USER")}:' + 
-                                f'{os.getenv("POSTGRES_PW")}@{os.getenv("POSTGRES_URL")}/{os.getenv("POSTGRES_DB")}'
-                                )
-    # broker_url = os.environ["DEV_MESSAGE_QUEUE_URL"]
+    SQLALCHEMY_DATABASE_URI = os.environ['DEV_DATABASE_URL']
 
 
 class TestingConfig(Config):
