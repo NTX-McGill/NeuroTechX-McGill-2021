@@ -12,6 +12,7 @@ If you are setting up on Mac install the package using Homebrew instead
 
 ## Running the application
 
+Prerequisite: A development or production database is running and healthy.
 ```
 $ flask run
 ```
