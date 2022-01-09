@@ -9,7 +9,7 @@ If you are setting up on Mac install the package using Homebrew instead
     - For Windows: `conda env create -f environment_windows.yml`
     - *TODO create environment_windows.yml (for devs working on Windows)
     - For MacOS: `conda env create -f environment_macOS.yml`
-
+2. Create a `.env` file in the current directory (`software/speller/data_collection_platform/.env`). Its content can be found in the **#software** channel.
 ## Running the application
 
 Prerequisite: A development or production database is running and healthy.
