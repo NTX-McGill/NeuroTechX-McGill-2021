@@ -23,4 +23,4 @@ is_bci_ready = Value("i", 0)
 # creating a manager that will allow processes to be communicated to from the flask app
 # the manager will control when processes can pull from the bci device
 manager = Manager()
-bci_running = manager.dict()
+bci_processes_states = manager.dict()

@@ -21,7 +21,7 @@ logging.basicConfig(filename=log_path,
 logger = logging.getLogger(__name__)
 logger.info('test logger')
 
-def stream_bci_api(bci_running): 
+def stream_bci_api(bci_processes_states): 
     # Some imports are only in this section, to allow other functions to be tested outside of the flask app
     # The relative import paths make this difficult to test in isolation
     # TODO: currently the collecting shared variable is in another branch, will have to test with other branch to see if this works
@@ -50,13 +50,13 @@ def stream_bci_api(bci_running):
     # this machine
     inlet.time_correction()
 
-    while bci_running[os.getpid()] == False:
+    while bci_processes_states[os.getpid()] == False:
         continue
         # this will ensure that there is no race condition, and that the parent process has been able to instantiate this variable
 
     # os.getpid()
     # running = True
-    while bci_running[os.getpid()]:
+    while bci_processes_states[os.getpid()]:
         samples, _timestamps = inlet.pull_chunk()
 
         if not samples:
