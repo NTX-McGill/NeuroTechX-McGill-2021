@@ -16,7 +16,8 @@ import "./Keyboard.css"
 class Keyboard extends Component<{}, KeyboardState> {
 
     COLOR_DEFAULT = "#000000"
-    COLOR_HIGHLIGHT = "#ff0000"
+    COLOR_HIGHLIGHT_START = "#ff0000"
+    COLOR_HIGHLIGHT_STOP = "#0000ff"
 
     WIDTH_DEFAULT = "50px"
     WIDTH_SPACE = "330px"
@@ -24,8 +25,9 @@ class Keyboard extends Component<{}, KeyboardState> {
     COLOR_RUN = "#2ede28"
     COLOR_STOP = "#ff0000"
 
-    DURATION_HIGHLIGHT = 5000
+    DURATION_HIGHLIGHT = 1000
     DURATION_FLASHING = 15000
+    DURATION_REST = 1000
 
     keyFlashing: string
 
@@ -67,17 +69,21 @@ class Keyboard extends Component<{}, KeyboardState> {
         }
 
         const newState = {...this.state.keys}
-        const keyFlashingInfo = newState[this.keyFlashing]
 
-        var delta = time - this.startTime// + performance.now() - a
-        var sine_value = 0.5*(1+Math.sin((2*Math.PI*keyFlashingInfo.freq*(delta/1000)) + keyFlashingInfo.phase));
+        var delta = time - this.startTime
 
-        newState[this.keyFlashing].color = this.hexToRGBA(this.COLOR_DEFAULT, sine_value.toString())
+        for (let key in newState) {
+            const info = newState[key]
 
-        this.setState({/*plot: [...this.state.plot, {name: delta/1000, value: sine_value, diff: 1000/(time-this.prevTime)}],*/ keys: newState},
+            var sine_value = 0.5*(1+Math.sin((2*Math.PI*info.freq*(delta/1000)) + info.phase));
+
+            newState[key].color = this.hexToRGBA(this.COLOR_DEFAULT, sine_value.toString())
+        }
+
+        this.setState({keys: newState},
             () => {
 
-                console.log(performance.now()-a)
+                //console.log(performance.now()-a)
 
                 if (this.prevTime === this.startTime) {
                     this.plot.push({name: delta/1000, value: sine_value})
@@ -116,7 +122,7 @@ class Keyboard extends Component<{}, KeyboardState> {
         const randKey = Object.keys(this.state.keys)[randIdx];
 
         const newState = {...this.state.keys}
-        newState[randKey].color = this.COLOR_HIGHLIGHT
+        newState[randKey].color = this.COLOR_HIGHLIGHT_START
 
         this.setState({keys: newState})
 
@@ -132,16 +138,18 @@ class Keyboard extends Component<{}, KeyboardState> {
             //opacity flashing
 
             this.callback = () => {
-                newState[randKey].color = this.COLOR_HIGHLIGHT
+                newState[randKey].color = this.COLOR_HIGHLIGHT_STOP
                 this.setState({keys: newState})
 
                 setTimeout(() => {
                     newState[randKey].color = this.COLOR_DEFAULT
                     this.setState({keys: newState})
 
-                    if (this.state.running) {
-                        this.startCollection();
-                    }
+                    setTimeout(() => {
+                        if (this.state.running) {
+                            this.startCollection();
+                        }
+                    }, this.DURATION_REST)
 
                 }, this.DURATION_HIGHLIGHT)
             }
