@@ -6,10 +6,12 @@ This code is based on
 2. the previous years stream.py found at NeuroTechX-McGill-2021/software/data_collection_platform/backend/dcp/bci/stream.py
 """
 
+from re import sub
 from pylsl import StreamInlet, resolve_stream
 import time 
 import logging
 import os
+from collections import deque
 
 log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))), "logs",
                         "bci.log")
@@ -21,27 +23,16 @@ logging.basicConfig(filename=log_path,
 logger = logging.getLogger(__name__)
 logger.info('test logger')
 
-def stream_bci_api(bci_processes_states): 
-    # Some imports are only in this section, to allow other functions to be tested outside of the flask app
-    # The relative import paths make this difficult to test in isolation
-    # TODO: currently the collecting shared variable is in another branch, will have to test with other branch to see if this works
-    # from dcp.mp.shared import collecting
-    from dcp.mp.shared import q
-    # TODO: this next import has to do with the DB, and reading the BCI config ID
-    # will need to be done once the db is fully setup
-    # from dcp.models.configurations import OpenBCIConfig
+def stream_bci_api(subprocess_dict): 
 
-    # from multiprocessing import current_process
     logger.info('Attempting to initialize stream')
 
     inlet = connect_to_bci()
 
     logger.info('Succesfully connected to an inlet stream')
-    logger.info(inlet.info().as_xml())
-
-    # TODO: save current configuration to database once it is ready
-    # db.session.add(config)
-    # db.session.commit()
+    bci_config = inlet.info().as_xml()
+    logger.info(bci_config)
+    subprocess_dict['bci_config'] = bci_config
 
     # TAKEN FROM LAST YEAR:
     # retrieve estimated time correction offset for the given stream - this is
@@ -49,23 +40,17 @@ def stream_bci_api(bci_processes_states):
     # generated via local_clock() to map it into the local clock domain for
     # this machine
     inlet.time_correction()
+    subprocess_dict['state'] = 'ready'
+    queue = deque()
 
-    while bci_processes_states[os.getpid()] == False:
-        continue
-        # this will ensure that there is no race condition, and that the parent process has been able to instantiate this variable
-
-    # os.getpid()
-    # running = True
-    while bci_processes_states[os.getpid()]:
+    while subprocess_dict['state'] != 'stop':
         samples, _timestamps = inlet.pull_chunk()
-
-        if not samples:
+        if not samples or subprocess_dict['state'] != 'collect':
             continue
-        # TODO: uncomment this section to check the collecting value
-        # with collecting.get_lock():
-        #     if collecting.value:
-        q.put_nowait(samples)
-    
+
+        queue.append(samples)
+        subprocess_dict['q'] = queue
+
         logger.info(samples)
 
     logger.info("no longer running")
