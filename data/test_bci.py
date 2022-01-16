@@ -31,8 +31,9 @@ def stream_bci():
                 continue
 
             for sample in samples:
-                f.write(sample)
-
+                sample_csv = ','.join([str(x) for x in sample])
+                f.write(sample_csv)
+                f.write('\n')
 
 if __name__ == "__main__":
     stream_bci()
