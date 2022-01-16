@@ -54,7 +54,7 @@ def openbci_start():
             'q': deque(),
             'config_id': None, 
             'bci_config': None,
-            'state': 'start'
+            'state': None
         })
         # only pass this subprocess dict to ensure that locks are not too contentious
         p = Process(target=stream_bci_api, args=(subprocess_dict,))
