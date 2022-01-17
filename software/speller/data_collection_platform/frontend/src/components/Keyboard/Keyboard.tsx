@@ -1,359 +1,259 @@
-import React, { Component, Dispatch, SetStateAction } from 'react';
-import './Keyboard.css';
+import React, { Component } from "react"
+import Key from "../Key/Key"
 
-import config from '../../keyboard_config.json';
+import config from "../../keyboard_config.json"
+import KeyboardState from "./KeyboardState";
+import KeyProps from "../Key/KeyProps";
+import KeyMap from "./KeyMap";
 
-import Key, { KeyProps } from '../Key/Key';
-import SpaceBarIcon from '@material-ui/icons/SpaceBar';
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
+import SpaceBarIcon from '@material-ui/icons/SpaceBar'
 
-import {startBCI, stopBCI, startCollectingKey, stopCollectingKey} from '../../api'
+import { LineChart, Line, XAxis, Tooltip, CartesianGrid, YAxis } from "recharts";
 
-const COLOR_DEFAULT = '#000000';
-const COLOR_HIGHLIGHT_START = '#ff0000';
-const COLOR_HIGHLIGHT_STOP = '#000000';
+import "./Keyboard.css"
 
-const WIDTH_DEFAULT = '7rem';
+class Keyboard extends Component<{}, KeyboardState> {
 
-const COLOR_RUN = '#2ede28';
-const COLOR_STOP = '#ff0000';
+    COLOR_DEFAULT = "#000000"
+    COLOR_HIGHLIGHT_START = "#ff0000"
+    COLOR_HIGHLIGHT_STOP = "#0000ff"
 
-const DURATION_HIGHLIGHT_START = 1000;
-const DURATION_HIGHLIGHT_STOP = 100;
-const DURATION_FLASHING = 5000;
-const DURATION_REST = 100;
+    WIDTH_DEFAULT = "50px"
+    WIDTH_SPACE = "330px"
 
-interface KeyMap {
-  [key: string]: KeyProps;
-}
+    COLOR_RUN = "#2ede28"
+    COLOR_STOP = "#ff0000"
 
-interface KeyboardState {
-  keys: KeyMap;
-  running: boolean;
-  unFlashedKeys: string[];
-  numRoundsCollected: number;
-  collectorName: string;
-}
+    DURATION_HIGHLIGHT = 1000
+    DURATION_FLASHING = 15000
+    DURATION_REST = 1000
 
-interface KeyboardProps {
-  chartData: any[];
-  setChartData: Dispatch<SetStateAction<any[]>>;
-}
+    keyFlashing: string
 
-class Keyboard extends Component<KeyboardProps, KeyboardState> {
-  keyFlashing: string;
-  keys: KeyMap;
+    keys: KeyMap
 
-  startTime: number;
-  prevTime: number;
+    startTime: number
+    prevTime: number
 
-  callback: Function;
+    callback: Function
 
-  plot: any[];
+    plot: any[]
 
-  processID: number;
-  listRefs: any;
-
-  constructor(props: KeyboardProps) {
-    super(props);
-    this.keys = {} as KeyMap;
-    this.state = {
-      running: false,
-      keys: {} as KeyMap,
-      numRoundsCollected: 0,
-      unFlashedKeys: [] as string[],
-      collectorName: "",
-    };
-    this.keyFlashing = '';
-    this.startTime = -1;
-    this.prevTime = -1;
-    this.callback = () => {};
-    this.plot = props.chartData;
-    this.processID = -1;
-    for (let val in Object.keys(config)) {
-      let temp = {...this.listRefs}
-      temp[Object.keys(config)[val]] = React.createRef()
-      this.listRefs = temp
+    constructor(props: any) {
+        super(props);
+        this.keys = {} as KeyMap;
+        this.state = {keys: {} as KeyMap, running: false, plot: []};
+        this.keyFlashing = "";
+        this.startTime = -1
+        this.prevTime = -1
+        this.callback = () => {}
+        this.plot = []
     }
 
-    this.onNameChange = this.onNameChange.bind(this);
-  }
-
-  hexToRGBA(hex: string, alpha: string) {
-    const r = parseInt(hex.slice(1, 3), 16);
-    const g = parseInt(hex.slice(3, 5), 16);
-    const b = parseInt(hex.slice(5, 7), 16);
-
-    return 'rgba(' + r + ', ' + g + ', ' + b + ', ' + alpha + ')';
-  }
-
-  flash = (time: number) => {
-
-    var a = performance.now()
-
-    if (this.startTime === -1) {
-        this.startTime = time
-        this.prevTime = time
+    hexToRGBA(hex: string, alpha: string) {
+        const r = parseInt(hex.slice(1, 3), 16)
+        const g = parseInt(hex.slice(3, 5), 16)
+        const b = parseInt(hex.slice(5, 7), 16)
+    
+        return "rgba(" + r + ", " + g + ", " + b + ", " + alpha + ")"
     }
 
-    var b = performance.now()
+    flash = (time: number) => {
 
-    const newState = {...this.state.keys}
+        var a = performance.now()
 
-    var c = performance.now()
+        if (this.startTime === -1) {
+            this.startTime = time
+            this.prevTime = time
+        }
 
-    var delta = time - this.startTime
+        const newState = {...this.state.keys}
 
-    for (let key in newState) {
-        const info = newState[key]
+        var delta = time - this.startTime
 
-        var sine_value = 0.5*(1+Math.sin((2*Math.PI*info.freq*(delta/1000)) + info.phase));
+        for (let key in newState) {
+            const info = newState[key]
 
-        //newState[key].color = this.hexToRGBA(this.COLOR_DEFAULT, sine_value.toString())
+            var sine_value = 0.5*(1+Math.sin((2*Math.PI*info.freq*(delta/1000)) + info.phase));
 
-        this.listRefs[key].current.setColor(this.hexToRGBA(COLOR_DEFAULT, sine_value.toString()))
+            newState[key].color = this.hexToRGBA(this.COLOR_DEFAULT, sine_value.toString())
+        }
+
+        this.setState({keys: newState},
+            () => {
+
+                //console.log(performance.now()-a)
+
+                if (this.prevTime === this.startTime) {
+                    this.plot.push({name: delta/1000, value: sine_value})
+                }
+                else {
+                    this.plot.push({name: delta/1000, value: sine_value, diff: 1000/(time-this.prevTime)})
+                }
+
+                if (delta < this.DURATION_FLASHING) {
+                    this.prevTime = time
+                    window.requestAnimationFrame(this.flash);
+                }
+                else {
+                    this.setState({plot: this.plot})
+                    this.callback()
+                }
+            })
     }
 
-    if (this.prevTime === this.startTime) {
-        this.plot.push({name: delta/1000})
-    }
-    else {
-        this.plot.push({name: delta/1000, diff: 1000/(time-this.prevTime)})
-    }
-
-    if (delta < DURATION_FLASHING) {
-        this.prevTime = time
+    startFlash() {
+        this.startTime = -1
+        //plot
+        this.setState({plot: []})
+        this.plot = []
         window.requestAnimationFrame(this.flash);
     }
-    else {
-        //this.setState({plot: this.plot})
-        //this.props.setChartData([...this.plot]);
-        this.callback()
-    }
-  };
 
-  startFlash() {
-    this.startTime = -1;
-    this.plot = [];
-    this.props.setChartData([]);
-    window.requestAnimationFrame(this.flash);
-  }
+    startCollection() {
 
-  async startCollection() {
-    if (!this.state.running) {
-      return;
-    }
-
-    if (this.processID === -1) {
-      try {
-        this.processID = (await startBCI(this.state.collectorName)).data.data.pid
-        console.log(this.processID)
-      }
-      catch (error) {
-        console.error(error);
-      }
-    }
-
-    // don't collect from same key twice
-    const numKeys = this.state.unFlashedKeys.length;
-    const randIdx = Math.floor(Math.random() * numKeys);
-    const randKey = this.state.unFlashedKeys[randIdx];
-
-    const newState = { ...this.state.keys };
-    newState[randKey].color = COLOR_HIGHLIGHT_START;
-
-    const unFlashedKeys = this.state.unFlashedKeys;
-    if(unFlashedKeys.length === 0){
-      try {
-        await stopBCI(this.processID)
-        this.setState({running: false});
-        return;
-      }
-      catch (error) {
-        console.error(error);
-      }
-    }
-    unFlashedKeys.splice(randIdx, 1);
-    
-    this.setState({ keys: newState, unFlashedKeys });
-
-    this.keyFlashing = randKey;
-
-    console.info('Collecting data for:', randKey);
-
-    setTimeout(async () => {
-
-      try {
-        await startCollectingKey(this.processID, randKey, config[randKey as keyof typeof config].phase, config[randKey as keyof typeof config].frequency)
-      }
-      catch (error) {
-        console.error(error);
-      }
-      newState[randKey].color = COLOR_DEFAULT;
-      this.setState({ keys: newState });
-
-      // opacity flashing
-
-      this.callback = async () => {
-
-        for (let val in this.listRefs) {
-          this.listRefs[val].current.setColor(COLOR_DEFAULT)
+        if (!this.state.running) {
+            return
         }
 
-        try {
-          await stopCollectingKey(this.processID)
-        }
-        catch (error) {
-          console.error(error);
-        }
+        const numKeys = Object.keys(this.state.keys).length
+        const randIdx = Math.floor(Math.random() * numKeys);
+        const randKey = Object.keys(this.state.keys)[randIdx];
 
-        for (let val in this.listRefs) {
-          this.listRefs[val].current.setColor(COLOR_DEFAULT)
-        }
+        const newState = {...this.state.keys}
+        newState[randKey].color = this.COLOR_HIGHLIGHT_START
 
-        newState[randKey].color = COLOR_HIGHLIGHT_STOP;
-        this.setState({ keys: newState });
+        this.setState({keys: newState})
+
+        this.keyFlashing = randKey
+
+        console.log("Collecting data for:", randKey)
 
         setTimeout(() => {
-          newState[randKey].color = COLOR_DEFAULT;
-          this.setState({ keys: newState });
 
-          setTimeout(async () => {
-            if (this.state.running) {
-              this.startCollection();
+            newState[randKey].color = this.COLOR_DEFAULT
+            this.setState({keys: newState})
+
+            //opacity flashing
+
+            this.callback = () => {
+                newState[randKey].color = this.COLOR_HIGHLIGHT_STOP
+                this.setState({keys: newState})
+
+                setTimeout(() => {
+                    newState[randKey].color = this.COLOR_DEFAULT
+                    this.setState({keys: newState})
+
+                    setTimeout(() => {
+                        if (this.state.running) {
+                            this.startCollection();
+                        }
+                    }, this.DURATION_REST)
+
+                }, this.DURATION_HIGHLIGHT)
             }
-          }, DURATION_REST);
-        }, DURATION_HIGHLIGHT_STOP);
-      };
 
-      this.startFlash();
-    }, DURATION_HIGHLIGHT_START);
-  }
+            this.startFlash()
 
-  async start() {
+        }, this.DURATION_HIGHLIGHT)
+    }
 
-    if (!this.state.running) {
-      this.setState(
-        {
-          running: true,
-          unFlashedKeys: Object.keys(this.keys),
-          numRoundsCollected: this.state.numRoundsCollected + 1,
-        },
-        () => this.startCollection()
+    start() {
+        this.setState({running: !this.state.running}, () => {
+            this.startCollection()
+        })
+    }
+
+    listOfRows() {
+        return [...new Set(Object.keys(config).map(item => config[item as keyof typeof config].row))].sort();
+    }
+
+    keysByRow(rowNum: number) : String[] {
+        return Object.keys(config).filter(key => config[key as keyof typeof config].row === rowNum).sort((a, b) => {
+            if (config[a as keyof typeof config].order > config[b as keyof typeof config].order) {
+                return 1;
+            }
+            else if (config[a as keyof typeof config].order < config[b as keyof typeof config].order) {
+                return -1;
+            }
+
+            return 0;
+        })
+    }
+
+    getKey(key: string) {
+
+        var keyInfo = {
+            dispChar: key.toUpperCase(),
+            outputChar: key,
+            freq: config[key as keyof typeof config].frequency,
+            phase: config[key as keyof typeof config].phase,
+            color: this.COLOR_DEFAULT,
+            width: this.WIDTH_DEFAULT
+        } as KeyProps
+
+        switch(key) { 
+            case "\\\s": {
+               keyInfo.dispChar = <SpaceBarIcon/>
+               keyInfo.outputChar = " "
+               break; 
+            }
+            default: { 
+               break; 
+            } 
+         }
+
+        this.keys[key as keyof typeof config] = keyInfo
+
+        return (
+            <Key key={key}
+            dispChar = {keyInfo.dispChar}
+            outputChar = {keyInfo.outputChar}
+            freq = {keyInfo.freq}
+            phase = {keyInfo.phase}
+            color = {this.state.keys[key as keyof typeof config]?.color}
+            width = {keyInfo.width}/>
+        ) 
+    }
+
+    componentDidMount() {
+        this.setState({keys: this.keys})
+    }
+
+    getToggleColor() {
+        return !this.state.running ? this.COLOR_RUN : this.COLOR_STOP
+    }
+
+    render() {
+      return (         
+        <div>
+            {this.listOfRows().map(rowNum =>
+            <div key={rowNum} className="keys-div">
+                {this.keysByRow(rowNum).map(key => this.getKey(key as string))}
+            </div>
+            )}
+
+            <button className="toggle" style={{background: this.getToggleColor()}} onClick={this.start.bind(this)}>{!this.state.running ? "Start" : "Stop"}</button>
+
+            <LineChart
+                width={1400}
+                height={400}
+                data={this.state.plot}
+                margin={{ top: 5, right: 20, left: 10, bottom: 5 }}>
+                <XAxis type="number" dataKey="name" domain={[0, 15]} tickCount={16} allowDataOverflow={true}/>
+                <YAxis type="number" domain={[0, 1]} yAxisId={0}/>
+                <YAxis type="number" yAxisId={1}/>
+                <YAxis type="number" yAxisId={2}/>
+                <Tooltip />
+                <CartesianGrid stroke="#f5f5f5" />
+                <Line type="monotone" dataKey="value" stroke="#ff7300" yAxisId={0}/>
+                <Line type="monotone" dataKey="diff" stroke="#088F8F" yAxisId={1}/>
+                <Line type="monotone" dataKey="int" stroke="#E6E6FA" yAxisId={2}/>
+            </LineChart>
+        </div>
       );
-    } else {
-      this.setState({ running: false });
+     }
     }
-  }
-
-  listOfRows() {
-    return [
-      ...new Set(
-        Object.keys(config).map(item => config[item as keyof typeof config].row)
-      ),
-    ].sort();
-  }
-
-  keysByRow(rowNum: number): String[] {
-    return Object.keys(config)
-      .filter(key => config[key as keyof typeof config].row === rowNum)
-      .sort((a, b) => {
-        if (
-          config[a as keyof typeof config].order >
-          config[b as keyof typeof config].order
-        ) {
-          return 1;
-        } else if (
-          config[a as keyof typeof config].order <
-          config[b as keyof typeof config].order
-        ) {
-          return -1;
-        }
-
-        return 0;
-      });
-  }
-
-  getKey(key: string) {
-    var keyInfo = {
-      dispChar: key.toUpperCase(),
-      outputChar: key,
-      freq: config[key as keyof typeof config].frequency,
-      phase: config[key as keyof typeof config].phase,
-      color: COLOR_DEFAULT,
-      width: WIDTH_DEFAULT,
-    } as KeyProps;
-
-    switch (key) {
-      case '\\s': {
-        keyInfo.dispChar = <SpaceBarIcon />;
-        keyInfo.outputChar = ' ';
-        break;
-      }
-      case '\b': {
-        keyInfo.dispChar = <KeyboardBackspaceIcon/>;
-        break;
-      }
-      default: {
-        break;
-      }
-    }
-
-    this.keys[key as keyof typeof config] = keyInfo;
-
-    return (
-      <Key
-        ref={this.listRefs[key]}
-        key={key}
-        dispChar={keyInfo.dispChar}
-        outputChar={keyInfo.outputChar}
-        freq={keyInfo.freq}
-        phase={keyInfo.phase}
-        color={this.state.keys[key as keyof typeof config]?.color}
-        width={keyInfo.width}
-      />
-    );
-  }
-
-  componentDidMount() {
-    this.setState({ keys: this.keys, running: false });
-  }
-
-  getToggleColor() {
-    return !this.state.running ? COLOR_RUN : COLOR_STOP;
-  }
-
-  onNameChange(e:  React.FormEvent<HTMLInputElement>) {
-    this.setState({collectorName: e.currentTarget.value});
-  }
-
-  render() {
-    return (
-      <div className={'keyboard'}>
-        {this.listOfRows().map(rowNum => (
-          <div key={rowNum} className="keys-div">
-            {this.keysByRow(rowNum).map(key => this.getKey(key as string))}
-          </div>
-        ))}
-
-        <button
-          className="toggle"
-          style={{ background: this.getToggleColor() }}
-          onClick={this.start.bind(this)}
-          disabled={!!!this.state.collectorName}
-        >
-          {this.state.running
-            ? 'Stop'
-            : this.state.numRoundsCollected > 0
-            ? 'Collect Again'
-            : 'Start'}
-        </button>
-        
-        <input value={this.state.collectorName} onChange={this.onNameChange} />
-        
-      </div>
-    );
-  }
-}
 
 export default Keyboard;

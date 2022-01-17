@@ -1,3 +1,7 @@
+.App {
+  text-align: center;
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;
@@ -31,33 +35,4 @@
   to {
     transform: rotate(360deg);
   }
-}
-
-.container {
-  height: 100%;
-  text-align: center;
-  display: grid;
-  grid-gap: 3%;
-  padding: 0 0.5%;
-  grid-template-rows: 10% 50% 40%;
-  grid-template-columns: repeat(12, 1fr);
-}
-
-.grid-item {
-  display: flex;
-  align-items: stretch;
-  align-content: stretch;
-  min-width: 0;
-  min-height: 0;
-  grid-column-end: span 12;
-}
-
-.grid-item > * {
-  flex: 1;
-}
-
-.keyboard {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
 }
