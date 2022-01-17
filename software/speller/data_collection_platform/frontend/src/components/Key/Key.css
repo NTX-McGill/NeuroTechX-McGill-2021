@@ -1,5 +1,5 @@
 .key-button {
-  height: 50px;
+  height: 3.3rem;
   border: none;
   color: #ffffff;
   font-size: 1.05rem;
@@ -12,5 +12,5 @@
   padding: 0;
   -webkit-tap-highlight-color: transparent;
   position: relative;
-  margin: 10px;
+  margin: .5rem;
 }
