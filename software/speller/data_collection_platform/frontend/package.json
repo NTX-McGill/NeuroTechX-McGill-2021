@@ -26,7 +26,9 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "check-format": "yarn prettier --check src",
+    "lint": "yarn eslint --max-warnings=0 src"
   },
   "eslintConfig": {
     "extends": [
