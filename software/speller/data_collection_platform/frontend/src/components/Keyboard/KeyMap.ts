@@ -1,7 +1,7 @@
-import KeyProps from "../Key/KeyProps"
+import KeyProps from '../Key/KeyProps';
 
 interface KeyMap {
-    [key: string]: KeyProps;
+  [key: string]: KeyProps;
 }
 
 export default KeyMap;
