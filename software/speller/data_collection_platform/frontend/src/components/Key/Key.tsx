@@ -1,28 +1,19 @@
-import React, { Component } from 'react';
+import React, { memo } from 'react';
 import KeyProps from './KeyProps';
 import './Key.css';
 
-class Key extends Component<KeyProps> {
-  shouldComponentUpdate(nextProps: KeyProps) {
-    if (nextProps.color === this.props.color) {
-      return false;
-    }
+const Key = ({ color, width, freq, dispChar }: KeyProps) => (
+  <button
+    className="key-button"
+    style={{ backgroundColor: color, width }}
+  >
+    {freq}
+    <br />
+    {dispChar}
+  </button>
+);
 
-    return true;
-  }
-
-  render() {
-    return (
-      <button
-        className="key-button"
-        style={{ backgroundColor: this.props.color, width: this.props.width }}
-      >
-        {this.props.freq}
-        <br />
-        {this.props.dispChar}
-      </button>
-    );
-  }
-}
-
-export default Key;
+export default memo(Key, (props: KeyProps, nextProps: KeyProps) => {
+  // only re-render key if the colour prop changes
+  return nextProps.color === props.color;
+});

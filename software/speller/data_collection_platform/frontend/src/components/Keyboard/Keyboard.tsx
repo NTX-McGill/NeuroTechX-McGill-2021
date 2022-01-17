@@ -6,7 +6,6 @@ import KeyboardState from './KeyboardState';
 import KeyProps from '../Key/KeyProps';
 import KeyMap from './KeyMap';
 
-import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 import SpaceBarIcon from '@material-ui/icons/SpaceBar';
 
 import {
@@ -66,7 +65,7 @@ class Keyboard extends Component<{}, KeyboardState> {
   }
 
   flash = (time: number) => {
-    var a = performance.now();
+    // var a = performance.now();
 
     if (this.startTime === -1) {
       this.startTime = time;
