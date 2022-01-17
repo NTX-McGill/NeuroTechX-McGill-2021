@@ -1,11 +1,17 @@
 .toggle {
-  height: 50px;
-  width: 100px;
+  height: 3rem;
+  width: 10rem;
   border: none;
   background: black;
   color: #ffffff;
   font-size: 1.05rem;
   outline: none;
   cursor: pointer;
-  margin: 10px;
+  margin: 0.6rem;
+}
+
+.keyboard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }

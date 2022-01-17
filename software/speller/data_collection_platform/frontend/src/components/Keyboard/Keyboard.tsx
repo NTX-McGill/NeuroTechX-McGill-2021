@@ -1,41 +1,41 @@
-import React, { Component } from 'react';
-import Key from '../Key/Key';
-
-import config from '../../keyboard_config.json';
-import KeyboardState from './KeyboardState';
-import KeyProps from '../Key/KeyProps';
-import KeyMap from './KeyMap';
-
-import SpaceBarIcon from '@material-ui/icons/SpaceBar';
-
-import {
-  LineChart,
-  Line,
-  XAxis,
-  Tooltip,
-  CartesianGrid,
-  YAxis,
-} from 'recharts';
-
+import React, { Component, Dispatch, SetStateAction } from 'react';
 import './Keyboard.css';
 
-class Keyboard extends Component<{}, KeyboardState> {
-  COLOR_DEFAULT = '#000000';
-  COLOR_HIGHLIGHT_START = '#ff0000';
-  COLOR_HIGHLIGHT_STOP = '#0000ff';
+import config from '../../keyboard_config.json';
 
-  WIDTH_DEFAULT = '50px';
-  WIDTH_SPACE = '330px';
+import Key, { KeyProps } from '../Key/Key';
+import SpaceBarIcon from '@material-ui/icons/SpaceBar';
 
-  COLOR_RUN = '#2ede28';
-  COLOR_STOP = '#ff0000';
+const COLOR_DEFAULT = '#000000';
+const COLOR_HIGHLIGHT_START = '#ff0000';
+const COLOR_HIGHLIGHT_STOP = '#0000ff';
 
-  DURATION_HIGHLIGHT = 1000;
-  DURATION_FLASHING = 15000;
-  DURATION_REST = 1000;
+const WIDTH_DEFAULT = '3.3rem';
 
+const COLOR_RUN = '#2ede28';
+const COLOR_STOP = '#ff0000';
+
+const DURATION_HIGHLIGHT = 1000;
+const DURATION_FLASHING = 15000;
+const DURATION_REST = 1000;
+
+interface KeyMap {
+  [key: string]: KeyProps;
+}
+
+interface KeyboardState {
+  keys: KeyMap;
+  running: boolean;
+  [key: string]: any;
+}
+
+interface KeyboardProps {
+  chartData: any[],
+  setChartData: Dispatch<SetStateAction<any[]>>
+}
+
+class Keyboard extends Component<KeyboardProps, KeyboardState> {
   keyFlashing: string;
-
   keys: KeyMap;
 
   startTime: number;
@@ -45,15 +45,15 @@ class Keyboard extends Component<{}, KeyboardState> {
 
   plot: any[];
 
-  constructor(props: any) {
+  constructor(props: KeyboardProps) {
     super(props);
     this.keys = {} as KeyMap;
-    this.state = { keys: {} as KeyMap, running: false, plot: [] };
+    this.state = { keys: {} as KeyMap, running: false };
     this.keyFlashing = '';
     this.startTime = -1;
     this.prevTime = -1;
     this.callback = () => {};
-    this.plot = [];
+    this.plot = props.chartData;
   }
 
   hexToRGBA(hex: string, alpha: string) {
@@ -65,8 +65,6 @@ class Keyboard extends Component<{}, KeyboardState> {
   }
 
   flash = (time: number) => {
-    // var a = performance.now();
-
     if (this.startTime === -1) {
       this.startTime = time;
       this.prevTime = time;
@@ -84,7 +82,7 @@ class Keyboard extends Component<{}, KeyboardState> {
         (1 + Math.sin(2 * Math.PI * info.freq * (delta / 1000) + info.phase));
 
       newState[key].color = this.hexToRGBA(
-        this.COLOR_DEFAULT,
+        COLOR_DEFAULT,
         sine_value.toString()
       );
     }
@@ -102,11 +100,11 @@ class Keyboard extends Component<{}, KeyboardState> {
         });
       }
 
-      if (delta < this.DURATION_FLASHING) {
+      if (delta < DURATION_FLASHING) {
         this.prevTime = time;
         window.requestAnimationFrame(this.flash);
       } else {
-        this.setState({ plot: this.plot });
+        this.props.setChartData([...this.plot]);
         this.callback();
       }
     });
@@ -114,9 +112,8 @@ class Keyboard extends Component<{}, KeyboardState> {
 
   startFlash() {
     this.startTime = -1;
-    //plot
-    this.setState({ plot: [] });
     this.plot = [];
+    this.props.setChartData([]);
     window.requestAnimationFrame(this.flash);
   }
 
@@ -130,38 +127,38 @@ class Keyboard extends Component<{}, KeyboardState> {
     const randKey = Object.keys(this.state.keys)[randIdx];
 
     const newState = { ...this.state.keys };
-    newState[randKey].color = this.COLOR_HIGHLIGHT_START;
+    newState[randKey].color = COLOR_HIGHLIGHT_START;
 
     this.setState({ keys: newState });
 
     this.keyFlashing = randKey;
 
-    console.log('Collecting data for:', randKey);
+    console.info('Collecting data for:', randKey);
 
     setTimeout(() => {
-      newState[randKey].color = this.COLOR_DEFAULT;
+      newState[randKey].color = COLOR_DEFAULT;
       this.setState({ keys: newState });
 
       //opacity flashing
 
       this.callback = () => {
-        newState[randKey].color = this.COLOR_HIGHLIGHT_STOP;
+        newState[randKey].color = COLOR_HIGHLIGHT_STOP;
         this.setState({ keys: newState });
 
         setTimeout(() => {
-          newState[randKey].color = this.COLOR_DEFAULT;
+          newState[randKey].color = COLOR_DEFAULT;
           this.setState({ keys: newState });
 
           setTimeout(() => {
             if (this.state.running) {
               this.startCollection();
             }
-          }, this.DURATION_REST);
-        }, this.DURATION_HIGHLIGHT);
+          }, DURATION_REST);
+        }, DURATION_HIGHLIGHT);
       };
 
       this.startFlash();
-    }, this.DURATION_HIGHLIGHT);
+    }, DURATION_HIGHLIGHT);
   }
 
   start() {
@@ -204,8 +201,8 @@ class Keyboard extends Component<{}, KeyboardState> {
       outputChar: key,
       freq: config[key as keyof typeof config].frequency,
       phase: config[key as keyof typeof config].phase,
-      color: this.COLOR_DEFAULT,
-      width: this.WIDTH_DEFAULT,
+      color: COLOR_DEFAULT,
+      width: WIDTH_DEFAULT,
     } as KeyProps;
 
     switch (key) {
@@ -239,12 +236,12 @@ class Keyboard extends Component<{}, KeyboardState> {
   }
 
   getToggleColor() {
-    return !this.state.running ? this.COLOR_RUN : this.COLOR_STOP;
+    return !this.state.running ? COLOR_RUN : COLOR_STOP;
   }
 
   render() {
     return (
-      <div>
+      <div className={'keyboard'}>
         {this.listOfRows().map(rowNum => (
           <div key={rowNum} className="keys-div">
             {this.keysByRow(rowNum).map(key => this.getKey(key as string))}
@@ -258,29 +255,6 @@ class Keyboard extends Component<{}, KeyboardState> {
         >
           {!this.state.running ? 'Start' : 'Stop'}
         </button>
-
-        <LineChart
-          width={1400}
-          height={400}
-          data={this.state.plot}
-          margin={{ top: 5, right: 20, left: 10, bottom: 5 }}
-        >
-          <XAxis
-            type="number"
-            dataKey="name"
-            domain={[0, 15]}
-            tickCount={16}
-            allowDataOverflow={true}
-          />
-          <YAxis type="number" domain={[0, 1]} yAxisId={0} />
-          <YAxis type="number" yAxisId={1} />
-          <YAxis type="number" yAxisId={2} />
-          <Tooltip />
-          <CartesianGrid stroke="#f5f5f5" />
-          <Line type="monotone" dataKey="value" stroke="#ff7300" yAxisId={0} />
-          <Line type="monotone" dataKey="diff" stroke="#088F8F" yAxisId={1} />
-          <Line type="monotone" dataKey="int" stroke="#E6E6FA" yAxisId={2} />
-        </LineChart>
       </div>
     );
   }
