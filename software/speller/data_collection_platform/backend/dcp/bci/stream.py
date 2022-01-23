@@ -43,7 +43,7 @@ def stream_bci_api(subprocess_dict):
     # this machine
     inlet.time_correction()
     subprocess_dict['params']['state'] = 'ready'
-    queue = shared.manager.Queue()
+    queue = subprocess_dict['q']
 
     while subprocess_dict['params']['state'] != 'stop':
         samples, _timestamps = inlet.pull_chunk()
@@ -51,7 +51,6 @@ def stream_bci_api(subprocess_dict):
             continue
 
         queue.put(samples)
-        subprocess_dict['q'] = queue
 
         logger.info(samples)
 

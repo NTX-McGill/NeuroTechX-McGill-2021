@@ -120,7 +120,7 @@ def openbci_stop(process_id: int):
         return {"error": f"stopped bci process while it was collecting, data was not written for character {subprocess_dict['character']}"}, 400
     
     subprocess_dict['params']['state'] = 'stop'
-    if subprocess_dict['q']:
+    if not subprocess_dict['q'].empty():
         return {'warning': f"stopped bci process, however the queue for bci data was not empty, data for character {subprocess_dict['character']} might be incomplete"}, 400
     shared.bci_processes_states.pop(process_id, None)
     return {'success': f"ended subprocess with id {process_id}"}, 200
@@ -132,7 +132,7 @@ def write_stream_data(subprocess_dict):
     queue = subprocess_dict['q']
     collected_data = []
     while queue:
-        stream_data = queue.popleft()
+        stream_data = queue.get()
         for row in stream_data:
             if len(row) < 8:
                 raise Exception("BCI Data is not the right format")
