@@ -61,9 +61,10 @@ def openbci_start():
         # need to start process before referencing it to obtain the right process_id
         p.start()
         shared.bci_processes_states[p.pid] = subprocess_dict
+    start = time.time()
     while subprocess_dict['state'] != 'ready' or subprocess_dict['bci_config'] == None:
-        print('BCI NOT READY YET')
-        time.sleep(1)
+        if (time.time()-start) > 10:
+            return {"error_message": "server timeout"}, 408
     config = OpenBCIConfig(configuration=subprocess_dict['bci_config'])
     db.session.add(config)
     db.session.commit()
