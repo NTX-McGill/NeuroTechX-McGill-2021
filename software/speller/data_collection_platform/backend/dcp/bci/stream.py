@@ -13,6 +13,8 @@ import logging
 import os
 from collections import deque
 
+from dcp.mp import shared
+
 log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))), "logs",
                         "bci.log")
 
@@ -32,7 +34,7 @@ def stream_bci_api(subprocess_dict):
     logger.info('Succesfully connected to an inlet stream')
     bci_config = inlet.info().as_xml()
     logger.info(bci_config)
-    subprocess_dict['bci_config'] = bci_config
+    subprocess_dict['params']['bci_config'] = bci_config
 
     # TAKEN FROM LAST YEAR:
     # retrieve estimated time correction offset for the given stream - this is
@@ -40,15 +42,15 @@ def stream_bci_api(subprocess_dict):
     # generated via local_clock() to map it into the local clock domain for
     # this machine
     inlet.time_correction()
-    subprocess_dict['state'] = 'ready'
-    queue = deque()
+    subprocess_dict['params']['state'] = 'ready'
+    queue = shared.manager.Queue()
 
-    while subprocess_dict['state'] != 'stop':
+    while subprocess_dict['params']['state'] != 'stop':
         samples, _timestamps = inlet.pull_chunk()
-        if not samples or subprocess_dict['state'] != 'collect':
+        if not samples or subprocess_dict['params']['state'] != 'collect':
             continue
 
-        queue.append(samples)
+        queue.put(samples)
         subprocess_dict['q'] = queue
 
         logger.info(samples)

@@ -47,27 +47,26 @@ def openbci_start():
     with current_app.app_context():
         # Although the subprocess gets initialized inside this scope, it will persist
         # bci_processes_states references this subprocess_dict
-        subprocess_dict = shared.manager.dict({
-            'character': None,
-            'phase': None,
-            'frequency': None,
-            'q': deque(),
-            'config_id': None, 
-            'bci_config': None,
-            'state': None
-        })
+        subprocess_dict = {'params': shared.manager.dict({
+                    'character': None,
+                    'phase': None,
+                    'frequency': None,
+                    'config_id': None,
+                    'bci_config': None,
+                    'state': None
+                }), 'q': shared.manager.Queue()}
         # only pass this subprocess dict to ensure that locks are not too contentious
-        p = Process(target=stream_bci_api, args=(subprocess_dict,))
+        p = Process(target=stream_bci_api, args=(subprocess_dict['params'],))
         # need to start process before referencing it to obtain the right process_id
         p.start()
-        shared.bci_processes_states[p.pid] = subprocess_dict
-    while subprocess_dict['state'] != 'ready' or subprocess_dict['bci_config'] == None:
+        shared.bci_processes_states[p.pid] = subprocess_dict['params']
+    while subprocess_dict['params']['state'] != 'ready' or subprocess_dict['params']['bci_config'] == None:
         print('BCI NOT READY YET')
         time.sleep(1)
-    config = OpenBCIConfig(configuration=subprocess_dict['bci_config'])
+    config = OpenBCIConfig(configuration=subprocess_dict['params']['bci_config'])
     db.session.add(config)
     db.session.commit()
-    subprocess_dict['config_id'] = config.id
+    subprocess_dict['params']['config_id'] = config.id
     # once the subprocess is ready, return from call
     return {"data": {"pid": p.pid}}, 201
 
@@ -82,32 +81,32 @@ def openbci_process_collect_start(process_id:int):
     # We now know that the request contains all the keys
     if process_id not in shared.bci_processes_states:
         return {'Invalid Request': 'There is no process with this id, make sure your process id is valid'}, 404
-    subprocess_dict = shared.bci_processes_states[process_id]
+    subprocess_dict['params'] = shared.bci_processes_states[process_id]
     try:
-        subprocess_dict['character'] = data.get('character')
-        subprocess_dict['frequency'] = float(data.get('frequency'))
-        subprocess_dict['phase'] = float(data.get('phase'))
+        subprocess_dict['params']['character'] = data.get('character')
+        subprocess_dict['params']['frequency'] = float(data.get('frequency'))
+        subprocess_dict['params']['phase'] = float(data.get('phase'))
     except:
         return {'Invalid Request': 'Could not convert post form data. Make sure the data is the correct type. (string for character, and float for phase and frequency)'}, 400
     
-    subprocess_dict['state'] = 'collect'
+    subprocess_dict['params']['state'] = 'collect'
     return {'Success': 'BCI is collecting'}, 201
 
 @bp.route('/openbci/<int:process_id>/collect/stop', methods=['POST'])
 def openbci_process_collect_stop(process_id:int):
     if process_id not in shared.bci_processes_states:
         return {'Invalid Request': 'There is no process with this id, make sure your process id is valid'}, 404
-    subprocess_dict = shared.bci_processes_states[process_id]
-    subprocess_dict['state'] = 'ready'
+    subprocess_dict['params'] = shared.bci_processes_states[process_id]
+    subprocess_dict['params']['state'] = 'ready'
 
     # write to database 
-    if not write_stream_data(subprocess_dict):
+    if not write_stream_data(subprocess_dict['params']):
         return {'result': "Did not write any new information to database, stopping collection"}, 202
     # clear the subprocess_dict
-    subprocess_dict['character'] = None
-    subprocess_dict['frequency'] = None
-    subprocess_dict['phase'] = None
-    subprocess_dict['q'] = deque()
+    subprocess_dict['params']['character'] = None
+    subprocess_dict['params']['frequency'] = None
+    subprocess_dict['params']['phase'] = None
+    subprocess_dict['q'] = shared.manager.Queue()
 
     return {'Success': 'BCI has stopped collecting, and the queue has been writen to the db'}, 201
 
@@ -115,12 +114,12 @@ def openbci_process_collect_stop(process_id:int):
 def openbci_stop(process_id: int):
     if process_id not in shared.bci_processes_states:
         return {'Invalid Request': 'There is no process with this id, make sure your process id is valid'}, 404
-    subprocess_dict = shared.bci_processes_states[process_id]
-    if subprocess_dict['state'] == 'collect':
-        subprocess_dict['state'] = 'stop'
+    subprocess_dict['params'] = shared.bci_processes_states[process_id]
+    if subprocess_dict['params']['state'] == 'collect':
+        subprocess_dict['params']['state'] = 'stop'
         return {"error": f"stopped bci process while it was collecting, data was not written for character {subprocess_dict['character']}"}, 400
     
-    subprocess_dict['state'] = 'stop'
+    subprocess_dict['params']['state'] = 'stop'
     if subprocess_dict['q']:
         return {'warning': f"stopped bci process, however the queue for bci data was not empty, data for character {subprocess_dict['character']} might be incomplete"}, 400
     shared.bci_processes_states.pop(process_id, None)
@@ -147,10 +146,10 @@ def write_stream_data(subprocess_dict):
                     channel_6=float(row[5]),
                     channel_7=float(row[6]),
                     channel_8=float(row[7]),
-                    config_id=subprocess_dict['config_id'],
-                    character=subprocess_dict['character'],
-                    frequency=subprocess_dict['frequency'],
-                    phase=subprocess_dict['phase'],
+                    config_id=subprocess_dict['params']['config_id'],
+                    character=subprocess_dict['params']['character'],
+                    frequency=subprocess_dict['params']['frequency'],
+                    phase=subprocess_dict['params']['phase'],
                     order=order
                 )
             )
