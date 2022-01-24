@@ -27,6 +27,7 @@ interface KeyboardState {
   keys: KeyMap;
   running: boolean;
   unFlashedKeys: string[];
+  numRoundsCollected: number;
 }
 
 interface KeyboardProps {
@@ -49,8 +50,9 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     super(props);
     this.keys = {} as KeyMap;
     this.state = {
-      keys: {} as KeyMap,
       running: false,
+      keys: {} as KeyMap,
+      numRoundsCollected: 0,
       unFlashedKeys: [] as string[],
     };
     this.keyFlashing = '';
@@ -170,12 +172,18 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   }
 
   start() {
-    this.setState(
-      { running: !this.state.running, unFlashedKeys: Object.keys(this.keys) },
-      () => {
-        this.startCollection();
-      }
-    );
+    if (!this.state.running) {
+      this.setState(
+        {
+          running: true,
+          unFlashedKeys: Object.keys(this.keys),
+          numRoundsCollected: this.state.numRoundsCollected + 1,
+        },
+        () => this.startCollection()
+      );
+    } else {
+      this.setState({ running: false });
+    }
   }
 
   listOfRows() {
@@ -243,7 +251,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   }
 
   componentDidMount() {
-    this.setState({ keys: this.keys });
+    this.setState({ keys: this.keys, running: false });
   }
 
   getToggleColor() {
@@ -264,7 +272,11 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
           style={{ background: this.getToggleColor() }}
           onClick={this.start.bind(this)}
         >
-          {!this.state.running ? 'Start' : 'Stop'}
+          {this.state.running
+            ? 'Stop'
+            : this.state.numRoundsCollected > 0
+            ? 'Collect Again'
+            : 'Start'}
         </button>
       </div>
     );
