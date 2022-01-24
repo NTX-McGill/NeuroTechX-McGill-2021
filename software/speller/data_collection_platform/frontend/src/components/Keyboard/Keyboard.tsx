@@ -26,12 +26,12 @@ interface KeyMap {
 interface KeyboardState {
   keys: KeyMap;
   running: boolean;
-  [key: string]: any;
+  unFlashedKeys: string[];
 }
 
 interface KeyboardProps {
-  chartData: any[],
-  setChartData: Dispatch<SetStateAction<any[]>>
+  chartData: any[];
+  setChartData: Dispatch<SetStateAction<any[]>>;
 }
 
 class Keyboard extends Component<KeyboardProps, KeyboardState> {
@@ -48,7 +48,11 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   constructor(props: KeyboardProps) {
     super(props);
     this.keys = {} as KeyMap;
-    this.state = { keys: {} as KeyMap, running: false };
+    this.state = {
+      keys: {} as KeyMap,
+      running: false,
+      unFlashedKeys: [] as string[],
+    };
     this.keyFlashing = '';
     this.startTime = -1;
     this.prevTime = -1;
@@ -122,14 +126,18 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
       return;
     }
 
-    const numKeys = Object.keys(this.state.keys).length;
+    // don't collect from same key twice
+    const numKeys = this.state.unFlashedKeys.length;
     const randIdx = Math.floor(Math.random() * numKeys);
-    const randKey = Object.keys(this.state.keys)[randIdx];
+    const randKey = this.state.unFlashedKeys[randIdx];
 
     const newState = { ...this.state.keys };
     newState[randKey].color = COLOR_HIGHLIGHT_START;
 
-    this.setState({ keys: newState });
+    const unFlashedKeys = this.state.unFlashedKeys;
+    unFlashedKeys.splice(randIdx, 1);
+
+    this.setState({ keys: newState, unFlashedKeys });
 
     this.keyFlashing = randKey;
 
@@ -139,7 +147,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
       newState[randKey].color = COLOR_DEFAULT;
       this.setState({ keys: newState });
 
-      //opacity flashing
+      // opacity flashing
 
       this.callback = () => {
         newState[randKey].color = COLOR_HIGHLIGHT_STOP;
@@ -162,9 +170,12 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   }
 
   start() {
-    this.setState({ running: !this.state.running }, () => {
-      this.startCollection();
-    });
+    this.setState(
+      { running: !this.state.running, unFlashedKeys: Object.keys(this.keys) },
+      () => {
+        this.startCollection();
+      }
+    );
   }
 
   listOfRows() {
