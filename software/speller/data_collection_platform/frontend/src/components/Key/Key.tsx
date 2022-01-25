@@ -1,4 +1,4 @@
-import React, { memo } from 'react';
+import React, { Component } from 'react';
 import './Key.css';
 
 export interface KeyProps {
@@ -10,15 +10,33 @@ export interface KeyProps {
   width: string;
 }
 
-const Key = ({ color, width, freq, dispChar }: KeyProps) => (
-  <button className="key-button" style={{ backgroundColor: color, width }}>
-    {freq}
-    <br />
-    {dispChar}
-  </button>
-);
+class Key extends Component<KeyProps> {
 
-export default memo(Key, (props: KeyProps, nextProps: KeyProps) => {
-  // only re-render key if the colour prop changes
-  return nextProps.color === props.color;
-});
+  ref: any
+
+  constructor(props: KeyProps){
+    super(props)
+    this.ref = React.createRef()
+  }
+
+  shouldComponentUpdate(nextProps: KeyProps){
+    if (nextProps.color === this.props.color) {
+      return false
+    }
+
+    return true
+  }
+
+  setColor(color: string){
+    this.ref.current.style.backgroundColor = color
+  }
+
+  render() {
+    return (            
+      <button ref={this.ref} className="key-button" style={{backgroundColor: this.props.color, width: this.props.width}}>{this.props.freq}<br/>{this.props.dispChar}</button>
+    );
+  }
+}
+
+export default Key;
+

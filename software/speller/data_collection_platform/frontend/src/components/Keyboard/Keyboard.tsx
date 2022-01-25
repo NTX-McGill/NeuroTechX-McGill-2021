@@ -5,6 +5,9 @@ import config from '../../keyboard_config.json';
 
 import Key, { KeyProps } from '../Key/Key';
 import SpaceBarIcon from '@material-ui/icons/SpaceBar';
+import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
+
+import {startBCI, stopBCI, startCollectingKey, stopCollectingKey} from '../../api'
 
 const COLOR_DEFAULT = '#000000';
 const COLOR_HIGHLIGHT_START = '#ff0000';
@@ -46,6 +49,9 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
   plot: any[];
 
+  processID: number;
+  listRefs: any;
+
   constructor(props: KeyboardProps) {
     super(props);
     this.keys = {} as KeyMap;
@@ -60,6 +66,12 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     this.prevTime = -1;
     this.callback = () => {};
     this.plot = props.chartData;
+    this.processID = -1;
+    for (let val in Object.keys(config)) {
+      let temp = {...this.listRefs}
+      temp[Object.keys(config)[val]] = React.createRef()
+      this.listRefs = temp
+    }
   }
 
   hexToRGBA(hex: string, alpha: string) {
@@ -71,49 +83,48 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   }
 
   flash = (time: number) => {
+
+    var a = performance.now()
+
     if (this.startTime === -1) {
-      this.startTime = time;
-      this.prevTime = time;
+        this.startTime = time
+        this.prevTime = time
     }
 
-    const newState = { ...this.state.keys };
+    var b = performance.now()
 
-    var delta = time - this.startTime;
+    const newState = {...this.state.keys}
+
+    var c = performance.now()
+
+    var delta = time - this.startTime
 
     for (let key in newState) {
-      const info = newState[key];
+        const info = newState[key]
 
-      var sine_value =
-        0.5 *
-        (1 + Math.sin(2 * Math.PI * info.freq * (delta / 1000) + info.phase));
+        var sine_value = 0.5*(1+Math.sin((2*Math.PI*info.freq*(delta/1000)) + info.phase));
 
-      newState[key].color = this.hexToRGBA(
-        COLOR_DEFAULT,
-        sine_value.toString()
-      );
+        //newState[key].color = this.hexToRGBA(this.COLOR_DEFAULT, sine_value.toString())
+
+        this.listRefs[key].current.setColor(this.hexToRGBA(COLOR_DEFAULT, sine_value.toString()))
     }
 
-    this.setState({ keys: newState }, () => {
-      //console.log(performance.now()-a)
+    if (this.prevTime === this.startTime) {
+        this.plot.push({name: delta/1000})
+    }
+    else {
+        this.plot.push({name: delta/1000, diff: 1000/(time-this.prevTime)})
+    }
 
-      if (this.prevTime === this.startTime) {
-        this.plot.push({ name: delta / 1000, value: sine_value });
-      } else {
-        this.plot.push({
-          name: delta / 1000,
-          value: sine_value,
-          diff: 1000 / (time - this.prevTime),
-        });
-      }
-
-      if (delta < DURATION_FLASHING) {
-        this.prevTime = time;
+    if (delta < DURATION_FLASHING) {
+        this.prevTime = time
         window.requestAnimationFrame(this.flash);
-      } else {
-        this.props.setChartData([...this.plot]);
-        this.callback();
-      }
-    });
+    }
+    else {
+        //this.setState({plot: this.plot})
+        //this.props.setChartData([...this.plot]);
+        this.callback()
+    }
   };
 
   startFlash() {
@@ -123,9 +134,19 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     window.requestAnimationFrame(this.flash);
   }
 
-  startCollection() {
+  async startCollection() {
     if (!this.state.running) {
       return;
+    }
+
+    if (this.processID === -1) {
+      try {
+        this.processID = (await startBCI()).data.pid
+        console.log(this.processID)
+      }
+      catch (error) {
+        console.error(error);
+      }
     }
 
     // don't collect from same key twice
@@ -145,13 +166,36 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
     console.info('Collecting data for:', randKey);
 
-    setTimeout(() => {
+    setTimeout(async () => {
+
+      try {
+        await startCollectingKey(this.processID, randKey, config[randKey as keyof typeof config].phase, config[randKey as keyof typeof config].frequency)
+      }
+      catch (error) {
+        console.error(error);
+      }
       newState[randKey].color = COLOR_DEFAULT;
       this.setState({ keys: newState });
 
       // opacity flashing
 
-      this.callback = () => {
+      this.callback = async () => {
+
+        for (let val in this.listRefs) {
+          this.listRefs[val].current.setColor(COLOR_DEFAULT)
+        }
+
+        try {
+          await stopCollectingKey(this.processID)
+        }
+        catch (error) {
+          console.error(error);
+        }
+
+        for (let val in this.listRefs) {
+          this.listRefs[val].current.setColor(COLOR_DEFAULT)
+        }
+
         newState[randKey].color = COLOR_HIGHLIGHT_STOP;
         this.setState({ keys: newState });
 
@@ -159,8 +203,14 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
           newState[randKey].color = COLOR_DEFAULT;
           this.setState({ keys: newState });
 
-          setTimeout(() => {
+          setTimeout(async () => {
             if (this.state.running) {
+              try {
+                await stopBCI(this.processID)
+              }
+              catch (error) {
+                console.error(error);
+              }
               this.startCollection();
             }
           }, DURATION_REST);
@@ -230,6 +280,10 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
         keyInfo.outputChar = ' ';
         break;
       }
+      case '\b': {
+        keyInfo.dispChar = <KeyboardBackspaceIcon/>;
+        break;
+      }
       default: {
         break;
       }
@@ -239,6 +293,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
     return (
       <Key
+        ref={this.listRefs[key]}
         key={key}
         dispChar={keyInfo.dispChar}
         outputChar={keyInfo.outputChar}
