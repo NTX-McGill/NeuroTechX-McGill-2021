@@ -109,13 +109,13 @@ def is_whole_word(w):
 # If just partial is passed, return the most common completions
 # If last and possibly second_last are passed, results are based on ngrams
 def get_completions(partial, last = '', second_last = ''):
-	COUNT = 10
+	COUNT = 3
 	completions = []
 	if last == '' and second_last == '':
 		# Just return the most common completions
 		completions = sorted([(w, c[w]) for w in get_suffixes(partial) if w in c],
 							key=lambda w: c[w[0]],
-							reverse=True)[:COUNT]
+							reverse=True)
 							
 	elif last != '' and second_last == '':
 		# Return completions based on last word
@@ -124,7 +124,7 @@ def get_completions(partial, last = '', second_last = ''):
 								and w in ngrams[last]
 								and "_count" in ngrams[last][w]],
 							key=lambda w: ngrams[last][w[0]]["_count"],
-							reverse=True)[:COUNT]
+							reverse=True)
 	elif last != '' and second_last != '':
 		# Return completions based on last 2 words
 		completions = sorted([(w, ngrams[second_last][last][w]["_count"]) for w in get_suffixes(partial)
@@ -133,7 +133,7 @@ def get_completions(partial, last = '', second_last = ''):
 								and w in ngrams[second_last][last]
 								and "_count" in ngrams[second_last][last][w]],
 							key=lambda w: ngrams[second_last][last][w[0]]["_count"],
-							reverse=True)[:COUNT]
+							reverse=True)
 	
 	# try weaker search if nothing was found
 	if len(completions) == 0:
@@ -141,9 +141,13 @@ def get_completions(partial, last = '', second_last = ''):
 			completions = get_completions(partial, last)
 		elif last != '':
 			completions = get_completions(partial)
-	
+	else: 
+		# removes first prediction if it is the same as the input word
+		if completions[0][0] == partial:
+			completions.pop(0)
+
 	# completions is a sorted list of (word, ngram-count) tuples
-	return completions
+	return completions[:COUNT]
 
 def time_millis():
 	return int(round(time.time()*1000))
@@ -216,6 +220,8 @@ if(args.mode == M_INT):
 		last_w = ''
 		second_last_w = ''
 		third_last_w = ''
+
+		start_time_inter = time_millis()
 		if len(in_words) == 0:
 			continue
 		elif len(in_words) == 1:
@@ -240,12 +246,19 @@ if(args.mode == M_INT):
 		else:
 			print("Partial word detected.\n")
 		
-		completions = [c[0] for c in get_completions(
-			partial=last_w, last=second_last_w, second_last=third_last_w)]
-		
+		try:
+			# what order is this grabbing the completion predictions?
+			# I think it is most common completions by count
+			completions = [c[0] for c in get_completions(
+				partial=last_w, last=second_last_w, second_last=third_last_w)]
+		except KeyError:
+			print("Word not found. \n")
+			continue
+
 		if len(completions) > 1 or (len(completions)==1 and completions[0] != last_w):
 			print("Here are the word completion predictions:")
 			print(', '.join(completions))
+			print('\n processing time: ' + str(time_millis() - start_time_inter) + "ms")
 			print()
 
 # Train and evaluate algorithm on brown data
