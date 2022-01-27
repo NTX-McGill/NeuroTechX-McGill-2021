@@ -44,6 +44,7 @@ def openbci_start():
     # use a separate process to stream BCI data
     from dcp.bci.stream import stream_bci_api
     from multiprocessing import Process
+    from flask import session
     with current_app.app_context():
         # Although the subprocess gets initialized inside this scope, it will persist
         # bci_processes_states references this subprocess_dict
@@ -56,10 +57,10 @@ def openbci_start():
                     'state': None
                 }), 'q': shared.manager.Queue()}
         # only pass this subprocess dict to ensure that locks are not too contentious
-        p = Process(target=stream_bci_api, args=(subprocess_dict['params'],))
+        p = Process(target=stream_bci_api, args=(subprocess_dict,))
         # need to start process before referencing it to obtain the right process_id
         p.start()
-        shared.bci_processes_states[p.pid] = subprocess_dict['params']
+        session[p.pid] = subprocess_dict
     while subprocess_dict['params']['state'] != 'ready' or subprocess_dict['params']['bci_config'] == None:
         print('BCI NOT READY YET')
         time.sleep(1)
@@ -81,7 +82,7 @@ def openbci_process_collect_start(process_id:int):
     # We now know that the request contains all the keys
     if process_id not in shared.bci_processes_states:
         return {'Invalid Request': 'There is no process with this id, make sure your process id is valid'}, 404
-    subprocess_dict['params'] = shared.bci_processes_states[process_id]
+    subprocess_dict = shared.bci_processes_states[process_id]
     try:
         subprocess_dict['params']['character'] = data.get('character')
         subprocess_dict['params']['frequency'] = float(data.get('frequency'))
@@ -96,7 +97,7 @@ def openbci_process_collect_start(process_id:int):
 def openbci_process_collect_stop(process_id:int):
     if process_id not in shared.bci_processes_states:
         return {'Invalid Request': 'There is no process with this id, make sure your process id is valid'}, 404
-    subprocess_dict['params'] = shared.bci_processes_states[process_id]
+    subprocess_dict = shared.bci_processes_states[process_id]
     subprocess_dict['params']['state'] = 'ready'
 
     # write to database 
@@ -114,7 +115,7 @@ def openbci_process_collect_stop(process_id:int):
 def openbci_stop(process_id: int):
     if process_id not in shared.bci_processes_states:
         return {'Invalid Request': 'There is no process with this id, make sure your process id is valid'}, 404
-    subprocess_dict['params'] = shared.bci_processes_states[process_id]
+    subprocess_dict = shared.bci_processes_states[process_id]
     if subprocess_dict['params']['state'] == 'collect':
         subprocess_dict['params']['state'] = 'stop'
         return {"error": f"stopped bci process while it was collecting, data was not written for character {subprocess_dict['character']}"}, 400
