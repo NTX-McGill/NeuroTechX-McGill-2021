@@ -62,7 +62,7 @@ def openbci_start():
         p.start()
         shared.bci_processes_states[p.pid] = subprocess_dict
     while subprocess_dict['state'] != 'ready' or subprocess_dict['bci_config'] == None:
-        print('BCI NOT READY YET')
+        current_app.logger.info('BCI NOT READY YET')
         time.sleep(1)
     config = OpenBCIConfig(configuration=subprocess_dict['bci_config'])
     db.session.add(config)
@@ -161,6 +161,6 @@ def write_stream_data(subprocess_dict):
     db.session.add_all(collected_data)
     db.session.commit()
     if len(collected_data) > 0:
-        print("Successfully wrote {} samples.".format(len(collected_data)))
+        current_app.logger.info("Successfully wrote {} samples.".format(len(collected_data)))
         return True
     return False
