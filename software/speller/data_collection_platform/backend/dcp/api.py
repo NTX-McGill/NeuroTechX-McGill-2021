@@ -64,6 +64,7 @@ def openbci_start():
     start = time.time()
     while subprocess_dict['state'] != 'ready' or subprocess_dict['bci_config'] == None:
         if (time.time()-start) > 10:
+            p.kill()
             return {"error_message": "server timeout"}, 408
     config = OpenBCIConfig(configuration=subprocess_dict['bci_config'])
     db.session.add(config)
