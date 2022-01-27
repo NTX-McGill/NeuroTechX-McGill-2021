@@ -1,0 +1,10 @@
+Confusing things:
+
+Enter word or partial word: m
+Whole word detected. Here are the top next word predictions:
+de, m, mb
+
+Here are the word completion predictions:
+may, my, more
+
+ processing time: 21ms

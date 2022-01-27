@@ -145,6 +145,7 @@ def get_completions(partial, last = '', second_last = ''):
 		# removes first prediction if it is the same as the input word
 		if completions[0][0] == partial:
 			completions.pop(0)
+	# print(completions)
 
 	# completions is a sorted list of (word, ngram-count) tuples
 	return completions[:COUNT]
@@ -169,7 +170,6 @@ def get_predictions(last = '', second_last = '', N_PREDS=3):
 							if "_count" in ngrams[last][k]],
 							key=lambda k: ngrams[last][k]["_count"],
 							reverse=True)[:N_PREDS]
-	
 	return preds
 
 # Generate structures from struct_file and evaluate on raw_words
@@ -208,7 +208,7 @@ if(args.mode == M_INT):
 	print("Generating structures...")
 	start_millis = time_millis()
 	gen_trie("words")
-	gen_ngrams(dirname="train_english")
+	gen_ngrams(dirname="train_big")
 	gen_ngrams()
 
 	print("Generating structures took " + str((time_millis() - start_millis)) + "ms")
