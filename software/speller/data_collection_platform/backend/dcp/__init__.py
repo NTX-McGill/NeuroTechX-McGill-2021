@@ -27,7 +27,7 @@ def create_app():
         app.register_blueprint(api.bp)
 
         # importing models so that Flask-Migrate can detect them
-        from dcp.models.configurations import OpenBCIConfig
+        from dcp.models.collection import BCICollection
         from dcp.models.data import CollectedData
 
         # # initialize extensions
