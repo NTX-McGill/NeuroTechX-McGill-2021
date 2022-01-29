@@ -8,10 +8,10 @@ This code is based on
 
 from re import sub
 from pylsl import StreamInlet, resolve_stream
+import dcp.mp.shared as shared
 import time 
 import logging
 import os
-from collections import deque
 
 log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.realpath(__file__)))), "logs",
                         "bci.log")
@@ -41,19 +41,16 @@ def stream_bci_api(subprocess_dict):
     # this machine
     inlet.time_correction()
     subprocess_dict['state'] = 'ready'
-    queue = deque()
 
     while subprocess_dict['state'] != 'stop':
         samples, _timestamps = inlet.pull_chunk()
         if not samples or subprocess_dict['state'] != 'collect':
             continue
 
-        queue.append(samples)
-        subprocess_dict['q'] = queue
-
+        shared.queue.put_nowait(samples)
         logger.info(samples)
 
-    logger.info("no longer running")
+    logger.info("Finished collecting BCI data.")
     return 'success'
 
 
@@ -101,7 +98,3 @@ if __name__ == '__main__':
     duration = 5
     inlet = connect_to_bci()
     testLSLSamplingRate(inlet, duration)
-    # while True:
-    #     chunk, timestamp = inlet.pull_chunk()
-    #     if chunk:
-    #         print('got chunk')
