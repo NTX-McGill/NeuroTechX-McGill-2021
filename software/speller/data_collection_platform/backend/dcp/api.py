@@ -65,6 +65,7 @@ def openbci_start():
             p.kill()
             return {"error_message": "Server timeout"}, 408
 
+
     config = OpenBCIConfig(configuration=subprocess_dict['bci_config'])
     db.session.add(config)
     db.session.commit()
