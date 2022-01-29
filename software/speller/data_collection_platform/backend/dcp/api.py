@@ -26,18 +26,13 @@ def validate_json(*fields):
 
             missing_fields = fields - request.json.keys()
             if len(missing_fields) > 0:
-                return {'error':
+                return {'error_message':
                         f'Missing fields: {", ".join(missing_fields)}'}, 400
 
             return f(*args, **kwargs)
         return decorated
     return decorator
 
-
-@bp.route('/')
-def index():
-    # TODO return keyboard layout
-    return ' '
 
 @bp.route("/openbci/start", methods=['POST'])
 def openbci_start():
@@ -51,8 +46,7 @@ def openbci_start():
             'character': None,
             'phase': None,
             'frequency': None,
-            'q': deque(),
-            'config_id': None, 
+            'config_id': None,
             'bci_config': None,
             'state': None
         })
@@ -61,9 +55,17 @@ def openbci_start():
         # need to start process before referencing it to obtain the right process_id
         p.start()
         shared.bci_processes_states[p.pid] = subprocess_dict
+
+    BCI_CONNECT_TIMEOUT = 10
+    start = time.time()
     while subprocess_dict['state'] != 'ready' or subprocess_dict['bci_config'] == None:
-        current_app.logger.info('BCI NOT READY YET')
-        time.sleep(1)
+        current_app.logger.info("Trying to resolve BCI stream.")
+        if (time.time() - start) > BCI_CONNECT_TIMEOUT:
+            current_app.logger.info("BCI connection timeout, failed to resolve BCI stream.")
+            p.kill()
+            return {"error_message": "Server timeout"}, 408
+
+
     config = OpenBCIConfig(configuration=subprocess_dict['bci_config'])
     db.session.add(config)
     db.session.commit()
@@ -73,70 +75,78 @@ def openbci_start():
 
 
 @bp.route('/openbci/<int:process_id>/collect/start', methods=['POST'])
-def openbci_process_collect_start(process_id:int):
-    data = request.form
-    expected_keys = ['character', 'phase' ,'frequency']
-    for key in expected_keys:
-        if key not in request.form.keys():
-            return {'Invalid Request': 'Did not contain all attributes, make sure you send character, phase and frequency'}, 400
+def openbci_process_collect_start(process_id: int):
+    data = request.json()
+
     # We now know that the request contains all the keys
     if process_id not in shared.bci_processes_states:
-        return {'Invalid Request': 'There is no process with this id, make sure your process id is valid'}, 404
+        return {'error_message': f'There is no process with id {process_id}, make sure your process id is valid'}, 404
     subprocess_dict = shared.bci_processes_states[process_id]
+
     try:
-        subprocess_dict['character'] = data.get('character')
-        subprocess_dict['frequency'] = float(data.get('frequency'))
-        subprocess_dict['phase'] = float(data.get('phase'))
-    except:
-        return {'Invalid Request': 'Could not convert post form data. Make sure the data is the correct type. (string for character, and float for phase and frequency)'}, 400
-    
+        subprocess_dict['character'] = data['character']
+        subprocess_dict['frequency'] = float(data['frequency'])
+        subprocess_dict['phase'] = float(data['phase'])
+    except KeyError as e:
+        return {'error_message': f'{e}. Could not convert post data into their respective types. Make sure the data is the correct type: string for character, and float for phase and frequency.'}, 400
+
     subprocess_dict['state'] = 'collect'
-    return {'Success': 'BCI is collecting'}, 201
+    current_app.logger.info(
+        f"BCI is collecting data for character \"{subprocess_dict['character']}\" with phase {subprocess_dict['phase']} and frequency {subprocess_dict['frequency']}.")
+
+    return {'success_message': 'BCI is collecting.'}, 201
+
 
 @bp.route('/openbci/<int:process_id>/collect/stop', methods=['POST'])
-def openbci_process_collect_stop(process_id:int):
+def openbci_process_collect_stop(process_id: int):
     if process_id not in shared.bci_processes_states:
-        return {'Invalid Request': 'There is no process with this id, make sure your process id is valid'}, 404
+        return {'error_message': 'There is no process with this id, make sure your process id is valid'}, 404
+
     subprocess_dict = shared.bci_processes_states[process_id]
     subprocess_dict['state'] = 'ready'
+    current_app.logger.info(f"Stopped collecting for character {subprocess_dict['character']}.")
+    current_app.logger.info(f"Writing collected data for character {subprocess_dict['character']} to the database.")
 
-    # write to database 
+    # write to database
     if not write_stream_data(subprocess_dict):
-        return {'result': "Did not write any new information to database, stopping collection"}, 202
+        return {'error_message': "Did not write any data to the database, make sure to call /openbci/<int:process_id>/collect/start before this route."}, 400
+
     # clear the subprocess_dict
     subprocess_dict['character'] = None
     subprocess_dict['frequency'] = None
     subprocess_dict['phase'] = None
-    subprocess_dict['q'] = deque()
 
-    return {'Success': 'BCI has stopped collecting, and the queue has been writen to the db'}, 201
+    return {'success_message': 'BCI has stopped collecting, and the queue has been written to the db'}, 201
+
 
 @bp.route("/openbci/<int:process_id>/stop", methods=['POST'])
 def openbci_stop(process_id: int):
+
     if process_id not in shared.bci_processes_states:
-        return {'Invalid Request': 'There is no process with this id, make sure your process id is valid'}, 404
+        return {'error_message': 'There is no process with this id, make sure your process id is valid'}, 404
+    
     subprocess_dict = shared.bci_processes_states[process_id]
     if subprocess_dict['state'] == 'collect':
         subprocess_dict['state'] = 'stop'
-        return {"error": f"stopped bci process while it was collecting, data was not written for character {subprocess_dict['character']}"}, 400
-    
+        return {"error_message": f"Stopped bci process while it was collecting, data was not written for character {subprocess_dict['character']}."}, 400
+
     subprocess_dict['state'] = 'stop'
-    if subprocess_dict['q']:
-        return {'warning': f"stopped bci process, however the queue for bci data was not empty, data for character {subprocess_dict['character']} might be incomplete"}, 400
-    shared.bci_processes_states.pop(process_id, None)
-    return {'success': f"ended subprocess with id {process_id}"}, 200
+    if not shared.queue.empty():
+        return {'error_message': f"Stopped bci process, however the queue for BCI data was not empty, data for character {subprocess_dict['character']} might be incomplete."}, 400
+    
+    shared.bci_processes_states.pop(process_id)
+
+    return {'success_message': f"Successfully ended BCI subprocess with id {process_id}"}, 200
+
 
 def write_stream_data(subprocess_dict):
     # ensure any remaining connections are flushed to avoid racing conditions
     db.engine.dispose()
     order = 1
-    queue = subprocess_dict['q']
     collected_data = []
-    while queue:
-        stream_data = queue.popleft()
+    while shared.queue:
+        stream_data = shared.queue.get_nowait()
         for row in stream_data:
-            if len(row) < 8:
-                raise Exception("BCI Data is not the right format")
             collected_data.append(
                 CollectedData(
                     channel_1=float(row[0]),
@@ -156,11 +166,9 @@ def write_stream_data(subprocess_dict):
             )
             order += 1
 
-    # logger.info(f"Collected data: {collected_data}")
-
     db.session.add_all(collected_data)
     db.session.commit()
     if len(collected_data) > 0:
-        current_app.logger.info("Successfully wrote {} samples.".format(len(collected_data)))
+        current_app.logger.info("Successfully wrote {} samples to the database.".format(len(collected_data)))
         return True
     return False
