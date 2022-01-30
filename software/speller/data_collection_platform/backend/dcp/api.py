@@ -60,6 +60,7 @@ def openbci_start():
     start = time.time()
     while subprocess_dict['state'] != 'ready' or subprocess_dict['bci_config'] == None:
         current_app.logger.info("Trying to resolve BCI stream.")
+        time.sleep(1)
         if (time.time() - start) > BCI_CONNECT_TIMEOUT:
             current_app.logger.info("BCI connection timeout, failed to resolve BCI stream.")
             p.kill()
@@ -118,7 +119,7 @@ def openbci_process_collect_stop(process_id: int):
     subprocess_dict['frequency'] = None
     subprocess_dict['phase'] = None
 
-    return {'success_message': 'BCI has stopped collecting, and the queue has been written to the db'}, 201
+    return {'success_message': 'BCI has stopped collecting, and the queue has been written to the database'}, 201
 
 
 @bp.route("/openbci/<int:process_id>/stop", methods=['POST'])
@@ -146,7 +147,7 @@ def write_stream_data(subprocess_dict):
     db.engine.dispose()
     order = 1
     collected_data = []
-    while shared.queue:
+    while not shared.queue.empty():
         stream_data = shared.queue.get_nowait()
         for row in stream_data:
             collected_data.append(
