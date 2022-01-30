@@ -3,7 +3,7 @@ from dcp import db
 from datetime import datetime
 
 from dcp.models.utils import auto_str
-from dcp.models.configurations import OpenBCIConfig
+from dcp.models.collection import BCICollection
 
 from sqlalchemy.orm import validates
 
@@ -23,8 +23,8 @@ class CollectedData(db.Model):
     channel_8 = db.Column(db.Float, nullable=False)
     collection_time = db.Column(db.DateTime(
         timezone=True), default=datetime.utcnow, nullable=False)
-    config_id = db.Column(db.Integer, db.ForeignKey(
-        OpenBCIConfig.id), nullable=False)
+    collection_id = db.Column(db.Integer, db.ForeignKey(
+        BCICollection.id), nullable=False)
     character = db.Column(db.String, nullable=False)
     frequency = db.Column(db.Float, nullable=False)
     phase = db.Column(db.Float, nullable=False)
