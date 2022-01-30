@@ -11,6 +11,24 @@ If you are setting up on Mac install the package use Homebrew to install this pa
     - *TODO create environment_windows.yml (for devs working on Windows)
     - For MacOS: `conda env create -f environment_macOS.yml`
 2. Create a `.env` file in the current directory (`software/speller/data_collection_platform/.env`). Its content can be found in the **#software** channel.
+## Database migrations
+
+We are using the [`Flask-Migrate`](https://flask-migrate.readthedocs.io/en/latest/) package to manage database migrations.
+
+At the beginning, we need to create a migration repository with the following command:
+
+```
+$ flask db init
+```
+
+This will add a migrations folder to your application. The contents of this folder need to be added to version control along with your other source files.
+
+Every time some modifies the database table, please generate a migration:
+
+```
+$ flask db migrate -m "Detail message about what has changed."
+```
+
 ## Running the application
 
 Prerequisite: A development or production database is running and healthy.

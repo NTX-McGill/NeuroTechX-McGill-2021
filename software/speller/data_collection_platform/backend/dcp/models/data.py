@@ -28,6 +28,7 @@ class CollectedData(db.Model):
     character = db.Column(db.String, nullable=False)
     frequency = db.Column(db.Float, nullable=False)
     phase = db.Column(db.Float, nullable=False)
+    order = db.Column(db.Integer, nullable=False)
 
     def __repr__(self):
         return str(self.__dict__)

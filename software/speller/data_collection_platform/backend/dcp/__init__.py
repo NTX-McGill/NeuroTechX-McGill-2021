@@ -17,6 +17,12 @@ cors = CORS()
 def create_app():
     app = Flask(__name__)
 
+    # configure logging
+    import logging
+    log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "logs",
+                        "app.log")
+    logging.basicConfig(filename=log_path,level=logging.DEBUG)
+
     app.config.from_object(app_configs)
 
     # create logs directory if not exists
