@@ -76,7 +76,7 @@ def openbci_start():
 
 @bp.route('/openbci/<int:process_id>/collect/start', methods=['POST'])
 def openbci_process_collect_start(process_id: int):
-    data = request.json()
+    data = request.json
 
     # We now know that the request contains all the keys
     if process_id not in shared.bci_processes_states:
@@ -88,7 +88,9 @@ def openbci_process_collect_start(process_id: int):
         subprocess_dict['frequency'] = float(data['frequency'])
         subprocess_dict['phase'] = float(data['phase'])
     except KeyError as e:
-        return {'error_message': f'{e}. Could not convert post data into their respective types. Make sure the data is the correct type: string for character, and float for phase and frequency.'}, 400
+        return {'error_message': f'Key {e} is missing from json.'}, 400
+    except ValueError as e:
+        return {'error_message': f'{e}. Make sure the data is the correct type: string for character, and float for phase and frequency.'}, 400
 
     subprocess_dict['state'] = 'collect'
     current_app.logger.info(
