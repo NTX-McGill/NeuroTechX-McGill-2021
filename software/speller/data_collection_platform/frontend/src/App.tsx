@@ -15,9 +15,11 @@ function App() {
       <div className={'grid-item'}>
         <Keyboard chartData={chartData} setChartData={setChartData} />
       </div>
+      {/*
       <div className={'grid-item'}>
         <LineGraph data={chartData} />
       </div>
+      */}
     </div>
   );
 }
