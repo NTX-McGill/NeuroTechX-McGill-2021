@@ -38,7 +38,7 @@ def validate_json(*fields):
 def openbci_start():
     
     try:
-        collector_name = request.json()["collector_name"]
+        collector_name = request.json["collector_name"]
     except KeyError as e:
         return {'error_message': f'{e}. The \"collector name\" attribute is missing from the json.'}, 400 
 
