@@ -205,12 +205,6 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
           setTimeout(async () => {
             if (this.state.running) {
-              try {
-                await stopBCI(this.processID)
-              }
-              catch (error) {
-                console.error(error);
-              }
               this.startCollection();
             }
           }, DURATION_REST);
@@ -221,7 +215,17 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     }, DURATION_HIGHLIGHT);
   }
 
-  start() {
+  async start() {
+
+    if (this.processID != -1){ 
+      try {
+        await stopBCI(this.processID)
+      }
+      catch (error) {
+        console.error(error);
+      }
+    }
+
     if (!this.state.running) {
       this.setState(
         {
