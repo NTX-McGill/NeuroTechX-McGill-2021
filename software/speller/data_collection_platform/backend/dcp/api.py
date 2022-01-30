@@ -7,7 +7,7 @@ from dcp import db
 from collections import deque
 import time
 from dcp.models.data import CollectedData
-from dcp.models.configurations import OpenBCIConfig
+from dcp.models.collection import BCICollection
 
 
 bp = Blueprint('api', __name__, url_prefix='/api')
@@ -36,6 +36,12 @@ def validate_json(*fields):
 
 @bp.route("/openbci/start", methods=['POST'])
 def openbci_start():
+    
+    try:
+        collector_name = request.json["collector_name"]
+    except KeyError as e:
+        return {'error_message': f'{e}. The \"collector name\" attribute is missing from the json.'}, 400 
+
     # use a separate process to stream BCI data
     from dcp.bci.stream import stream_bci_api
     from multiprocessing import Process
@@ -46,7 +52,7 @@ def openbci_start():
             'character': None,
             'phase': None,
             'frequency': None,
-            'config_id': None,
+            'collection_id': None,
             'bci_config': None,
             'state': None
         })
@@ -65,12 +71,11 @@ def openbci_start():
             current_app.logger.info("BCI connection timeout, failed to resolve BCI stream.")
             p.kill()
             return {"error_message": "Server timeout"}, 408
-
-
-    config = OpenBCIConfig(configuration=subprocess_dict['bci_config'])
-    db.session.add(config)
+    
+    collection = BCICollection(bci_configuration=subprocess_dict['bci_config'],collector_name=collector_name)
+    db.session.add(collection)
     db.session.commit()
-    subprocess_dict['config_id'] = config.id
+    subprocess_dict['collection_id'] = collection.id
     # once the subprocess is ready, return from call
     return {"data": {"pid": p.pid}}, 201
 
@@ -160,7 +165,7 @@ def write_stream_data(subprocess_dict):
                     channel_6=float(row[5]),
                     channel_7=float(row[6]),
                     channel_8=float(row[7]),
-                    config_id=subprocess_dict['config_id'],
+                    collection_id=subprocess_dict['collection_id'],
                     character=subprocess_dict['character'],
                     frequency=subprocess_dict['frequency'],
                     phase=subprocess_dict['phase'],
