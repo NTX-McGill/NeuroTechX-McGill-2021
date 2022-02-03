@@ -42,7 +42,6 @@ def predict(prefix):
     # autcomplete_options = this_word(prefix)
     autcomplete_options = this_word_given_last("my", "name")
 
-    # print("Recieved prefix:{} \n autocomplete options:{}".format(prefix, autcomplete_options))
 
 if __name__ == '__main__':
     

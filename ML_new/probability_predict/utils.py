@@ -20,17 +20,18 @@ def chunks(l, n):
 
 #load training corpus 
 def load_corpus(corpus_path): 
-    # corpus = os.path.join(os.path.dirname(__file__), 'big.txt')
+    '''
+    :param corpus_path: file path to where you have the downloaded corpus 
+    '''
     with open(corpus_path, 'r') as corpus:
         return str(corpus.read()) 
-        # train_models(str(bigtxtfile.read()))
-
+    
 #saving parameters from trained models
 def save_models(word_model, tuple_model, save_path):
     ''' 
-    :word_model: unique word count dict to save 
-    :tuple_model: (word a, word b) tuple count dict to save 
-    :save_path: location to save models 
+    :param word_model: unique word count dict to save 
+    :param tuple_model: (word a, word b) tuple count dict to save 
+    :param save_path: location to save models 
     '''
     pickle.dump({'words_model': word_model,
                  'word_tuples_model': tuple_model},
@@ -40,7 +41,7 @@ def save_models(word_model, tuple_model, save_path):
 #loads the pre-trained models for inference 
 def load_models(model_path): 
     ''' 
-    :model_path: location where pre-trained models are left
+    :param model_path: location where pre-trained models are left
     :returns: WORD_MODEL (unique word count dict) and WORD_TUPLES_MODEL (word a, word b) tuple count dict)
     '''
     mod = pickle.load(open(model_path, "rb"))
