@@ -51,13 +51,16 @@ def interactive_test_loop():
         if txt == "stop":
             print("Thank you for testing!") 
             exit() 
-        if txt == "stop":
-            print("Thank you for testing!") 
-            exit() 
+        if txt == "clear":
+            print("***RESET***")
+            prefix = []  
+            print("Please type your prefix: (write 'stop' if you want to stop testing and 'clear' if you want to erase everything)")
+            continue   
         prefix.append(txt)  
         print("-->", prefix)
         options = predict(prefix[-1])
         print("options:", options)
+
 
         '''
         TO DO: 
