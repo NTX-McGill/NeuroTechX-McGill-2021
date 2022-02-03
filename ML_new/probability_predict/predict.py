@@ -39,24 +39,55 @@ def this_word_given_last(prev_prefix, cur_prefix, top_n=3):
     return Counter(probable_words).most_common(top_n)
 
 def predict(prefix):
-    # autcomplete_options = this_word(prefix)
-    autcomplete_options = this_word_given_last("my", "name")
+    autcomplete_options = this_word(prefix)
+    # autcomplete_options = this_word_given_last("my", "name")
+    return autcomplete_options
 
+def interactive_test_loop():
+    prefix = []
+    print("Please type your prefix: (write 'stop' if you want to stop testing and 'clear' if you want to erase everything)") 
+    while True:
+        txt = input() 
+        if txt == "stop":
+            print("Thank you for testing!") 
+            exit() 
+        if txt == "stop":
+            print("Thank you for testing!") 
+            exit() 
+        prefix.append(txt)  
+        print("-->", prefix)
+        options = predict(prefix[-1])
+        print("options:", options)
+
+        '''
+        TO DO: 
+        1. Write cleaning function --> lowercase and strip non [a-z]  characters 
+        2. Cover all the autocompletion cases:  
+            2.1. user enters a single word --> this_word() 
+            2.2. user enters a second word --> this_word_given_last()
+            2.3. user enters a sentence --> break it up and decide how to handle 
+        3. Add a functionality for user to select the prefix (just for testing and later comparison) 
+        '''
+        # cleaned = clean_input(prefix)
+        # options = predict(cleaned)
+        
 
 if __name__ == '__main__':
-    
-    parser = argparse.ArgumentParser()
-    parser.add_argument("-m", type=str, default = '/Users/rebeccasalganik/Documents/School/NT/model_test2.pkl', help= "location for pre-trained model pickle")
-    parser.add_argument("-p", type=str, nargs='+', help="prefix to autocomplete")
-    parser.add_argument("-v", type=bool, help="verbose setting for testing", default=True)
-    args = parser.parse_args()
-    WORDS_MODEL, WORD_TUPLES_MODEL = load_models(args.m)
+    WORDS_MODEL, WORD_TUPLES_MODEL = load_models('/Users/rebeccasalganik/Documents/School/NT/model_test2.pkl')
+    interactive_test_loop()
 
-    if args.v: 
-        print("Prefix is: {}".format(args.p))
+    # parser = argparse.ArgumentParser()
+    # parser.add_argument("-m", type=str, default = '/Users/rebeccasalganik/Documents/School/NT/model_test2.pkl', help= "location for pre-trained model pickle")
+    # parser.add_argument("-p", type=str, nargs='+', help="prefix to autocomplete")
+    # parser.add_argument("-v", type=bool, help="verbose setting for testing", default=True)
+    # args = parser.parse_args()
+    # WORDS_MODEL, WORD_TUPLES_MODEL = load_models(args.m)
+
+    # if args.v: 
+    #     print("Prefix is: {}".format(args.p))
     
-    prefix = process_input_prefix(args.p)
-    print("cleaned prefix", prefix)
+    # prefix = process_input_prefix(args.p)
+    # print("cleaned prefix", prefix)
 
     # predict('na')
 #     # prefix = process_input_prefix(args.p)
