@@ -1,0 +1,18 @@
+A set of test words for competition
+
+# common phrases #
+i
+y
+you
+can i 
+yester
+tomorrow i will go 
+two
+
+# edge cases #
+NeurotechX
+wordle
+Rebecca (or any other proper noun)
+xylophones (uncommon words)
+fg (typos)
+
