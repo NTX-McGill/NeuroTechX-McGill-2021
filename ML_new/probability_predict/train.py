@@ -42,4 +42,5 @@ def train_model(corpus_path, save_path=None, verbose=False):
         print("Saved models to {}".format(save_path))
 
 save_path = '/Users/rebeccasalganik/Documents/School/NT/model_test2.pkl'
-train_model('/Users/rebeccasalganik/Documents/School/NT/NeuroTechX-McGill-2021/ML_new/text.txt', save_path, verbose=True)
+data_path = '/Users/rebeccasalganik/Documents/School/NT/NeuroTechX-McGill-2021/ML_new/text.txt'
+train_model(data_path, save_path, verbose=True)
