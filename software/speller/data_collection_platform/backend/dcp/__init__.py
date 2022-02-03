@@ -21,6 +21,11 @@ def create_app():
     import logging
     log_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "logs",
                         "app.log")
+
+    os.makedirs(os.path.dirname(log_path), exist_ok=True)
+    file = open(log_path, "w+")
+    file.close()
+
     logging.basicConfig(filename=log_path,level=logging.DEBUG)
 
     app.config.from_object(app_configs)

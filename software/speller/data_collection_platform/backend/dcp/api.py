@@ -40,7 +40,7 @@ def openbci_start():
     try:
         collector_name = request.json["collector_name"]
     except KeyError as e:
-        return {'error_message': f'{e}. The \"collector name\" attribute is missing from the json.'}, 400 
+        return {'error_message': f'{e}. The \"collector_name\" attribute is missing from the json.'}, 400 
 
     # use a separate process to stream BCI data
     from dcp.bci.stream import stream_bci_api
