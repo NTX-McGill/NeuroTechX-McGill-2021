@@ -165,7 +165,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     if(unFlashedKeys.length === 0){
       try {
         await stopBCI(this.processID)
-        this.state.running = false;
+        this.setState({running: false});
         return;
       }
       catch (error) {
