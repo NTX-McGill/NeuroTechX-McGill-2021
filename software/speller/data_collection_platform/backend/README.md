@@ -66,12 +66,11 @@ For example:
 ## Development database
 TODO: Update this part
 
-In order to not corrupt the production database, we should use a development database when developing the application. There are two options to setup such database locally: 
-1.  Using docker: ``docker run --name <my-db-name> -p 5432:5432 -e POSTGRES_PASSWORD=mysecretpassword -d postgres``
-    - Altertive: Install the PostgreSQL server [here](https://www.postgresql.org/download/)
-
-Then update the `DB_USERNAME`, `DB_PASSWORD` and `DATABASE_URL` to the configurations of your local database. 
-For example, if I used docker to start a postgres server on my local machine, then I would have in my `.env` file:
-- DB_USERNAME=postgres
-- DB_PASSWORD=mysecretpassword
-- DATABASE_URL=postgresql://${DB_USERNAME}:${DB_PASSWORD}@localhost:5432/postgres
+In order to not corrupt the production database, we should use a development database when developing the application. The database credentials can be found on the `software` channel on Slack - put them inside of a file called `.env` at the `software/speller/data_collection_platform/backend` directory. There are two options to setup such database locally: 
+1.  Using docker: 
+```
+cd software/speller/data_collection_platform/backend
+source .env
+docker run --name db -p ${DEV_DB_PORT}:5432 -e POSTGRES_USER=${DEV_DB_USERNAME} -e POSTGRES_PASSWORD=${DEV_DB_PASSWORD} --restart=always -d postgres 
+```
+2. Altertive: Install the PostgreSQL server [here](https://www.postgresql.org/download/) and run the database server locally
