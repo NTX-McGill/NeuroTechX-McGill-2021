@@ -51,7 +51,7 @@ $ flask run
 The database credentials can be found on the `software` channel on Slack - put them inside of a file called `.env` at the `software/speller/data_collection_platform/backend` directory. Then using the `psql` CLI to connect to the database:
 ```
 source .env
-psql --host=${AWS_RDS_URL} --port=${AWS_RDS_PORT} --username=${DB_USERNAME} --dbname=${DB_NAME}
+psql ${DATABASE_URL}
 ```
 
 Alternatively, see https://flask-sqlalchemy.palletsprojects.com/en/2.x/quickstart/#a-minimal-application to interact with the database using python.
@@ -64,7 +64,6 @@ For example:
 ```
 
 ## Development database
-TODO: Update this part
 
 In order to not corrupt the production database, we should use a development database when developing the application. The database credentials can be found on the `software` channel on Slack - put them inside of a file called `.env` at the `software/speller/data_collection_platform/backend` directory. There are two options to setup such database locally: 
 1.  Using docker: 
