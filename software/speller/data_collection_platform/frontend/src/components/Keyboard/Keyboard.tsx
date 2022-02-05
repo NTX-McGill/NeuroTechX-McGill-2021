@@ -144,7 +144,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
     if (this.processID === -1) {
       try {
-        this.processID = (await startBCI(this.collectorName)).data.pid
+        this.processID = (await startBCI(this.collectorName)).data.data.pid
         console.log(this.processID)
       }
       catch (error) {
@@ -161,8 +161,17 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     newState[randKey].color = COLOR_HIGHLIGHT_START;
 
     const unFlashedKeys = this.state.unFlashedKeys;
+    if(unFlashedKeys.length === 0){
+      try {
+        await stopBCI(this.processID)
+        return;
+      }
+      catch (error) {
+        console.error(error);
+      }
+    }
     unFlashedKeys.splice(randIdx, 1);
-
+    
     this.setState({ keys: newState, unFlashedKeys });
 
     this.keyFlashing = randKey;
@@ -219,15 +228,6 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   }
 
   async start() {
-
-    if (this.processID != -1){ 
-      try {
-        await stopBCI(this.processID)
-      }
-      catch (error) {
-        console.error(error);
-      }
-    }
 
     if (!this.state.running) {
       this.setState(
