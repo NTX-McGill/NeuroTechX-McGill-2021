@@ -21,9 +21,8 @@ logging.basicConfig(filename=log_path,
                     format="%(asctime)s %(name)s %(levelname)s %(message)s")
 
 logger = logging.getLogger(__name__)
-logger.info('test logger')
 
-def stream_bci_api(subprocess_dict): 
+def stream_bci_api(subprocess_dict, queue): 
 
     logger.info('Attempting to initialize stream')
 
@@ -47,7 +46,7 @@ def stream_bci_api(subprocess_dict):
         if not samples or subprocess_dict['state'] != 'collect':
             continue
 
-        shared.queue.put_nowait(samples)
+        queue.put_nowait(samples)
         logger.info(samples)
 
     logger.info("Finished collecting BCI data.")

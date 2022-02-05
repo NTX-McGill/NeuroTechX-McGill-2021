@@ -49,7 +49,8 @@ def openbci_start():
     with current_app.app_context():
         # Although the subprocess gets initialized inside this scope, it will persist
         # bci_processes_states references this subprocess_dict
-        subprocess_dict = shared.manager.dict({
+        shared.initialize_queue()
+        subprocess_dict = shared.get_manager().dict({
             'character': None,
             'phase': None,
             'frequency': None,
@@ -58,10 +59,10 @@ def openbci_start():
             'state': None
         })
         # only pass this subprocess dict to ensure that locks are not too contentious
-        p = Process(target=stream_bci_api, args=(subprocess_dict,))
+        p = Process(target=stream_bci_api, args=(subprocess_dict,shared.queue))
         # need to start process before referencing it to obtain the right process_id
         p.start()
-        shared.bci_processes_states[p.pid] = subprocess_dict
+        shared.get_bci_processes_states()[p.pid] = subprocess_dict
 
     BCI_CONNECT_TIMEOUT = 10
     start = time.time()
@@ -86,9 +87,9 @@ def openbci_process_collect_start(process_id: int):
     data = request.json
 
     # We now know that the request contains all the keys
-    if process_id not in shared.bci_processes_states:
+    if process_id not in shared.get_bci_processes_states():
         return {'error_message': f'There is no process with id {process_id}, make sure your process id is valid'}, 404
-    subprocess_dict = shared.bci_processes_states[process_id]
+    subprocess_dict = shared.get_bci_processes_states()[process_id]
 
     try:
         subprocess_dict['character'] = data['character']
@@ -108,10 +109,10 @@ def openbci_process_collect_start(process_id: int):
 
 @bp.route('/openbci/<int:process_id>/collect/stop', methods=['POST'])
 def openbci_process_collect_stop(process_id: int):
-    if process_id not in shared.bci_processes_states:
+    if process_id not in shared.get_bci_processes_states():
         return {'error_message': 'There is no process with this id, make sure your process id is valid'}, 404
 
-    subprocess_dict = shared.bci_processes_states[process_id]
+    subprocess_dict = shared.get_bci_processes_states()[process_id]
     subprocess_dict['state'] = 'ready'
     current_app.logger.info(f"Stopped collecting for character {subprocess_dict['character']}.")
     current_app.logger.info(f"Writing collected data for character {subprocess_dict['character']} to the database.")
@@ -131,10 +132,10 @@ def openbci_process_collect_stop(process_id: int):
 @bp.route("/openbci/<int:process_id>/stop", methods=['POST'])
 def openbci_stop(process_id: int):
 
-    if process_id not in shared.bci_processes_states:
+    if process_id not in shared.get_bci_processes_states():
         return {'error_message': 'There is no process with this id, make sure your process id is valid'}, 404
     
-    subprocess_dict = shared.bci_processes_states[process_id]
+    subprocess_dict = shared.get_bci_processes_states()[process_id]
     if subprocess_dict['state'] == 'collect':
         subprocess_dict['state'] = 'stop'
         return {"error_message": f"Stopped bci process while it was collecting, data was not written for character {subprocess_dict['character']}."}, 400
@@ -143,7 +144,7 @@ def openbci_stop(process_id: int):
     if not shared.queue.empty():
         return {'error_message': f"Stopped bci process, however the queue for BCI data was not empty, data for character {subprocess_dict['character']} might be incomplete."}, 400
     
-    shared.bci_processes_states.pop(process_id)
+    shared.get_bci_processes_states().pop(process_id)
 
     return {'success_message': f"Successfully ended BCI subprocess with id {process_id}"}, 200
 
