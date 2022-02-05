@@ -73,4 +73,4 @@ cd software/speller/data_collection_platform/backend
 source .env
 docker run --name db -p ${DEV_DB_PORT}:5432 -e POSTGRES_USER=${DEV_DB_USERNAME} -e POSTGRES_PASSWORD=${DEV_DB_PASSWORD} --restart=always -d postgres 
 ```
-2. Altertive: Install the PostgreSQL server [here](https://www.postgresql.org/download/) and run the database server locally
+2. Running PostgreSQL locally: Install the PostgreSQL server [here](https://www.postgresql.org/download/) and run the database server locally
