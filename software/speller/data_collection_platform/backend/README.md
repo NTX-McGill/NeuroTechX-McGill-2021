@@ -47,10 +47,12 @@ $ flask run
 
 
 ## Connecting to the database
-TODO: Update this part
 
-The database credentials can be found on the `software` channel on Slack.
-One can use the `psql` CLI to connect to the database: `psql --host=neurotech-db.postgres.database.azure.com --port=5432 --username=neurotech@neurotech-db --dbname=postgres`
+The database credentials can be found on the `software` channel on Slack - put them inside of a file called `.env` at the `software/speller/data_collection_platform/backend` directory. Then using the `psql` CLI to connect to the database:
+```
+source .env
+psql --host=${AWS_RDS_URL} --port=${AWS_RDS_PORT} --username=${DB_USERNAME} --dbname=${DB_NAME}
+```
 
 Alternatively, see https://flask-sqlalchemy.palletsprojects.com/en/2.x/quickstart/#a-minimal-application to interact with the database using python.
 
