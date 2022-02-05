@@ -39,6 +39,7 @@ def openbci_start():
     
     try:
         collector_name = request.json["collector_name"]
+        current_app.logger.info(f"Current collect name is: {collector_name}.")
     except KeyError as e:
         return {'error_message': f'{e}. The \"collector_name\" attribute is missing from the json.'}, 400 
 

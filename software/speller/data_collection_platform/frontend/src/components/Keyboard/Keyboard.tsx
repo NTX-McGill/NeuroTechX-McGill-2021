@@ -31,6 +31,7 @@ interface KeyboardState {
   running: boolean;
   unFlashedKeys: string[];
   numRoundsCollected: number;
+  collectorName: string;
 }
 
 interface KeyboardProps {
@@ -47,8 +48,6 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
   callback: Function;
 
-  collectorName: string;
-
   plot: any[];
 
   processID: number;
@@ -62,6 +61,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
       keys: {} as KeyMap,
       numRoundsCollected: 0,
       unFlashedKeys: [] as string[],
+      collectorName: "",
     };
     this.keyFlashing = '';
     this.startTime = -1;
@@ -69,12 +69,13 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     this.callback = () => {};
     this.plot = props.chartData;
     this.processID = -1;
-    this.collectorName = "Steve"
     for (let val in Object.keys(config)) {
       let temp = {...this.listRefs}
       temp[Object.keys(config)[val]] = React.createRef()
       this.listRefs = temp
     }
+
+    this.onNameChange = this.onNameChange.bind(this);
   }
 
   hexToRGBA(hex: string, alpha: string) {
@@ -144,7 +145,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
     if (this.processID === -1) {
       try {
-        this.processID = (await startBCI(this.collectorName)).data.data.pid
+        this.processID = (await startBCI(this.state.collectorName)).data.data.pid
         console.log(this.processID)
       }
       catch (error) {
@@ -320,6 +321,10 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     return !this.state.running ? COLOR_RUN : COLOR_STOP;
   }
 
+  onNameChange(e:  React.FormEvent<HTMLInputElement>) {
+    this.setState({collectorName: e.currentTarget.value});
+  }
+
   render() {
     return (
       <div className={'keyboard'}>
@@ -333,6 +338,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
           className="toggle"
           style={{ background: this.getToggleColor() }}
           onClick={this.start.bind(this)}
+          disabled={!!!this.state.collectorName}
         >
           {this.state.running
             ? 'Stop'
@@ -340,6 +346,9 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
             ? 'Collect Again'
             : 'Start'}
         </button>
+        
+        <input value={this.state.collectorName} onChange={this.onNameChange} />
+        
       </div>
     );
   }
