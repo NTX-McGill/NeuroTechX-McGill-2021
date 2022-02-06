@@ -37,6 +37,10 @@ def validate_json(*fields):
 @bp.route("/openbci/start", methods=['POST'])
 def openbci_start():
     
+    # TODO handle case where json is empty and return error
+    if request.json is None:
+        return {"error_message": "A json object with attributed 'collector_name' must be submitted"}, 400
+
     try:
         collector_name = request.json["collector_name"]
         current_app.logger.info(f"Current collect name is: {collector_name}.")
@@ -58,6 +62,7 @@ def openbci_start():
             'bci_config': None,
             'state': None
         })
+        
         # only pass this subprocess dict to ensure that locks are not too contentious
         p = Process(target=stream_bci_api, args=(subprocess_dict,shared.queue))
         # need to start process before referencing it to obtain the right process_id

@@ -9,6 +9,6 @@ class BCICollection(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     bci_configuration = db.Column(db.Text, nullable=False)
     collector_name = db.Column(db.Text, nullable=False)
-
+    
     def __repr__(self):
         return str(self.__dict__)
