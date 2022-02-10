@@ -1,6 +1,6 @@
 from utils import NEARBY_KEYS, load_models, process_input_prefix
 from collections import Counter 
-import sys 
+import sys, os 
 import argparse 
 
 def this_word(prefix, top_n=3):
@@ -76,7 +76,20 @@ def interactive_test_loop():
         
 
 if __name__ == '__main__':
-    WORDS_MODEL, WORD_TUPLES_MODEL = load_models('/Users/rebeccasalganik/Documents/School/NT/model_test2.pkl')
+
+    '''
+    run in probability_predict as working directory
+    example command used: python predict.py -m model_test2.pk1
+    '''
+
+    PATH = os.path.dirname(os.path.realpath(__file__))
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-m", "--model", help="relative data path for model file")
+    args = parser.parse_args()
+    model_file = str(args.model)
+
+    WORDS_MODEL, WORD_TUPLES_MODEL = load_models(os.path.join(PATH, model_file))
     interactive_test_loop()
 
     # parser = argparse.ArgumentParser()

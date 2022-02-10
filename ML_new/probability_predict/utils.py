@@ -23,7 +23,7 @@ def load_corpus(corpus_path):
     '''
     :param corpus_path: file path to where you have the downloaded corpus 
     '''
-    with open(corpus_path, 'r') as corpus:
+    with open(corpus_path, 'r', encoding='utf-8') as corpus:
         return str(corpus.read()) 
     
 #saving parameters from trained models
