@@ -11,16 +11,17 @@ import {startBCI, stopBCI, startCollectingKey, stopCollectingKey} from '../../ap
 
 const COLOR_DEFAULT = '#000000';
 const COLOR_HIGHLIGHT_START = '#ff0000';
-const COLOR_HIGHLIGHT_STOP = '#0000ff';
+const COLOR_HIGHLIGHT_STOP = '#000000';
 
-const WIDTH_DEFAULT = '3.3rem';
+const WIDTH_DEFAULT = '5rem';
 
 const COLOR_RUN = '#2ede28';
 const COLOR_STOP = '#ff0000';
 
-const DURATION_HIGHLIGHT = 1000;
-const DURATION_FLASHING = 15000;
-const DURATION_REST = 1000;
+const DURATION_HIGHLIGHT_START = 2000;
+const DURATION_HIGHLIGHT_STOP = 100;
+const DURATION_FLASHING = 5000;
+const DURATION_REST = 100;
 
 interface KeyMap {
   [key: string]: KeyProps;
@@ -222,11 +223,11 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
               this.startCollection();
             }
           }, DURATION_REST);
-        }, DURATION_HIGHLIGHT);
+        }, DURATION_HIGHLIGHT_STOP);
       };
 
       this.startFlash();
-    }, DURATION_HIGHLIGHT);
+    }, DURATION_HIGHLIGHT_START);
   }
 
   async start() {
