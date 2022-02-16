@@ -20,14 +20,20 @@ def create_app():
     app.config.from_object(app_configs)
 
     # create logs directory if not exists
-    os.makedirs(os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "logs"), exist_ok=True)
+    logs_path = os.path.join(os.path.dirname(os.path.dirname(os.path.realpath(__file__))), "logs")
+    os.makedirs(logs_path, exist_ok=True)
+
+    # configure logging
+    import logging
+    log_path = os.path.join(logs_path, "dcp.log")
+    logging.basicConfig(filename=log_path,level=logging.DEBUG)
 
     with app.app_context():
         from dcp import api
         app.register_blueprint(api.bp)
 
         # importing models so that Flask-Migrate can detect them
-        from dcp.models.configurations import OpenBCIConfig
+        from dcp.models.collection import BCICollection
         from dcp.models.data import CollectedData
 
         # # initialize extensions
