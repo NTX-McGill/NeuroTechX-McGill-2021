@@ -65,7 +65,7 @@ def main():
                            template=test_template, sampling_rate=250)
     print(r)
     """
-    all_channels = [47, 53, 54, 55, 56, 57, 60, 61, 62]
+    all_channels = [47, 53, 54, 55, 56, 57, 60, 61, 62] # 64 channels, index: 0-63
     # all_channels = [i for i in range(64)]
     mean, std = cross_validate_fbcca(data=data, channels=all_channels, num_harmonics=5, data_length=2)
     print(mean, std)
