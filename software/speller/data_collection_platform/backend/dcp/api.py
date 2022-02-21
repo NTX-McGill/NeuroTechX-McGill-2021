@@ -1,3 +1,4 @@
+from datetime import datetime
 from functools import wraps
 from flask import Blueprint, request, current_app
 import os
@@ -150,6 +151,10 @@ def openbci_stop(process_id: int):
         return {'error_message': f"Stopped bci process, however the queue for BCI data was not empty, data for character {subprocess_dict['character']} might be incomplete."}, 400
     
     shared.get_bci_processes_states().pop(process_id)
+
+    collection = db.session.query(BCICollection).get(subprocess_dict['collection_id'])
+    collection.collection_end_time = datetime.utcnow()
+    db.session.commit()
 
     return {'success_message': f"Successfully ended BCI subprocess with id {process_id}"}, 200
 
