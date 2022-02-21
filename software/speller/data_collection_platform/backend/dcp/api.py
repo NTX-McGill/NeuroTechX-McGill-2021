@@ -149,12 +149,12 @@ def openbci_stop(process_id: int):
     subprocess_dict['state'] = 'stop'
     if not shared.queue.empty():
         return {'error_message': f"Stopped bci process, however the queue for BCI data was not empty, data for character {subprocess_dict['character']} might be incomplete."}, 400
-    
-    shared.get_bci_processes_states().pop(process_id)
-
+        
     collection = db.session.query(BCICollection).get(subprocess_dict['collection_id'])
     collection.collection_end_time = datetime.utcnow()
     db.session.commit()
+
+    shared.get_bci_processes_states().pop(process_id)
 
     return {'success_message': f"Successfully ended BCI subprocess with id {process_id}"}, 200
 
