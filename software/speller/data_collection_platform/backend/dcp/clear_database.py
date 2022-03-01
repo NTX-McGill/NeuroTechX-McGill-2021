@@ -11,7 +11,7 @@ from dcp.models.collection import BCICollection
 usersbp = Blueprint('users', __name__)
 
 
-@usersbp.cli.command('clear')
+@usersbp.cli.command('cleardb')
 def cleardb():
     db.session.query(CollectedData).delete()
     db.session.query(BCICollection).delete()
