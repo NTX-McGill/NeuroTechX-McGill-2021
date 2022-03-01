@@ -42,6 +42,7 @@ def create_app():
         db.create_all()  # creates all db tables (NOTE: will not recreate tables that already exist)
         migrate.init_app(app, db)
 
+        # Added blueprint for clearing the database
         from .clear_database import usersbp
         app.register_blueprint(usersbp)
 
