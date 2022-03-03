@@ -1,4 +1,4 @@
-from utils import NEARBY_KEYS, load_models, process_input_prefix
+from utils import NEARBY_KEYS, load_models, process_input_prefix, clean_and_parse
 from collections import Counter 
 import sys, os 
 import argparse 
@@ -46,17 +46,22 @@ def predict(prefix):
 def interactive_test_loop():
     prefix = []
     print("Please type your prefix: (write 'stop' if you want to stop testing and 'clear' if you want to erase everything)") 
+
+
     while True:
-        txt = input() 
-        if txt == "stop":
+        txt = input()
+        cleaned, last_space = clean_and_parse(txt)
+        print("result of cleaner: ", cleaned, last_space)
+
+        if cleaned == ["stop"]:
             print("Thank you for testing!") 
             exit() 
-        if txt == "clear":
+        if cleaned == ["clear"]:
             print("***RESET***")
             prefix = []  
             print("Please type your prefix: (write 'stop' if you want to stop testing and 'clear' if you want to erase everything)")
             continue   
-        prefix.append(txt)  
+        prefix.extend(cleaned)  
         print("-->", prefix)
         options = predict(prefix[-1])
         print("options:", options)

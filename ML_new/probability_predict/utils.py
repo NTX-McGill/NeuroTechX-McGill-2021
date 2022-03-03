@@ -64,6 +64,15 @@ def process_input_prefix(prefix):
 #     args = parser.parse_args()
 #     print(args.echo)
 
+def clean_and_parse(input):
+
+    last_space = True if input[-1:] == " " else False
+    if last_space:
+        input = input[0:-1]
+    split = input.split(" ")
+
+    return ([clean(s) for s in split], last_space)
+
 
 #Used to define potential mistakes for last letter of prefix to autocomplete 
 NEARBY_KEYS = {
