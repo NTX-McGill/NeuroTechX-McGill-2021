@@ -5,7 +5,7 @@
 
 **Frequency configurations**
 
-- ***A***: 8.00-15.75 Hz (inclusive), steps of 0.25 Hz
+- ***A***: 8.00-15.75 Hz (inclusive), steps of 0.25 Hz, excluding 12 Hz
 - ***B***: 5.10-12.85 Hz (inclusive), steps of 0.25 Hz
 - ***C***: 5.85-10.65 Hz (inclusive), steps of 0.16 Hz
 
