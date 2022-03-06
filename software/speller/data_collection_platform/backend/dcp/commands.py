@@ -8,10 +8,13 @@ from dcp.models.data import CollectedData
 from dcp.models.collection import BCICollection
 
 
-usersbp = Blueprint('users', __name__)
+# Custom flask commands blueprint
+commands_bp = Blueprint('commands', __name__)
 
 
-@usersbp.cli.command('cleardb')
+# ADD COMMANDS HERE
+
+@commands_bp.cli.command('cleardb')
 def cleardb():
     db.session.query(CollectedData).delete()
     db.session.query(BCICollection).delete()
