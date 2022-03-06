@@ -43,7 +43,7 @@ def create_app():
         migrate.init_app(app, db)
 
         # Added blueprint for clearing the database
-        from .commands import commands_bp
+        from dcp.commands import commands_bp
         app.register_blueprint(commands_bp)
 
     return app

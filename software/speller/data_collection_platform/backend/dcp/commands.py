@@ -1,4 +1,3 @@
-from distutils import command
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
