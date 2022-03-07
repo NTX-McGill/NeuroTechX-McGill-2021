@@ -19,7 +19,7 @@
 ### Frequency configuration ***B***
 
 - 4 blocks (2022-02-27)
-    - 1 block has 1 missing target
+    - 1 block (`collection_id` 39) has 1 missing target
     - 1 block (`collection_id` 44) has 19 missing targets (***DO NOT USE***)
 
 ### Frequency configuration ***C***
