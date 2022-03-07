@@ -20,7 +20,12 @@
 
 - 4 blocks (2022-02-27)
     - 1 block has 1 missing target
-    - 1 block has 19 missing targets (DO NOT USE)
+    - 1 block (`collection_id` 44) has 19 missing targets (***DO NOT USE***)
+
+### Frequency configuration ***C***
+
+- 8 blocks (2022-03-06)
+    - 9 blocks were recorded but one of them (`collection_id` 80) had bad timing/lag in software (***DO NOT USE***)
 
 ## S04
 
@@ -40,8 +45,8 @@
 ### Frequency configuration ***B***
 
 - 10 blocks (2022-03-01)
-    - 1 block has 2 missing targets
-    - 3 blocks have 1 missing target
+    - 1 block (`collection_id` 50) has 2 missing targets
+    - 3 blocks (`collection_id` 51, 53, and 56) have 1 missing target
 
 ## S07
 
