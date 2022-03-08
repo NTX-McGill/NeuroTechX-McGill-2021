@@ -29,10 +29,13 @@
 
 ## S04
 
+### Frequency configuration ***A***
+
+- 6 blocks (2022-03-03)
+
 ### Frequency configuration ***B***
 
 - 2 blocks (2022-02-26)
-- 6 blocks (2022-03-03)
 
 ## S05
 
