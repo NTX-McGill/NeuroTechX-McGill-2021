@@ -97,6 +97,14 @@ def interactive_test_loop():
         # cleaned = clean_input(prefix)
         # options = predict(cleaned)
         
+def mode(last_space, sentence, top_n=3, num_options=5):
+    if last_space: 
+        pred = next_word(sentence, num_options)
+    else:
+        pred = this_word(sentence[-1], top_n)
+        
+    return pred 
+        
 
 if __name__ == '__main__':
 
