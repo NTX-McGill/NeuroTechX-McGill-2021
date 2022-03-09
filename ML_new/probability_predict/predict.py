@@ -2,6 +2,9 @@ from utils import NEARBY_KEYS, load_models, process_input_prefix, clean_and_pars
 from collections import Counter 
 import sys, os 
 import argparse 
+import torch
+import tensorflow
+from transformers import GPT2LMHeadModel, GPT2Tokenizer, pipeline, set_seed
 
 def this_word(prefix, top_n=3):
     '''
@@ -42,6 +45,21 @@ def predict(prefix):
     autcomplete_options = this_word(prefix)
     # autcomplete_options = this_word_given_last("my", "name")
     return autcomplete_options
+
+def next_word(prefix, num_options=5): 
+    tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+    model = GPT2LMHeadModel.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
+    params = {'max_length': 10, 
+          'do_sample': True, 
+          'top_k': 10, 
+          'no_repeat_ngram_size': 2,  
+          'labels': inputs["input_ids"]}
+    
+    inputs = tokenizer(prefix, return_tensors="pt")
+    input_len = len(inputs['input_ids'][0])
+    top_k_multi_output = model.generate(**inputs, **params, num_return_sequences=5)
+    
+    return top_k_multi_output[:, input_len:input_len+1]
 
 def interactive_test_loop():
     prefix = []
