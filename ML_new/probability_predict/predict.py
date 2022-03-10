@@ -46,20 +46,24 @@ def predict(prefix):
     # autcomplete_options = this_word_given_last("my", "name")
     return autcomplete_options
 
-def next_word(prefix, num_options=5): 
+def next_word(prefix, num_options=3): 
     tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
     model = GPT2LMHeadModel.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
+    inputs = tokenizer(prefix, return_tensors="pt")
     params = {'max_length': 10, 
           'do_sample': True, 
           'top_k': 10, 
           'no_repeat_ngram_size': 2,  
           'labels': inputs["input_ids"]}
-    
-    inputs = tokenizer(prefix, return_tensors="pt")
+
     input_len = len(inputs['input_ids'][0])
     top_k_multi_output = model.generate(**inputs, **params, num_return_sequences=5)
     
-    return top_k_multi_output[:, input_len:input_len+1]
+    for i, outputs in enumerate(top_k_multi_output):
+        print("{}: {}".format(i,tokenizer.decode(outputs)))
+
+    #return top_k_multi_output[:, input_len:input_len+1]
+    return ["example", "example", "example"]
 
 def interactive_test_loop():
     prefix = []
@@ -81,7 +85,17 @@ def interactive_test_loop():
             continue   
         prefix.extend(cleaned)  
         print("-->", prefix)
-        options = predict(prefix[-1])
+
+        # this needs to be changed
+        if last_space:
+            str_prefix = " ".join(prefix) + " "
+            print(str_prefix)
+            options = next_word(prefix)
+        else:
+            options = predict(prefix[-1])
+
+
+
         print("options:", options)
 
 
@@ -90,9 +104,13 @@ def interactive_test_loop():
         1. Write cleaning function --> lowercase and strip non [a-z]  characters 
         2. Cover all the autocompletion cases:  
             2.1. user enters a single word --> this_word() 
+                - prefix length is 1 and has space is false
             2.2. user enters a second word --> this_word_given_last()
+                - prefix length is 2 and has space is false
             2.3. user enters a sentence --> break it up and decide how to handle 
+                - has space is true
         3. Add a functionality for user to select the prefix (just for testing and later comparison) 
+                - choice between input 1, 2, 3
         '''
         # cleaned = clean_input(prefix)
         # options = predict(cleaned)
