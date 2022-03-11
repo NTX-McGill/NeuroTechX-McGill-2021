@@ -1,7 +1,10 @@
-from utils import NEARBY_KEYS, load_models, process_input_prefix
+from utils import NEARBY_KEYS, load_models, process_input_prefix, clean_and_parse
 from collections import Counter 
 import sys, os 
 import argparse 
+import torch
+import tensorflow
+from transformers import GPT2LMHeadModel, GPT2Tokenizer, pipeline, set_seed
 
 def this_word(prefix, top_n=3):
     '''
@@ -43,20 +46,40 @@ def predict(prefix):
     # autcomplete_options = this_word_given_last("my", "name")
     return autcomplete_options
 
+def next_word(prefix, num_options=5): 
+    tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
+    model = GPT2LMHeadModel.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
+    params = {'max_length': 10, 
+          'do_sample': True, 
+          'top_k': 10, 
+          'no_repeat_ngram_size': 2,  
+          'labels': inputs["input_ids"]}
+    
+    inputs = tokenizer(prefix, return_tensors="pt")
+    input_len = len(inputs['input_ids'][0])
+    top_k_multi_output = model.generate(**inputs, **params, num_return_sequences=5)
+    
+    return top_k_multi_output[:, input_len:input_len+1]
+
 def interactive_test_loop():
     prefix = []
     print("Please type your prefix: (write 'stop' if you want to stop testing and 'clear' if you want to erase everything)") 
+
+
     while True:
-        txt = input() 
-        if txt == "stop":
+        txt = input()
+        cleaned, last_space = clean_and_parse(txt)
+        print("result of cleaner: ", cleaned, last_space)
+
+        if cleaned == ["stop"]:
             print("Thank you for testing!") 
             exit() 
-        if txt == "clear":
+        if cleaned == ["clear"]:
             print("***RESET***")
             prefix = []  
             print("Please type your prefix: (write 'stop' if you want to stop testing and 'clear' if you want to erase everything)")
             continue   
-        prefix.append(txt)  
+        prefix.extend(cleaned)  
         print("-->", prefix)
         options = predict(prefix[-1])
         print("options:", options)

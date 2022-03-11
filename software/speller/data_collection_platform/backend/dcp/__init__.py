@@ -26,7 +26,7 @@ def create_app():
     # configure logging
     import logging
     log_path = os.path.join(logs_path, "dcp.log")
-    logging.basicConfig(filename=log_path,level=logging.DEBUG)
+    logging.basicConfig(filename=log_path, level=logging.DEBUG)
 
     with app.app_context():
         from dcp import api
@@ -41,5 +41,9 @@ def create_app():
         db.init_app(app)
         db.create_all()  # creates all db tables (NOTE: will not recreate tables that already exist)
         migrate.init_app(app, db)
+
+        # Added blueprint for clearing the database
+        from dcp.commands import commands_bp
+        app.register_blueprint(commands_bp)
 
     return app
