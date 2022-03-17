@@ -62,3 +62,5 @@
 ### Frequency configuration ***C***
 
 - 6 blocks (2022-03-03)
+- 5 blocks (2022-03-17)
+    - 1 block (`collection_id` 92) has 1 missing target
