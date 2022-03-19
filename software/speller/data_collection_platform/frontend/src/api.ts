@@ -2,12 +2,12 @@ import axios from 'axios'
 
 var URL = "http://localhost:5000/api"
 
-export async function startBCI() {
+
+export async function startBCI(collectorName: string) {
     var path = "/openbci/start"
-    const response = await fetch(`${URL}${path}`, {
-        method: 'POST',
-    });
-    return await response.json();
+    return await axios.post(`${URL}${path}`, {
+        collector_name: collectorName
+    })
 }
 
 export async function stopBCI(processID: number) {
@@ -20,24 +20,12 @@ export async function stopBCI(processID: number) {
 
 export async function startCollectingKey(processID: number, key: string, phase: number, freq: number) {
     var path = `/openbci/${processID}/collect/start`
-    /*
-    const response = await fetch(`${URL}${path}`, {
-        method: 'POST',
-        body: JSON.stringify({
-            character: key,
-            frequency: freq,
-            phase: phase
-        })
-    });
-    */
-    var bodyFormData = new FormData();
 
-    bodyFormData.append('character', key)
-    bodyFormData.append('frequency', freq.toString())
-    bodyFormData.append('phase', phase.toString())
-
-    return await axios.post(`${URL}${path}`, bodyFormData)
-    //return await response.json();
+    return await axios.post(`${URL}${path}`, {
+        character: key,
+        frequency: freq.toString(),
+        phase: phase.toString()
+    })
 }
 
 export async function stopCollectingKey(processID: number) {

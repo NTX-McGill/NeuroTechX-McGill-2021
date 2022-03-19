@@ -11,16 +11,21 @@ import {startBCI, stopBCI, startCollectingKey, stopCollectingKey} from '../../ap
 
 const COLOR_DEFAULT = '#000000';
 const COLOR_HIGHLIGHT_START = '#ff0000';
-const COLOR_HIGHLIGHT_STOP = '#0000ff';
 
-const WIDTH_DEFAULT = '3.3rem';
+const COLOR_HIGHLIGHT_STOP = '#000000';
+
+const WIDTH_DEFAULT = '7rem';
+
 
 const COLOR_RUN = '#2ede28';
 const COLOR_STOP = '#ff0000';
 
-const DURATION_HIGHLIGHT = 1000;
-const DURATION_FLASHING = 15000;
-const DURATION_REST = 1000;
+
+const DURATION_HIGHLIGHT_START = 1000;
+const DURATION_HIGHLIGHT_STOP = 100;
+const DURATION_FLASHING = 5000;
+const DURATION_REST = 100;
+
 
 interface KeyMap {
   [key: string]: KeyProps;
@@ -31,6 +36,7 @@ interface KeyboardState {
   running: boolean;
   unFlashedKeys: string[];
   numRoundsCollected: number;
+  collectorName: string;
 }
 
 interface KeyboardProps {
@@ -60,6 +66,8 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
       keys: {} as KeyMap,
       numRoundsCollected: 0,
       unFlashedKeys: [] as string[],
+      collectorName: "",
+
     };
     this.keyFlashing = '';
     this.startTime = -1;
@@ -72,6 +80,8 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
       temp[Object.keys(config)[val]] = React.createRef()
       this.listRefs = temp
     }
+
+    this.onNameChange = this.onNameChange.bind(this);
   }
 
   hexToRGBA(hex: string, alpha: string) {
@@ -141,7 +151,8 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
     if (this.processID === -1) {
       try {
-        this.processID = (await startBCI()).data.pid
+        this.processID = (await startBCI(this.state.collectorName)).data.data.pid
+
         console.log(this.processID)
       }
       catch (error) {
@@ -158,6 +169,16 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     newState[randKey].color = COLOR_HIGHLIGHT_START;
 
     const unFlashedKeys = this.state.unFlashedKeys;
+    if(unFlashedKeys.length === 0){
+      try {
+        await stopBCI(this.processID)
+        this.setState({running: false});
+        return;
+      }
+      catch (error) {
+        console.error(error);
+      }
+    }
     unFlashedKeys.splice(randIdx, 1);
 
     this.setState({ keys: newState, unFlashedKeys });
@@ -208,23 +229,15 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
               this.startCollection();
             }
           }, DURATION_REST);
-        }, DURATION_HIGHLIGHT);
+
+        }, DURATION_HIGHLIGHT_STOP);
       };
 
       this.startFlash();
-    }, DURATION_HIGHLIGHT);
+    }, DURATION_HIGHLIGHT_START);
   }
 
   async start() {
-
-    if (this.processID != -1){ 
-      try {
-        await stopBCI(this.processID)
-      }
-      catch (error) {
-        console.error(error);
-      }
-    }
 
     if (!this.state.running) {
       this.setState(
@@ -317,6 +330,11 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     return !this.state.running ? COLOR_RUN : COLOR_STOP;
   }
 
+
+  onNameChange(e:  React.FormEvent<HTMLInputElement>) {
+    this.setState({collectorName: e.currentTarget.value});
+  }
+
   render() {
     return (
       <div className={'keyboard'}>
@@ -330,6 +348,8 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
           className="toggle"
           style={{ background: this.getToggleColor() }}
           onClick={this.start.bind(this)}
+
+          disabled={!!!this.state.collectorName}
         >
           {this.state.running
             ? 'Stop'
@@ -337,6 +357,9 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
             ? 'Collect Again'
             : 'Start'}
         </button>
+        
+        <input value={this.state.collectorName} onChange={this.onNameChange} />
+        
       </div>
     );
   }
