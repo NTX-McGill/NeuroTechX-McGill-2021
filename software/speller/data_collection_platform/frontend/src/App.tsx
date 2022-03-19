@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import './App.css';
 import Keyboard from './components/Keyboard/Keyboard';
-import LineGraph from './components/LineGraph';
 
 function App() {
   const [chartData, setChartData] = useState<any[]>([]);
+  const [name, setName] = useState<string>('');
 
   return (
     <div className="container">
@@ -14,6 +14,15 @@ function App() {
       </div>
       <div className={'grid-item'}>
         <Keyboard chartData={chartData} setChartData={setChartData} />
+      </div>
+      <div className={'grid-item'}>
+        <form>
+          <label>
+            Collector name
+            <br />
+            <input value={name} onChange={e => setName(e.target.value)} />
+          </label>
+        </form>
       </div>
     </div>
   );
