@@ -148,7 +148,6 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
   async startCollection() {
     if (!this.state.running) return;
-
     if (this.processID === -1) {
       try {
         this.processID = (await startBCI()).data.pid;
@@ -193,7 +192,6 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
       this.callback = async () => {
         this.setState({ resting: true });
-
         for (let val in this.listRefs) {
           this.listRefs[val].current.setColor(COLOR_DEFAULT);
         }
@@ -243,7 +241,6 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
   async stop() {
     if (!this.state.running) return;
-
     if (this.processID !== -1) {
       try {
         await stopBCI(this.processID);
