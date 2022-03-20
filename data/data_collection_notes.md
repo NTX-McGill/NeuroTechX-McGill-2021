@@ -26,6 +26,7 @@
 
 - 8 blocks (2022-03-06)
     - 9 blocks were recorded but one of them (`collection_id` 80) had bad timing/lag in software (***DO NOT USE***)
+- 5 blocks (2022-03-20)
 
 ## S04
 
