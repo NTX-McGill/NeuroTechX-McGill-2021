@@ -11,37 +11,39 @@ def autocomplete(prefix, top_n=3):
     '''
     :prefix: one word that isn't complete to be autocompleted 
     :top_n: number of suggested words for autocompletion
-    :returns: n suggested autocompletions for prefix 
+    :returns: n suggested autocompletions for given prefix 
     '''
-    try:
-        return [(k, v) for k, v in WORDS_MODEL.most_common()
-                if k.startswith(prefix)][:top_n]
-    except KeyError:
-        raise Exception("train/load model first")
+    
+    options = [k for k, v in WORDS_MODEL.most_common()
+            if k.startswith(prefix)][:top_n]
+    if len(options) < top_n: 
+        options.extend([""]*top_n)
+    return list(options)[:min(len(options), top_n)]
+    
 
-def next_word_tuple(prev_prefix, cur_prefix, top_n=3):
+def next_word_tuple(prefix, top_n=3):
     '''
-    :prev_prefix: last complete word of prefix 
-    :cur_prefix: word that isn't complete to be autocompleted 
-    :top_n: number of suggested words for autocompletion
-    :returns: n suggested autocompletions for prefix 
+    :prefix: last word of the sentence  
+    :top_n: number of suggested words for next words
+    :returns: n suggested next words for the given last word 
     NOTE: Will also add common "misspellings" based on key proximity --> can be modified for frequency proximity
     '''
+    possible_cur_prefixes = [prefix[:-1]+char
+                             for char in NEARBY_KEYS[prefix[-1]]
+                             if len(prefix) > 1]
 
-    possible_cur_prefixes = [cur_prefix[:-1]+char
-                             for char in NEARBY_KEYS[cur_prefix[-1]]
-                             if len(cur_prefix) > 1]
+    possible_cur_prefixes.append(prefix)
 
-    possible_cur_prefixes.append(cur_prefix)
+    options = list({w for w, c in
+                WORD_TUPLES_MODEL[prefix].items()
+                for prefix in possible_cur_prefixes}) 
+    
+    #padding for length
+    if len(options) < top_n: 
+        options.extend([""]*top_n)
+    return list(options)[:min(len(options), top_n)]
 
-    probable_words = {w:c for w, c in
-                      WORD_TUPLES_MODEL[prev_prefix.lower()].items()
-                      for sec_word in possible_cur_prefixes
-                      if w.startswith(sec_word)}
-
-    return Counter(probable_words).most_common(top_n)
-
-def next_word_BERT(prefix, num_options=3): 
+def next_word_BERT(prefix, top_n=3): 
     tokenizer = GPT2Tokenizer.from_pretrained("gpt2")
     model = GPT2LMHeadModel.from_pretrained("gpt2", pad_token_id=tokenizer.eos_token_id)
     params = {'max_length': 10, 
@@ -52,19 +54,27 @@ def next_word_BERT(prefix, num_options=3):
     
     inputs = tokenizer(prefix, return_tensors="pt")
     input_len = len(inputs['input_ids'][0])
-    top_k_multi_output = model.generate(**inputs, **params, num_return_sequences=5)
+    top_k_multi_output = model.generate(**inputs, **params, top_n=top_n)
     
     return top_k_multi_output[:, input_len:input_len+1]
 
-def dispatch(prefix, last_space): 
-    if last_space: 
-        sentence = " ".join(prefix)
-        options = next_word_BERT(sentence)
+def dispatch(sentence, top_n=3):
+    '''
+    :sentence: sentence up till now 
+    :top_n: number of options to return 
+    :returns: 
+        {mode: int, options: list of strings}
+        - mode: 1 - autocompletion, 2 - next work prediction 
+        - options: list of autocomplete or next word suggestion (of length top_n) --> default 3 
+    '''
+    prefix, last_space = clean_and_parse(sentence)
+    if last_space : 
+        options = next_word_tuple(prefix[-1])
     else: 
-        incomplete_word = prefix[-1]
-        options = this_word(incomplete_word)
+        options = autocomplete(prefix[-1])
+    mode = 2 if last_space else 1 
+    return {'mode': mode, 'options': options}  
 
-    print("OPTIONS:", options)
 
 if __name__ == '__main__':
 
@@ -79,6 +89,5 @@ if __name__ == '__main__':
     parser.add_argument("-m", "--model", help="relative data path for model file")
     args = parser.parse_args()
     model_file = str(args.model)
-
     WORDS_MODEL, WORD_TUPLES_MODEL = load_models(os.path.join(PATH, model_file))
-
+    
