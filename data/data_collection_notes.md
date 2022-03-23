@@ -26,6 +26,7 @@
 
 - 8 blocks (2022-03-06)
     - 9 blocks were recorded but one of them (`collection_id` 80) had bad timing/lag in software (***DO NOT USE***)
+- 5 blocks (2022-03-20)
 
 ## S04
 
@@ -62,3 +63,13 @@
 ### Frequency configuration ***C***
 
 - 6 blocks (2022-03-03)
+- 5 blocks (2022-03-17)
+    - 1 block (`collection_id` 92) has 1 missing target
+
+## S09
+
+### Frequency configuration ***C***
+
+- 3 blocks (2022-03-08)
+    - 1 block (`collection_id` 97) has 1 missing target
+    - *Note*: `'collector_name'` is not consistent (used `'S09_trial1'`, `'s09_trial2'`, `'s09_trial3'`)
