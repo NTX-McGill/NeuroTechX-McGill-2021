@@ -8,6 +8,7 @@ export interface KeyProps {
   freq: number;
   color: string;
   width: string;
+  isSelected: boolean;
 }
 
 class Key extends Component<KeyProps> {
@@ -19,7 +20,10 @@ class Key extends Component<KeyProps> {
   }
 
   shouldComponentUpdate(nextProps: KeyProps) {
-    if (nextProps.color === this.props.color) {
+    if (
+      nextProps.color === this.props.color &&
+      nextProps.isSelected === this.props.isSelected
+    ) {
       return false;
     }
 
@@ -30,13 +34,23 @@ class Key extends Component<KeyProps> {
     this.ref.current.style.backgroundColor = color;
   }
 
+  makeKeyStyle() {
+    let keyStyle = {
+      borderWidth: 0,
+      width: this.props.width,
+      backgroundColor: this.props.color,
+    };
+
+    if (this.props.isSelected) {
+      keyStyle.borderWidth = 10;
+    }
+
+    return keyStyle;
+  }
+
   render() {
     return (
-      <button
-        ref={this.ref}
-        className="key-button"
-        style={{ backgroundColor: this.props.color, width: this.props.width }}
-      >
+      <button ref={this.ref} className="key-button" style={this.makeKeyStyle()}>
         {this.props.freq}
         <br />
         {this.props.dispChar}

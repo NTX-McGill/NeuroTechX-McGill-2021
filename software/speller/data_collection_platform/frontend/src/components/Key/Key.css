@@ -1,6 +1,6 @@
 .key-button {
   aspect-ratio: 1;
-  border: none;
+  border-color: #ff0000;
   color: #ffffff;
   font-size: 1.05rem;
   outline: none;

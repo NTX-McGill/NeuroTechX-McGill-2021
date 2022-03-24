@@ -28,7 +28,7 @@ const COLOR_STOP = '#ff0000';
 const DURATION_HIGHLIGHT_START = 1000;
 const DURATION_HIGHLIGHT_STOP = 100;
 const DURATION_FLASHING = 5000;
-const DURATION_REST = 100;
+const DURATION_REST = 1000;
 
 interface KeyMap {
   [key: string]: KeyProps;
@@ -258,15 +258,19 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   }
 
   async stop() {
-    if (!this.state.running) return;
+    if (!this.state.resting) return;
     if (this.processID !== -1) {
       try {
         await stopBCI(this.processID);
+
+        // reset process id when stopping collection for current round.
+        this.processID = -1;
       } catch (error) {
         console.error(error);
       }
     }
 
+    this.keyFlashing = '';
     this.setState({
       running: false,
       resting: false,
@@ -346,6 +350,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
         outputChar={keyInfo.outputChar}
         freq={keyInfo.freq}
         phase={keyInfo.phase}
+        isSelected={key === this.keyFlashing}
         color={this.state.keys[key as keyof typeof config]?.color}
         width={keyInfo.width}
       />
@@ -404,8 +409,11 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
             </>
           )}
         </div>
-
-        <input value={this.state.collectorName} onChange={this.onNameChange} />
+        <label>
+          Collector name
+          <br />
+          <input value={this.state.collectorName} onChange={this.onNameChange} />
+        </label>
       </div>
     );
   }
