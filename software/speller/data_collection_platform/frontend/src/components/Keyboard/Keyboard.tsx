@@ -412,7 +412,10 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
         <label>
           Collector name
           <br />
-          <input value={this.state.collectorName} onChange={this.onNameChange} />
+          <input
+            value={this.state.collectorName}
+            onChange={this.onNameChange}
+          />
         </label>
       </div>
     );
