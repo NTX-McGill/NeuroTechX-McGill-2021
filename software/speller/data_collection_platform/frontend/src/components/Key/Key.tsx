@@ -11,32 +11,38 @@ export interface KeyProps {
 }
 
 class Key extends Component<KeyProps> {
+  ref: any;
 
-  ref: any
-
-  constructor(props: KeyProps){
-    super(props)
-    this.ref = React.createRef()
+  constructor(props: KeyProps) {
+    super(props);
+    this.ref = React.createRef();
   }
 
-  shouldComponentUpdate(nextProps: KeyProps){
+  shouldComponentUpdate(nextProps: KeyProps) {
     if (nextProps.color === this.props.color) {
-      return false
+      return false;
     }
 
-    return true
+    return true;
   }
 
-  setColor(color: string){
-    this.ref.current.style.backgroundColor = color
+  setColor(color: string) {
+    this.ref.current.style.backgroundColor = color;
   }
 
   render() {
-    return (            
-      <button ref={this.ref} className="key-button" style={{backgroundColor: this.props.color, width: this.props.width}}>{this.props.freq}<br/>{this.props.dispChar}</button>
+    return (
+      <button
+        ref={this.ref}
+        className="key-button"
+        style={{ backgroundColor: this.props.color, width: this.props.width }}
+      >
+        {this.props.freq}
+        <br />
+        {this.props.dispChar}
+      </button>
     );
   }
 }
 
 export default Key;
-
