@@ -115,25 +115,47 @@ def openbci_process_collect_start(process_id: int):
 
 @bp.route('/openbci/<int:process_id>/collect/stop', methods=['POST'])
 def openbci_process_collect_stop(process_id: int):
-    if process_id not in shared.get_bci_processes_states():
-        return {'error_message': 'There is no process with this id, make sure your process id is valid'}, 404
 
-    subprocess_dict = shared.get_bci_processes_states()[process_id]
-    subprocess_dict['state'] = 'ready'
-    current_app.logger.info(f"Stopped collecting for character {subprocess_dict['character']}.")
-    current_app.logger.info(f"Writing collected data for character {subprocess_dict['character']} to the database.")
+    data = request.json
 
-    # write to database
-    if not write_stream_data(subprocess_dict):
-        return {'error_message': "Did not write any data to the database, make sure to call /openbci/<int:process_id>/collect/start before this route."}, 400
+    # if predict is false
+    if not data["predict"]:
 
-    # clear the subprocess_dict
-    subprocess_dict['character'] = None
-    subprocess_dict['frequency'] = None
-    subprocess_dict['phase'] = None
+        if process_id not in shared.get_bci_processes_states():
+            return {'error_message': 'There is no process with this id, make sure your process id is valid'}, 404
 
-    return {'success_message': 'BCI has stopped collecting, and the queue has been written to the database'}, 201
+        subprocess_dict = shared.get_bci_processes_states()[process_id]
+        subprocess_dict['state'] = 'ready'
+        current_app.logger.info(f"Stopped collecting for character {subprocess_dict['character']}.")
+        current_app.logger.info(f"Writing collected data for character {subprocess_dict['character']} to the database.")
 
+        # write to database
+        if not write_stream_data(subprocess_dict):
+            return {'error_message': "Did not write any data to the database, make sure to call /openbci/<int:process_id>/collect/start before this route."}, 400
+
+        # clear the subprocess_dict
+        subprocess_dict['character'] = None
+        subprocess_dict['frequency'] = None
+        subprocess_dict['phase'] = None
+
+        return {'success_message': 'BCI has stopped collecting, and the queue has been written to the database'}, 201
+
+    # run predict
+    else:
+        
+        # TODO verify matlab program name
+        from dcp.matlab.script import call_matlab_function
+        from dcp.ml.predict import dispatch
+
+        # call the matlab function with the EEG data in the shared queue
+        next_character = call_matlab_function(shared.queue)
+
+        # call the ML function for next word prediction or current word autocompletion
+        ml_predictions = dispatch(data["sentence"])
+
+        # TODO check if 200 response code is the correct choice
+        return {"next_character": next_character, "predictions": ml_predictions["options"], "mode": ml_predictions["mode"]}, 200
+        
 
 @bp.route("/openbci/<int:process_id>/stop", methods=['POST'])
 def openbci_stop(process_id: int):
