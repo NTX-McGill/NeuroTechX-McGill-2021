@@ -160,8 +160,6 @@ def openbci_stop(process_id: int):
 
 
 def write_stream_data(subprocess_dict):
-    # ensure any remaining connections are flushed to avoid racing conditions
-    db.engine.dispose()
     order = 1
     collected_data = []
     while not shared.queue.empty():
