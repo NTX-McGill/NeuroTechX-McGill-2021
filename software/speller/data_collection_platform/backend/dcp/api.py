@@ -143,6 +143,14 @@ def openbci_process_collect_stop(process_id: int):
 
     # run predict
     else:
+
+        # TODO test the following if statement for error handling     
+        if shared.queue.empty():
+            return {"error_message": "Did not return prediction. Queue for BCI data is empty."}, 400
+
+        # TODO test the following if statement for error handling
+        if data["sentence"] is None:
+            return {"error_message": "Sentence must be a string and cannot be a NoneType. Try using an empty string if sentence has length 0."}, 400
         
         # TODO verify matlab program name
         from dcp.matlab.script import call_matlab_function
@@ -150,7 +158,7 @@ def openbci_process_collect_stop(process_id: int):
 
         # call the matlab function with the EEG data in the shared queue
         next_character = call_matlab_function(shared.queue)
-        data["setnence"] += next_character
+        data["sentence"] += next_character
 
         # call the ML function for next word prediction or current word autocompletion
         ml_predictions = dispatch(data["sentence"])
