@@ -1,5 +1,6 @@
 from datetime import datetime
 from functools import wraps
+from re import L
 from flask import Blueprint, request, current_app
 import os
 
@@ -149,6 +150,7 @@ def openbci_process_collect_stop(process_id: int):
 
         # call the matlab function with the EEG data in the shared queue
         next_character = call_matlab_function(shared.queue)
+        data["setnence"] += next_character
 
         # call the ML function for next word prediction or current word autocompletion
         ml_predictions = dispatch(data["sentence"])
