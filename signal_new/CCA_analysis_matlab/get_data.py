@@ -13,7 +13,7 @@ SUBJECT_ID = 'S09'
 FREQ_TYPE = 'C'
 VERBOSE = True # if True, prints some output to screen
 
-BAD_COLLECTION_IDS = [44, 80]
+BAD_COLLECTION_IDS = [44, 80] # runs that should not be included in the data
 REF_FREQ_MAP = {
     # add 0.001 to upper bound because np.arange() doesn't include endpoint
     # round to 2 decimal places to avoid mismatches due to numerical errors
@@ -30,6 +30,7 @@ N_CHANNELS = 8
 CHANNEL_NAMES = [f'channel_{i+1}' for i in range(N_CHANNELS)]
 
 def infer_freq_type(freqs):
+    '''Returns a frequency type based on a list of (possibly incomplete) frequencies.'''
 
     freqs = {*freqs} # convert to set
     for freq_type, ref_freqs in REF_FREQ_MAP.items():
@@ -39,8 +40,12 @@ def infer_freq_type(freqs):
     raise ValueError(f'No frequency configuration matched for freqs {freqs}')
 
 def get_subject_data(database_url, subject_id, target_freq_type, bad_collection_ids=[], verbose=True):
+    '''
+    Downloads a subject's runs from a database and selects those with the target frequency type.
+    Returns a list of pandas dataframes (one for each data collection run).
+    '''
 
-    # connect to PostgreSQL server
+    # connect to database server
     alchemy_engine = create_engine(database_url)
     with alchemy_engine.connect() as db_connection:
 
@@ -73,9 +78,8 @@ def get_subject_data(database_url, subject_id, target_freq_type, bad_collection_
             n_rows_per_character = df_run['character'].value_counts()
             freq_type = infer_freq_type(df_run['frequency']).upper()
 
+            # if the dataframe is not empty and if the frequency type is correct
             if n_rows_per_character.sum() > 0 and freq_type == target_freq_type:
-
-                # df_session = df_session.drop(columns=['id', 'collection_time', 'collection_id', 'character', 'phase'])
                 subject_data.append(df_run)
 
                 if verbose:
@@ -90,6 +94,7 @@ def get_subject_data(database_url, subject_id, target_freq_type, bad_collection_
     return subject_data
 
 def remove_dc_offset(data, fs, chunk_length=0.5):
+    '''Splits the data into chunks of fixed length, substract channel-wise mean from each chunk.'''
     n_samples = data.shape[0]
     n_chunks = math.ceil(n_samples/(chunk_length*fs))
     processed_chunks = []
@@ -98,10 +103,12 @@ def remove_dc_offset(data, fs, chunk_length=0.5):
     return np.concatenate(processed_chunks, axis=0)
 
 def notch_filter(data, fs, freq=60, Q=10):
+    '''Applies notch filter to timeseries data of shape (n_samples, n_channels).'''
     b, a = iirnotch(freq, Q, fs=fs)
     return filtfilt(b, a, data, axis=0)
 
 def preprocess_trial(data, fs, dc_chunk_length=0.5, notch_freq=60, notch_Q=10):
+    '''Removes DC offset and filters data.'''
     data = remove_dc_offset(data, fs, chunk_length=dc_chunk_length)
     data = notch_filter(data, fs, freq=notch_freq, Q=notch_Q)
     return data
@@ -119,6 +126,7 @@ if __name__ == '__main__':
     freqs = sorted(list(REF_FREQ_MAP[FREQ_TYPE])) # list of all expected frequencies
     freq_char_map = dict.fromkeys(freqs, None)
     n_samples_per_trial = FS*TRIAL_DURATION
+
     all_blocks = []
     for i_run, run_data in enumerate(subject_data):
 
@@ -142,15 +150,17 @@ if __name__ == '__main__':
                 block_data.append(nan_trial)
                 continue
 
+            # update dictionary of frequency-character pairs
             char = trial_data['character'].iloc[0]
             if freq_char_map[freq] is None:
                 if char == '\b':
                     char = '\\b' # escape this for MATLAB to be able to read it as '\b'
                 freq_char_map[freq] = char
 
+            # extract and preprocess EEG channel data
             trial_data = trial_data.sort_values('order').reset_index(drop=True)
             trial_data = trial_data.loc[:n_samples_per_trial-1, CHANNEL_NAMES]
-            trial_data_preprocessed = preprocess_trial(trial_data.to_numpy(), FS)#, dc_chunk_length=TRIAL_DURATION)
+            trial_data_preprocessed = preprocess_trial(trial_data.to_numpy(), FS)
             block_data.append(trial_data_preprocessed)
         
         if VERBOSE:
@@ -168,6 +178,7 @@ if __name__ == '__main__':
     chars = sorted(char_freq_map.keys(), key=(lambda x: char_freq_map[x]))
     chars = np.array(chars, dtype=object) # want cell array in MATLAB
 
+    # save to .mat file
     fpath_out = f'{SUBJECT_ID}_type{FREQ_TYPE}.mat'
     savemat(fpath_out, {'data': all_blocks, 'freq_type': FREQ_TYPE, 'freqs': freqs, 'chars': chars})
     if VERBOSE:
