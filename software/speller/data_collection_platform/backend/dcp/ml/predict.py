@@ -20,7 +20,6 @@ def autocomplete(prefix, top_n=3):
         options.extend([""]*top_n)
     return list(options)[:min(len(options), top_n)]
     
-
 def next_word_tuple(prefix, top_n=3):
     '''
     :prefix: last word of the sentence  
@@ -64,15 +63,15 @@ def dispatch(sentence, top_n=3):
     :top_n: number of options to return 
     :returns: 
         {mode: int, options: list of strings}
-        - mode: 1 - autocompletion, 2 - next work prediction 
-        - options: list of autocomplete or next word suggestion (of length top_n) --> default 3 
+        - mode: autocompletion, prediction 
+        - options: list of autocompletion or next word suggestion (of length top_n) --> default 3 
     '''
     prefix, last_space = clean_and_parse(sentence)
     if last_space : 
         options = next_word_tuple(prefix[-1])
     else: 
         options = autocomplete(prefix[-1])
-    mode = 2 if last_space else 1 
+    mode = "completion" if last_space else "prediction" 
     return {'mode': mode, 'options': options}  
 
 
