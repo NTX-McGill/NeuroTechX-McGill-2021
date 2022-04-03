@@ -152,20 +152,23 @@ def openbci_process_collect_stop(process_id: int):
         if data["sentence"] is None:
             return {"error_message": "Sentence must be a string and cannot be a NoneType. Try using an empty string if sentence has length 0."}, 400
         
-        # TODO verify matlab program name
-        from dcp.matlab.script import call_matlab_function
-        from dcp.ml.predict import dispatch
-
         # call the matlab function with the EEG data in the shared queue
-        next_character = call_matlab_function(shared.queue)
+        next_character = predict_character(shared.queue)
         data["sentence"] += next_character
 
         # call the ML function for next word prediction or current word autocompletion
         ml_predictions = dispatch(data["sentence"])
 
         # TODO check if 200 response code is the correct choice
-        return {"next_character": next_character, "predictions": ml_predictions["options"], "mode": ml_predictions["mode"]}, 200
-        
+        return {"sentence": data["sentence"], "next_character": next_character, "predictions": ml_predictions["options"], "mode": ml_predictions["mode"]}, 200
+
+
+def predict_character(shared_queue):
+    """ Dummy function waiting for signal team """
+    # TODO: pull out data from the shared queue
+    # TODO: send data to the signal team's prediction function to get prediction
+    prediction = "a"
+    return prediction
 
 @bp.route("/openbci/<int:process_id>/stop", methods=['POST'])
 def openbci_stop(process_id: int):
