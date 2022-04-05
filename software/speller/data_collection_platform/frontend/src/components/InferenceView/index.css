@@ -1,0 +1,35 @@
+.main-container {
+    padding: 8% 1%;
+}
+
+.main-container > textarea {
+    width: 80%;
+    padding: 2% 5%;
+    max-height: 50%;
+    font-size: 1.5rem;
+    border-color: #000;
+    border-width: .1rem;
+    border-radius: .2rem;
+}
+
+.p-container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0 8%;
+}
+
+.p-container > h5 {
+    font-size: 1.6rem;
+    margin: 5% 0;
+}
+
+.p-container > .predictions {
+    width: 100%;
+    text-align: center;
+}
+
+.p-container > .predictions > h6 {
+    font-size: 1.5rem;
+    margin: 3% 0;
+}
