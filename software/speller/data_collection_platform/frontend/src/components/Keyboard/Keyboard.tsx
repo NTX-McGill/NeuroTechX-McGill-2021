@@ -7,25 +7,28 @@ import Key, { KeyProps } from '../Key/Key';
 import SpaceBarIcon from '@material-ui/icons/SpaceBar';
 import KeyboardBackspaceIcon from '@material-ui/icons/KeyboardBackspace';
 
-import {startBCI, stopBCI, startCollectingKey, stopCollectingKey} from '../../api'
+import {
+  startBCI,
+  stopBCI,
+  startCollectingKey,
+  stopCollectingKey,
+} from '../../api';
 
 const COLOR_DEFAULT = '#000000';
 const COLOR_HIGHLIGHT_START = '#ff0000';
 
 const COLOR_HIGHLIGHT_STOP = '#000000';
 
-const WIDTH_DEFAULT = '7rem';
-
+const WIDTH_DEFAULT = '4.2rem';
 
 const COLOR_RUN = '#2ede28';
+const COLOR_PAUSE = '#F2C94C';
 const COLOR_STOP = '#ff0000';
-
 
 const DURATION_HIGHLIGHT_START = 1000;
 const DURATION_HIGHLIGHT_STOP = 100;
 const DURATION_FLASHING = 5000;
-const DURATION_REST = 100;
-
+const DURATION_REST = 1000;
 
 interface KeyMap {
   [key: string]: KeyProps;
@@ -34,6 +37,7 @@ interface KeyMap {
 interface KeyboardState {
   keys: KeyMap;
   running: boolean;
+  resting: boolean;
   unFlashedKeys: string[];
   numRoundsCollected: number;
   collectorName: string;
@@ -63,11 +67,11 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     this.keys = {} as KeyMap;
     this.state = {
       running: false,
+      resting: false,
       keys: {} as KeyMap,
       numRoundsCollected: 0,
       unFlashedKeys: [] as string[],
-      collectorName: "",
-
+      collectorName: '',
     };
     this.keyFlashing = '';
     this.startTime = -1;
@@ -76,9 +80,9 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     this.plot = props.chartData;
     this.processID = -1;
     for (let val in Object.keys(config)) {
-      let temp = {...this.listRefs}
-      temp[Object.keys(config)[val]] = React.createRef()
-      this.listRefs = temp
+      let temp = { ...this.listRefs };
+      temp[Object.keys(config)[val]] = React.createRef();
+      this.listRefs = temp;
     }
 
     this.onNameChange = this.onNameChange.bind(this);
@@ -93,47 +97,51 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   }
 
   flash = (time: number) => {
-
-    var a = performance.now()
+    var a = performance.now();
 
     if (this.startTime === -1) {
-        this.startTime = time
-        this.prevTime = time
+      this.startTime = time;
+      this.prevTime = time;
     }
 
-    var b = performance.now()
+    var b = performance.now();
 
-    const newState = {...this.state.keys}
+    const newState = { ...this.state.keys };
 
-    var c = performance.now()
+    var c = performance.now();
 
-    var delta = time - this.startTime
+    var delta = time - this.startTime;
 
     for (let key in newState) {
-        const info = newState[key]
+      const info = newState[key];
 
-        var sine_value = 0.5*(1+Math.sin((2*Math.PI*info.freq*(delta/1000)) + info.phase));
+      var sine_value =
+        0.5 *
+        (1 + Math.sin(2 * Math.PI * info.freq * (delta / 1000) + info.phase));
 
-        //newState[key].color = this.hexToRGBA(this.COLOR_DEFAULT, sine_value.toString())
+      //newState[key].color = this.hexToRGBA(this.COLOR_DEFAULT, sine_value.toString())
 
-        this.listRefs[key].current.setColor(this.hexToRGBA(COLOR_DEFAULT, sine_value.toString()))
+      this.listRefs[key].current.setColor(
+        this.hexToRGBA(COLOR_DEFAULT, sine_value.toString())
+      );
     }
 
     if (this.prevTime === this.startTime) {
-        this.plot.push({name: delta/1000})
-    }
-    else {
-        this.plot.push({name: delta/1000, diff: 1000/(time-this.prevTime)})
+      this.plot.push({ name: delta / 1000 });
+    } else {
+      this.plot.push({
+        name: delta / 1000,
+        diff: 1000 / (time - this.prevTime),
+      });
     }
 
     if (delta < DURATION_FLASHING) {
-        this.prevTime = time
-        window.requestAnimationFrame(this.flash);
-    }
-    else {
-        //this.setState({plot: this.plot})
-        //this.props.setChartData([...this.plot]);
-        this.callback()
+      this.prevTime = time;
+      window.requestAnimationFrame(this.flash);
+    } else {
+      //this.setState({plot: this.plot})
+      //this.props.setChartData([...this.plot]);
+      this.callback();
     }
   };
 
@@ -145,17 +153,15 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   }
 
   async startCollection() {
-    if (!this.state.running) {
-      return;
-    }
-
+    if (!this.state.running) return;
     if (this.processID === -1) {
       try {
-        this.processID = (await startBCI(this.state.collectorName)).data.data.pid
+        this.processID = (
+          await startBCI(this.state.collectorName)
+        ).data.data.pid;
 
-        console.log(this.processID)
-      }
-      catch (error) {
+        console.log(this.processID);
+      } catch (error) {
         console.error(error);
       }
     }
@@ -169,13 +175,12 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     newState[randKey].color = COLOR_HIGHLIGHT_START;
 
     const unFlashedKeys = this.state.unFlashedKeys;
-    if(unFlashedKeys.length === 0){
+    if (unFlashedKeys.length === 0) {
       try {
-        await stopBCI(this.processID)
-        this.setState({running: false});
+        await stopBCI(this.processID);
+        this.setState({ running: false });
         return;
-      }
-      catch (error) {
+      } catch (error) {
         console.error(error);
       }
     }
@@ -188,11 +193,14 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     console.info('Collecting data for:', randKey);
 
     setTimeout(async () => {
-
       try {
-        await startCollectingKey(this.processID, randKey, config[randKey as keyof typeof config].phase, config[randKey as keyof typeof config].frequency)
-      }
-      catch (error) {
+        await startCollectingKey(
+          this.processID,
+          randKey,
+          config[randKey as keyof typeof config].phase,
+          config[randKey as keyof typeof config].frequency
+        );
+      } catch (error) {
         console.error(error);
       }
       newState[randKey].color = COLOR_DEFAULT;
@@ -201,20 +209,19 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
       // opacity flashing
 
       this.callback = async () => {
-
+        this.setState({ resting: true });
         for (let val in this.listRefs) {
-          this.listRefs[val].current.setColor(COLOR_DEFAULT)
+          this.listRefs[val].current.setColor(COLOR_DEFAULT);
         }
 
         try {
-          await stopCollectingKey(this.processID)
-        }
-        catch (error) {
+          await stopCollectingKey(this.processID);
+        } catch (error) {
           console.error(error);
         }
 
         for (let val in this.listRefs) {
-          this.listRefs[val].current.setColor(COLOR_DEFAULT)
+          this.listRefs[val].current.setColor(COLOR_DEFAULT);
         }
 
         newState[randKey].color = COLOR_HIGHLIGHT_STOP;
@@ -226,10 +233,10 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
           setTimeout(async () => {
             if (this.state.running) {
+              this.setState({ resting: false });
               this.startCollection();
             }
           }, DURATION_REST);
-
         }, DURATION_HIGHLIGHT_STOP);
       };
 
@@ -237,19 +244,46 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     }, DURATION_HIGHLIGHT_START);
   }
 
-  async start() {
+  start() {
+    if (this.state.running) return;
+    return this.setState(
+      {
+        running: true,
+        resting: false,
+        unFlashedKeys: Object.keys(this.keys),
+        numRoundsCollected: this.state.numRoundsCollected + 1,
+      },
+      () => this.startCollection()
+    );
+  }
 
-    if (!this.state.running) {
-      this.setState(
-        {
-          running: true,
-          unFlashedKeys: Object.keys(this.keys),
-          numRoundsCollected: this.state.numRoundsCollected + 1,
-        },
-        () => this.startCollection()
-      );
-    } else {
+  async stop() {
+    if (!this.state.resting) return;
+    if (this.processID !== -1) {
+      try {
+        await stopBCI(this.processID);
+
+        // reset process id when stopping collection for current round.
+        this.processID = -1;
+      } catch (error) {
+        console.error(error);
+      }
+    }
+
+    this.keyFlashing = '';
+    this.setState({
+      running: false,
+      resting: false,
+    });
+  }
+
+  pause() {
+    if (this.state.running) {
       this.setState({ running: false });
+    } else {
+      this.setState({ running: true, resting: false }, () => {
+        return this.startCollection();
+      });
     }
   }
 
@@ -298,7 +332,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
         break;
       }
       case '\b': {
-        keyInfo.dispChar = <KeyboardBackspaceIcon/>;
+        keyInfo.dispChar = <KeyboardBackspaceIcon />;
         break;
       }
       default: {
@@ -316,6 +350,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
         outputChar={keyInfo.outputChar}
         freq={keyInfo.freq}
         phase={keyInfo.phase}
+        isSelected={key === this.keyFlashing}
         color={this.state.keys[key as keyof typeof config]?.color}
         width={keyInfo.width}
       />
@@ -330,9 +365,8 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     return !this.state.running ? COLOR_RUN : COLOR_STOP;
   }
 
-
-  onNameChange(e:  React.FormEvent<HTMLInputElement>) {
-    this.setState({collectorName: e.currentTarget.value});
+  onNameChange(e: React.FormEvent<HTMLInputElement>) {
+    this.setState({ collectorName: e.currentTarget.value });
   }
 
   render() {
@@ -344,22 +378,42 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
           </div>
         ))}
 
-        <button
-          className="toggle"
-          style={{ background: this.getToggleColor() }}
-          onClick={this.start.bind(this)}
-
-          disabled={!!!this.state.collectorName}
-        >
-          {this.state.running
-            ? 'Stop'
-            : this.state.numRoundsCollected > 0
-            ? 'Collect Again'
-            : 'Start'}
-        </button>
-        
-        <input value={this.state.collectorName} onChange={this.onNameChange} />
-        
+        <div style={{ flexDirection: 'row' }}>
+          {!this.state.running && !this.state.resting && (
+            <button
+              className="toggle"
+              onClick={this.start.bind(this)}
+              disabled={!this.state.collectorName}
+              style={{ background: COLOR_RUN }}
+            >
+              {this.state.numRoundsCollected > 0 ? 'Collect Again' : 'Start'}
+            </button>
+          )}
+          {this.state.resting && (
+            <>
+              <button
+                className="toggle"
+                style={{ background: COLOR_STOP }}
+                onClick={this.stop.bind(this)}
+              >
+                Stop
+              </button>
+              <button
+                className="toggle"
+                disabled={!this.state.collectorName}
+                style={{ backgroundColor: COLOR_PAUSE }}
+                onClick={this.pause.bind(this)}
+              >
+                {this.state.running ? 'Pause' : 'Resume'}
+              </button>
+            </>
+          )}
+        </div>
+        <label>
+          Collector name
+          <br />
+          <input value={this.state.collectorName} onChange={this.onNameChange} />
+        </label>
       </div>
     );
   }
