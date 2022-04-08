@@ -42,7 +42,7 @@ class Key extends Component<KeyProps> {
     };
 
     if (this.props.isSelected) {
-      keyStyle.borderWidth = 10;
+      keyStyle.borderWidth = 1;
     }
 
     return keyStyle;
