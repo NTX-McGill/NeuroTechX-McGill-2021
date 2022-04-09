@@ -162,11 +162,14 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
         console.log(this.processID);
       } catch (error) {
+        this.setState({resting: false, running: false});
         console.error(error);
+        // TODO: Make a popup showing a message that the BCI stream has not started 
+        return;
       }
     }
 
-    // don't collect from same key twice
+    // don't collect from same key twiceß
     const numKeys = this.state.unFlashedKeys.length;
     const randIdx = Math.floor(Math.random() * numKeys);
     const randKey = this.state.unFlashedKeys[randIdx];
