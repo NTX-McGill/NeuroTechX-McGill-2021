@@ -5,7 +5,7 @@ from standard_CCA_ITCCA import standard_cca_it_cca
 
 
 def filter_bank_cca_it(signal, fund_freq, lower_freq, upper_freq,
-                       num_harmonics, template, sampling_rate, num_fb=4, fb_a=1, fb_b=0,
+                       num_harmonics, template, sampling_rate, num_fb=5, fb_a=1, fb_b=0.3,
                        filter_order=2, rp=1, *args, **kwargs):
     sum = []
     nyq = 0.5 * sampling_rate
