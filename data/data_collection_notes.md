@@ -6,7 +6,7 @@
 **Frequency configurations**
 
 - ***A***: 8.00-15.75 Hz (inclusive), steps of 0.25 Hz, excluding 12 Hz
-- ***B***: 5.10-12.85 Hz (inclusive), steps of 0.25 Hz
+- ***B***: 5.10-12.85 Hz (inclusive), steps of 0.25 Hz, excluding 10.85 Hz
 - ***C***: 5.85-10.65 Hz (inclusive), steps of 0.16 Hz
 
 ## S02
@@ -65,6 +65,8 @@
 - 6 blocks (2022-03-03)
 - 5 blocks (2022-03-17)
     - 1 block (`collection_id` 92) has 1 missing target
+- 4 blocks (2022-03-29)
+    - 2 blocks (`collection_id` 106 and 109) have 1 missing target
 
 ## S09
 
