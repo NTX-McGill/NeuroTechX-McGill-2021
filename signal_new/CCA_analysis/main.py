@@ -1,4 +1,3 @@
-from FBCCA_IT import filter_bank_cca_it
 from scipy.io import loadmat
 from scipy.signal import filtfilt, cheby1, butter, iirnotch
 import argparse
@@ -6,9 +5,10 @@ import numpy as np
 from standard_CCA import standard_cca
 from standard_CCA_ITCCA import standard_cca_it_cca
 from FBCCA_IT import filter_bank_cca_it
+import warnings
 
 
-def cross_validate_fbcca(data, channels, num_harmonics=5, data_length=1.5, includes_latency=1):
+def cross_validate_fbcca(data, channels, num_harmonics=5, data_length=4.2, includes_latency=1):
     _, _, num_targets, num_blocks = data.shape  # data is a 4D numpy array
     scores = np.zeros([1, num_blocks])
     results = np.zeros([1, 40])
@@ -47,6 +47,7 @@ def cross_validate_fbcca(data, channels, num_harmonics=5, data_length=1.5, inclu
 
 
 def main():
+    warnings.filterwarnings(action='ignore')
     parser = argparse.ArgumentParser()
     parser.add_argument('file_path')
     args = parser.parse_args()
@@ -67,9 +68,9 @@ def main():
     """
     all_channels = [47, 53, 54, 55, 56, 57, 60, 61, 62] # 64 channels, index: 0-63
     # all_channels = [i for i in range(64)]
-    mean, std = cross_validate_fbcca(data=data, channels=all_channels, num_harmonics=5, data_length=2)
+    mean, std = cross_validate_fbcca(data=data, channels=all_channels, num_harmonics=5, data_length=4.2)
     print(mean, std)
-    mean, std = cross_validate_fbcca(data=data, channels=all_channels, num_harmonics=5, data_length=1.5)
+    mean, std = cross_validate_fbcca(data=data, channels=all_channels, num_harmonics=5, data_length=3.0)
     print(mean, std)
     """
     mean, std = cross_validate_fbcca(data=data, channels=all_channels, num_harmonics=5, data_length=1)
