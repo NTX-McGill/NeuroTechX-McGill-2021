@@ -10,6 +10,7 @@ from collections import deque
 import time
 from dcp.models.data import CollectedData
 from dcp.models.collection import BCICollection
+from dcp.signals.predict import predict_letter
 
 
 bp = Blueprint('api', __name__, url_prefix='/api')
@@ -165,10 +166,13 @@ def openbci_process_collect_stop(process_id: int):
 
 def predict_character(shared_queue):
     """ Dummy function waiting for signal team """
-    # TODO: pull out data from the shared queue
-    # TODO: send data to the signal team's prediction function to get prediction
-    prediction = "a"
-    return prediction
+    # pull out data from the shared queue
+    bci_data = None
+    while not shared.queue.empty():
+        stream_data = shared.queue.get_nowait()
+        bci_data = np.asarray(stream_data) if not bci_data else np.concatenate((bci_data, np.asarray(stream_data)))
+    
+    return predict_letter(bci_data)
 
 @bp.route("/openbci/<int:process_id>/stop", methods=['POST'])
 def openbci_stop(process_id: int):
