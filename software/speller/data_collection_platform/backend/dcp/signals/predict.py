@@ -12,7 +12,8 @@ def predict_letter(bci_data, subject_id='S08'):
     low_bound_freq = 5.5
     upper_bound_freq = 54.0
     num_harmonics = 5  # parameter of FBCCA
-    onset = 35  # remove visual latency
+    onset = 80  # remove visual latency and head
+
     # dummy = np.random.rand(500, 8)  # 8 channels of 2s data, sampling rate = 250Hz
     # Template for each subject is stored locally, will be loaded as matlab array (for convenience) before inference.
     # Could be implemented differently
