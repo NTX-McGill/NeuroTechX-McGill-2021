@@ -17,7 +17,8 @@ def predict_letter(bci_data, subject_id='S08'):
     # Template for each subject is stored locally, will be loaded as matlab array (for convenience) before inference.
     # Could be implemented differently
     # template is basically averaged data previously collected given the same stimulus frequency
-    template = np.load(f'{subject_id}_template.npy', allow_pickle=True).item()
+
+    template = np.load(f'./dcp/signals/{subject_id}_template.npy', allow_pickle=True).item()
 
     """
     with open("keyboard_config.json") as fp:
@@ -32,7 +33,7 @@ def predict_letter(bci_data, subject_id='S08'):
     return 
     """
 
-    with open("freq_letter_map.json") as fp:
+    with open("./dcp/signals/freq_letter_map.json") as fp:
         freq_letter_dict = json.load(fp)
     # print(freq_letter_dict)
     signal_len = np.shape(bci_data)[0]

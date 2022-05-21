@@ -12,6 +12,8 @@ from dcp.models.data import CollectedData
 from dcp.models.collection import BCICollection
 from dcp.signals.predict import predict_letter
 
+import numpy as np
+
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -94,25 +96,36 @@ def openbci_start():
 def openbci_process_collect_start(process_id: int):
     data = request.json
 
-    # We now know that the request contains all the keys
     if process_id not in shared.get_bci_processes_states():
         return {'error_message': f'There is no process with id {process_id}, make sure your process id is valid'}, 404
+        
     subprocess_dict = shared.get_bci_processes_states()[process_id]
 
-    try:
-        subprocess_dict['character'] = data['character']
-        subprocess_dict['frequency'] = float(data['frequency'])
-        subprocess_dict['phase'] = float(data['phase'])
-    except KeyError as e:
-        return {'error_message': f'Key {e} is missing from json.'}, 400
-    except ValueError as e:
-        return {'error_message': f'{e}. Make sure the data is the correct type: string for character, and float for phase and frequency.'}, 400
+    if not data["predict"]:
 
-    subprocess_dict['state'] = 'collect'
-    current_app.logger.info(
-        f"BCI is collecting data for character \"{subprocess_dict['character']}\" with phase {subprocess_dict['phase']} and frequency {subprocess_dict['frequency']}.")
+        # We now know that the request contains all the key
 
-    return {'success_message': 'BCI is collecting.'}, 201
+        try:
+            subprocess_dict['character'] = data['character']
+            subprocess_dict['frequency'] = float(data['frequency'])
+            subprocess_dict['phase'] = float(data['phase'])
+        except KeyError as e:
+            return {'error_message': f'Key {e} is missing from json.'}, 400
+        except ValueError as e:
+            return {'error_message': f'{e}. Make sure the data is the correct type: string for character, and float for phase and frequency.'}, 400
+
+        subprocess_dict['state'] = 'collect'
+        current_app.logger.info(
+            f"BCI is collecting data for character \"{subprocess_dict['character']}\" with phase {subprocess_dict['phase']} and frequency {subprocess_dict['frequency']}.")
+
+        return {'success_message': 'BCI is collecting.'}, 201
+
+    else:
+
+        subprocess_dict['state'] = 'collect'
+        current_app.logger.info(
+            f"BCI is collecting data for inference.")
+        return {'success_message': 'BCI is collecting.'}, 201
 
 
 @bp.route('/openbci/<int:process_id>/collect/stop', methods=['POST'])
@@ -170,7 +183,7 @@ def predict_character(shared_queue):
     bci_data = None
     while not shared.queue.empty():
         stream_data = shared.queue.get_nowait()
-        bci_data = np.asarray(stream_data) if not bci_data else np.concatenate((bci_data, np.asarray(stream_data)))
+        bci_data = np.asarray(stream_data) if (bci_data is None) else np.concatenate((bci_data, np.asarray(stream_data)))
     
     return predict_letter(bci_data)
 
