@@ -51,6 +51,10 @@
   grid-template-columns: 70% auto;
 }
 
+.inference-div {
+  margin: 20px;
+}
+
 .grid-item {
   display: flex;
   align-items: stretch;
@@ -58,6 +62,7 @@
   min-width: 0;
   min-height: 0;
   grid-column-end: span 12;
+  flex-direction: row;
 }
 
 .grid-item > .mode {

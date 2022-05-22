@@ -23,7 +23,7 @@ const COLOR_HIGHLIGHT_START = '#ff0000';
 
 const COLOR_HIGHLIGHT_STOP = '#000000';
 
-const WIDTH_DEFAULT = '4.2rem';
+const WIDTH_DEFAULT = '7rem';
 
 const COLOR_RUN = '#2ede28';
 const COLOR_PAUSE = '#F2C94C';

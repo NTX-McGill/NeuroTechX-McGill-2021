@@ -22,17 +22,19 @@ function App() {
             {useInference ? 'Go to Data Collection' : 'Go to Inference'}
           </button>
         </div>
-      </div>
-      {useInference ? (
-        <div className={'col-container'}>
-          <Keyboard chartData={chartData} setChartData={setChartData} useInference={useInference} setSentence={setSentence}/>
-          <InferenceView
+        {useInference && <div className={'inference-div'}>
+        <InferenceView
             label={sentence}
             predictions={[
               { value: 'a', confidence: 0.9 },
               { value: 'b', confidence: 0.8 },
             ]}
           />
+        </div>}
+      </div>
+      {useInference ? (
+        <div className={'grid-item'}>
+          <Keyboard chartData={chartData} setChartData={setChartData} useInference={useInference} setSentence={setSentence}/>
         </div>
       ) : (
         <div className={'grid-item'}>
