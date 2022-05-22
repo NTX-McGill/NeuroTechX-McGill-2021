@@ -96,6 +96,8 @@ def openbci_start():
 def openbci_process_collect_start(process_id: int):
     data = request.json
 
+    print("Queue size:", shared.queue.qsize());
+
     if process_id not in shared.get_bci_processes_states():
         return {'error_message': f'There is no process with id {process_id}, make sure your process id is valid'}, 404
         
@@ -166,15 +168,22 @@ def openbci_process_collect_stop(process_id: int):
         if data["sentence"] is None:
             return {"error_message": "Sentence must be a string and cannot be a NoneType. Try using an empty string if sentence has length 0."}, 400
         
+        print("Before clearing:", shared.queue.qsize())
+
         # call the matlab function with the EEG data in the shared queue
         next_character = predict_character(shared.queue)
         data["sentence"] += next_character
 
+        while not shared.queue.empty():
+            stream_data = shared.queue.get_nowait()
+
+        print("After clearing:", shared.queue.qsize())
+
         # call the ML function for next word prediction or current word autocompletion
-        ml_predictions = dispatch(data["sentence"])
+        #ml_predictions = dispatch(data["sentence"])
 
         # TODO check if 200 response code is the correct choice
-        return {"sentence": data["sentence"], "next_character": next_character, "predictions": ml_predictions["options"], "mode": ml_predictions["mode"]}, 200
+        return {"sentence": data["sentence"], "next_character": next_character}, 200#, "predictions": ml_predictions["options"], "mode": ml_predictions["mode"]}, 200
 
 
 def predict_character(shared_queue):
@@ -183,7 +192,10 @@ def predict_character(shared_queue):
     bci_data = None
     while not shared.queue.empty():
         stream_data = shared.queue.get_nowait()
+        print("Data sample:", np.asarray(stream_data).shape)
         bci_data = np.asarray(stream_data) if (bci_data is None) else np.concatenate((bci_data, np.asarray(stream_data)))
+
+    print("Final shape:", bci_data.shape)
     
     return predict_letter(bci_data)
 
@@ -201,12 +213,15 @@ def openbci_stop(process_id: int):
     subprocess_dict['state'] = 'stop'
     if not shared.queue.empty():
         return {'error_message': f"Stopped bci process, however the queue for BCI data was not empty, data for character {subprocess_dict['character']} might be incomplete."}, 400
-        
-    collection = db.session.query(BCICollection).get(subprocess_dict['collection_id'])
-    collection.collection_end_time = datetime.utcnow()
-    db.session.commit()
+    
+    try:
+        collection = db.session.query(BCICollection).get(subprocess_dict['collection_id'])
+        collection.collection_end_time = datetime.utcnow()
+        db.session.commit()
 
-    shared.get_bci_processes_states().pop(process_id)
+        shared.get_bci_processes_states().pop(process_id)
+    except Exception as e:
+        return {'error_message': e.message}, 500
 
     return {'success_message': f"Successfully ended BCI subprocess with id {process_id}"}, 200
 
@@ -235,6 +250,8 @@ def write_stream_data(subprocess_dict):
                 )
             )
             order += 1
+
+    current_app.logger.info("Queue size after writing:", shared.queue.qsize())
 
     db.session.add_all(collected_data)
     db.session.commit()

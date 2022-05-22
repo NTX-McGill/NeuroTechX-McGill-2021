@@ -40,7 +40,7 @@ def predict_letter(bci_data, subject_id='S08'):
     for frequency in list(freq_letter_dict.keys()):  # Do FBCCA for every frequency, find the one with max corr
 
         rho = filter_bank_cca_it(bci_data[onset:, :], float(frequency), low_bound_freq, upper_bound_freq, num_harmonics,
-                                 template.get(float(frequency)).astype(float)[onset:signal_len+1, :], sampling_rate)
+                                 template.get(float(frequency)).astype(float)[onset:signal_len, :], sampling_rate)
         corr.append(rho)
     prediction_index = np.argmax(corr)
     predicted_letter = freq_letter_dict.get(list(freq_letter_dict.keys())[prediction_index])
