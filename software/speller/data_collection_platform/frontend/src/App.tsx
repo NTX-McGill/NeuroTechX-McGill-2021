@@ -8,6 +8,8 @@ function App() {
   const [chartData, setChartData] = useState<any[]>([]);
   const [useInference, setInference] = useState<boolean>(false);
 
+  const [sentence, setSentence] = useState<string>("sentence");
+
   return (
     <div className="container">
       <div className={'grid-item'}>
@@ -23,9 +25,9 @@ function App() {
       </div>
       {useInference ? (
         <div className={'col-container'}>
-          <Keyboard chartData={chartData} setChartData={setChartData} />
+          <Keyboard chartData={chartData} setChartData={setChartData} useInference={useInference} setSentence={setSentence}/>
           <InferenceView
-            label={'testing hello this is a long sentence, I need to make sure it can wrap. adf asdf adf adsf asdf asdf asdf asdf  asdf asdf asdf asdf asdf asdf '}
+            label={sentence}
             predictions={[
               { value: 'a', confidence: 0.9 },
               { value: 'b', confidence: 0.8 },
@@ -34,7 +36,7 @@ function App() {
         </div>
       ) : (
         <div className={'grid-item'}>
-          <Keyboard chartData={chartData} setChartData={setChartData} />
+          <Keyboard chartData={chartData} setChartData={setChartData} useInference={useInference} setSentence={setSentence}/>
         </div>
       )}
     </div>
