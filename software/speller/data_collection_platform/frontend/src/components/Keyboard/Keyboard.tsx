@@ -13,6 +13,10 @@ import {
   startCollectingKey,
   stopCollectingKey,
 } from '../../api';
+import { ThreeSixty } from '@material-ui/icons';
+
+var current_duration_flashing : number;
+var current_duration_rest : number;
 
 const COLOR_DEFAULT = '#000000';
 const COLOR_HIGHLIGHT_START = '#ff0000';
@@ -30,6 +34,9 @@ const DURATION_HIGHLIGHT_STOP = 100;
 const DURATION_FLASHING = 5000;
 const DURATION_REST = 1000;
 
+const DURATION_FLASHING_INFERENCE = 1000;
+const DURATION_REST_INFERENCE = 1000;
+
 interface KeyMap {
   [key: string]: KeyProps;
 }
@@ -46,6 +53,8 @@ interface KeyboardState {
 interface KeyboardProps {
   chartData: any[];
   setChartData: Dispatch<SetStateAction<any[]>>;
+  useInference: boolean;
+  setSentence: Function;
 }
 
 class Keyboard extends Component<KeyboardProps, KeyboardState> {
@@ -60,7 +69,10 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   plot: any[];
 
   processID: number;
+  inferenceProcessID: number;
   listRefs: any;
+
+  sentence: string;
 
   constructor(props: KeyboardProps) {
     super(props);
@@ -79,6 +91,10 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     this.callback = () => {};
     this.plot = props.chartData;
     this.processID = -1;
+    this.inferenceProcessID = -1;
+
+    this.sentence = "";
+
     for (let val in Object.keys(config)) {
       let temp = { ...this.listRefs };
       temp[Object.keys(config)[val]] = React.createRef();
@@ -135,7 +151,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
       });
     }
 
-    if (delta < DURATION_FLASHING) {
+    if (delta < current_duration_flashing) {
       this.prevTime = time;
       window.requestAnimationFrame(this.flash);
     } else {
@@ -162,7 +178,6 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
         console.log(this.processID);
       } catch (error) {
-        this.setState({resting: false, running: false});
         console.error(error);
         // TODO: Make a popup showing a message that the BCI stream has not started 
         return;
@@ -199,6 +214,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
       try {
         await startCollectingKey(
           this.processID,
+          false,
           randKey,
           config[randKey as keyof typeof config].phase,
           config[randKey as keyof typeof config].frequency
@@ -218,7 +234,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
         }
 
         try {
-          await stopCollectingKey(this.processID);
+          await stopCollectingKey(this.processID, false);
         } catch (error) {
           console.error(error);
         }
@@ -247,7 +263,76 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     }, DURATION_HIGHLIGHT_START);
   }
 
+  async startInferenceHelper() {
+    try {
+      await startCollectingKey(
+        this.inferenceProcessID,
+        true
+      );
+    } catch (error) {
+      console.error(error);
+    }
+
+    this.setState({ resting: false, running: true});
+    this.startFlash.bind(this)();
+  }
+
+  async startInference() {
+
+    console.log("Collector:", this.state.collectorName);
+
+    this.inferenceProcessID = (
+      await startBCI(this.state.collectorName)
+    ).data.data.pid;
+
+    console.log("Inference process:", this.inferenceProcessID);
+
+    current_duration_flashing = DURATION_FLASHING_INFERENCE;
+    current_duration_rest = DURATION_REST_INFERENCE;
+
+    this.callback = async () => {
+
+      this.setState({ resting: true });
+
+      for (let val in this.listRefs) {
+        this.listRefs[val].current.setColor(COLOR_DEFAULT);
+      }
+
+      try {
+        this.sentence = (await stopCollectingKey(this.inferenceProcessID, true, this.sentence)).data.sentence;
+        this.props.setSentence(this.sentence);
+        console.log(this.sentence);
+      } catch (error) {
+        console.error(error);
+      }
+
+      setTimeout(async () => {
+
+        if (this.state.running) {
+
+          this.startInferenceHelper();
+
+        }
+      }, DURATION_REST_INFERENCE);
+
+      //this.setState({ keys: newState });
+    }
+
+    this.startInferenceHelper();
+
+    //setInterval(this.startFlash.bind(this), DURATION_REST_INFERENCE);
+  }
+
   start() {
+
+    if (this.props.useInference === true) {
+      this.startInference();
+      return;
+    }
+
+    current_duration_flashing = DURATION_FLASHING;
+    current_duration_rest = DURATION_REST;
+
     if (this.state.running) return;
     return this.setState(
       {
@@ -260,8 +345,35 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     );
   }
 
+  async stopInference() {
+
+    this.sentence = "";
+
+    try {
+      this.sentence = (await stopCollectingKey(this.inferenceProcessID, true, this.sentence)).data.sentence;
+      this.props.setSentence(this.sentence);
+
+      await stopBCI(this.inferenceProcessID);
+      this.inferenceProcessID = -1;
+    } catch (error) {
+      console.error(error);
+    }
+
+    this.setState({
+      running: false,
+      resting: false,
+    });
+  }
+
   async stop() {
+
     if (!this.state.resting) return;
+
+    if (this.props.useInference === true) {
+      this.stopInference();
+      return;
+    }
+
     if (this.processID !== -1) {
       try {
         await stopBCI(this.processID);
@@ -280,7 +392,26 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     });
   }
 
+  pauseInference() {
+    console.log(this.state.running);
+
+    if (this.state.running) {
+      
+      this.setState({ running: false })
+    } else {
+      this.setState({ running: true }, () => {
+        this.startInferenceHelper();
+      });
+    }
+  }
+
   pause() {
+
+    if (this.props.useInference === true) {
+      this.pauseInference();
+      return;
+    }
+
     if (this.state.running) {
       this.setState({ running: false });
     } else {
@@ -415,8 +546,13 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
         <label>
           Collector name
           <br />
-          <input value={this.state.collectorName} onChange={this.onNameChange} />
+          <input
+            value={this.state.collectorName}
+            onChange={this.onNameChange}
+          />
         </label>
+        <label>Running: { this.state.running ? "Yes" : "No"} </label>
+        <label>Resting: { this.state.resting ? "Yes" : "No"} </label>
       </div>
     );
   }
