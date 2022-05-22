@@ -135,14 +135,14 @@ def openbci_process_collect_stop(process_id: int):
 
     data = request.json
 
+    if process_id not in shared.get_bci_processes_states():
+        return {'error_message': 'There is no process with this id, make sure your process id is valid'}, 404
+
     subprocess_dict = shared.get_bci_processes_states()[process_id]
     subprocess_dict['state'] = 'ready'
 
     # if predict is false
     if not data["predict"]:
-
-        if process_id not in shared.get_bci_processes_states():
-            return {'error_message': 'There is no process with this id, make sure your process id is valid'}, 404
 
         current_app.logger.info(f"Stopped collecting for character {subprocess_dict['character']}.")
         current_app.logger.info(f"Writing collected data for character {subprocess_dict['character']} to the database.")
@@ -168,8 +168,6 @@ def openbci_process_collect_stop(process_id: int):
         # TODO test the following if statement for error handling
         if data["sentence"] is None:
             return {"error_message": "Sentence must be a string and cannot be a NoneType. Try using an empty string if sentence has length 0."}, 400
-        
-        print("Before clearing:", shared.queue.qsize())
 
         # call the matlab function with the EEG data in the shared queue
         next_character = predict_character(shared.queue)
@@ -177,8 +175,6 @@ def openbci_process_collect_stop(process_id: int):
 
         while not shared.queue.empty():
             stream_data = shared.queue.get_nowait()
-
-        print("After clearing:", shared.queue.qsize())
 
         # call the ML function for next word prediction or current word autocompletion
         #ml_predictions = dispatch(data["sentence"])
@@ -193,7 +189,6 @@ def predict_character(shared_queue):
     bci_data = None
     while not shared.queue.empty():
         stream_data = shared.queue.get_nowait()
-        print("Data sample:", np.asarray(stream_data).shape)
         bci_data = np.asarray(stream_data) if (bci_data is None) else np.concatenate((bci_data, np.asarray(stream_data)))
 
     print("Final shape:", bci_data.shape)
