@@ -135,14 +135,15 @@ def openbci_process_collect_stop(process_id: int):
 
     data = request.json
 
+    subprocess_dict = shared.get_bci_processes_states()[process_id]
+    subprocess_dict['state'] = 'ready'
+
     # if predict is false
     if not data["predict"]:
 
         if process_id not in shared.get_bci_processes_states():
             return {'error_message': 'There is no process with this id, make sure your process id is valid'}, 404
 
-        subprocess_dict = shared.get_bci_processes_states()[process_id]
-        subprocess_dict['state'] = 'ready'
         current_app.logger.info(f"Stopped collecting for character {subprocess_dict['character']}.")
         current_app.logger.info(f"Writing collected data for character {subprocess_dict['character']} to the database.")
 
