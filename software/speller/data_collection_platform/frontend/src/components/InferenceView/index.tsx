@@ -5,12 +5,18 @@ const InferenceView = ({
   label,
   predictions,
   nextWord,
+  setSentence
 }: {
   label: string;
   predictions: { value: string; confidence: number }[];
   nextWord?: boolean;
+  setSentence: Function;
 }) => {
   const textLog = React.createRef<HTMLTextAreaElement>();
+
+  const clearSentence = () => {
+    setSentence("");
+  }
 
   const parsedPredictions = React.useMemo(() => {
     return predictions.sort((a, b) => {
@@ -36,6 +42,7 @@ const InferenceView = ({
             <h6 key={index}>{p.value}</h6>
           ))}
         </div>
+        <button className="clear" onClick={clearSentence}>Clear</button>
       </div>
     </div>
   );

@@ -10,11 +10,12 @@
     border-color: #000;
     border-width: .1rem;
     border-radius: .2rem;
+    color: black;
 }
 
 .p-container {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: flex-start;
     padding: 0 8%;
 }
@@ -32,4 +33,46 @@
 .p-container > .predictions > h6 {
     font-size: 1.5rem;
     margin: 3% 0;
+}
+
+.clear {
+    height: 3rem;
+    width: 10rem;
+    border: none;
+    background: black;
+    color: #ffffff;
+    font-size: 1.05rem;
+    outline: none;
+    cursor: pointer;
+    margin: 0.6rem;
+    padding: 1rem;
+}
+
+.container {
+    height: 100%;
+    text-align: center;
+    display: grid;
+    grid-gap: 0%;
+    padding: 0 0.5%;
+    grid-template-columns: 10% auto;
+    grid-template-columns: repeat(12, 1fr);
+  }
+  
+  .grid-item {
+    display: flex;
+    align-items: stretch;
+    align-content: stretch;
+    min-width: 0;
+    min-height: 0;
+    grid-column-end: span 12;
+    flex-direction: row;
+  }
+
+  select {
+    height: 3rem;
+    width: 10rem;
+    outline: none;
+    cursor: pointer;
+    margin: 0.6rem;
+    padding: 2% 5%;
 }

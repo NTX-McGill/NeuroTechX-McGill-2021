@@ -2,10 +2,10 @@ import axios from 'axios';
 
 var URL = 'http://localhost:5000/api';
 
-export async function startBCI(collectorName: string) {
+export async function startBCI(collectorName?: string) {
   var path = '/openbci/start';
   return await axios.post(`${URL}${path}`, {
-    collector_name: collectorName,
+    collector_name: collectorName ? collectorName : "",
   });
 }
 

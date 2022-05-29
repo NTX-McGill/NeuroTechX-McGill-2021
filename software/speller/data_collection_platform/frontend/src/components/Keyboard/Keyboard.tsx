@@ -282,7 +282,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     console.log("Collector:", this.state.collectorName);
 
     this.inferenceProcessID = (
-      await startBCI(this.state.collectorName)
+      await startBCI()
     ).data.data.pid;
 
     console.log("Inference process:", this.inferenceProcessID);
@@ -517,7 +517,6 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
             <button
               className="toggle"
               onClick={this.start.bind(this)}
-              disabled={!this.state.collectorName}
               style={{ background: COLOR_RUN }}
             >
               {this.state.numRoundsCollected > 0 ? 'Collect Again' : 'Start'}
@@ -543,16 +542,25 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
             </>
           )}
         </div>
-        <label>
+        {!this.props.useInference ? 
+        
+        (<label>
           Collector name
           <br />
           <input
             value={this.state.collectorName}
             onChange={this.onNameChange}
           />
-        </label>
-        <label>Running: { this.state.running ? "Yes" : "No"} </label>
-        <label>Resting: { this.state.resting ? "Yes" : "No"} </label>
+        </label>) :
+
+          (
+            <select>
+              <option value="S02">S02</option>
+              <option value="S08">S08</option>
+            </select>
+          )
+
+        }
       </div>
     );
   }
