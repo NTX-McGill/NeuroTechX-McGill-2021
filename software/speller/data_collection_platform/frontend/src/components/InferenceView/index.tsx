@@ -28,13 +28,13 @@ const InferenceView = ({
   React.useEffect(() => {
     if (textLog.current) {
       textLog.current.scrollTop = textLog.current.scrollHeight;
-      textLog.current.style.height = textLog.current.scrollHeight + 'px';
+      //textLog.current.style.height = textLog.current.scrollHeight + 'px';
     }
   }, [textLog]);
 
   return (
     <div className={'main-container'}>
-      <textarea ref={textLog} value={label} readOnly={true} />
+      <textarea ref={textLog} value={label} readOnly={true}/>
       <div className={'p-container'}>
         <h5>{nextWord ? 'Next Word:' : 'Next Character:'}</h5>
         <div className={'predictions'}>

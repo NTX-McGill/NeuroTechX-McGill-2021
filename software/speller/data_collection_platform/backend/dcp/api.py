@@ -14,6 +14,7 @@ from dcp.signals.predict import predict_letter
 
 import numpy as np
 
+import time
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
@@ -169,8 +170,13 @@ def openbci_process_collect_stop(process_id: int):
         if data["sentence"] is None:
             return {"error_message": "Sentence must be a string and cannot be a NoneType. Try using an empty string if sentence has length 0."}, 400
 
+        startPredict = time.time()
+
         # call the matlab function with the EEG data in the shared queue
         next_character = predict_character(shared.queue)
+
+        current_app.logger.info(f"Prediction time: {time.time() - startPredict}.")
+
         data["sentence"] += next_character
 
         while not shared.queue.empty():

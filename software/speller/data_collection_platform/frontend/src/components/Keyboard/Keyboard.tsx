@@ -344,7 +344,11 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
     try {
       this.props.setSentence(this.props.sentence + (await stopCollectingKey(this.inferenceProcessID, true, this.props.sentence)).data.next_character);
+    } catch (error) {
+      console.error(error);
+    }
 
+    try {
       await stopBCI(this.inferenceProcessID);
       this.inferenceProcessID = -1;
     } catch (error) {
@@ -514,18 +518,19 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
               {this.state.numRoundsCollected > 0 ? 'Collect Again' : 'Start'}
             </button>
           )}
-          {this.state.resting && (
+          {this.state.running && (
             <>
               <button
                 className="toggle"
                 style={{ background: COLOR_STOP }}
                 onClick={this.stop.bind(this)}
+                disabled={!this.state.resting}
               >
                 Stop
               </button>
               <button
                 className="toggle"
-                disabled={!this.state.collectorName}
+                disabled={!this.state.resting}
                 style={{ backgroundColor: COLOR_PAUSE }}
                 onClick={this.pause.bind(this)}
               >

@@ -4,6 +4,7 @@ import json
 
 
 def predict_letter(bci_data, subject_id='S08'):
+
     prediction = None
     # bci_data # 8 channels of x seconds data, sampling rate = 250Hz, then shape = (250x, 8)
     # parameters
