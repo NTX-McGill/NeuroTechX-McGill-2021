@@ -55,6 +55,7 @@ interface KeyboardProps {
   setChartData: Dispatch<SetStateAction<any[]>>;
   useInference: boolean;
   setSentence: Function;
+  sentence: string;
 }
 
 class Keyboard extends Component<KeyboardProps, KeyboardState> {
@@ -71,8 +72,6 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   processID: number;
   inferenceProcessID: number;
   listRefs: any;
-
-  sentence: string;
 
   constructor(props: KeyboardProps) {
     super(props);
@@ -92,8 +91,6 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     this.plot = props.chartData;
     this.processID = -1;
     this.inferenceProcessID = -1;
-
-    this.sentence = "";
 
     for (let val in Object.keys(config)) {
       let temp = { ...this.listRefs };
@@ -299,9 +296,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
       }
 
       try {
-        this.sentence = (await stopCollectingKey(this.inferenceProcessID, true, this.sentence)).data.sentence;
-        this.props.setSentence(this.sentence);
-        console.log(this.sentence);
+        this.props.setSentence(this.props.sentence + (await stopCollectingKey(this.inferenceProcessID, true, this.props.sentence)).data.next_character);
       } catch (error) {
         console.error(error);
       }
@@ -347,11 +342,8 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
   async stopInference() {
 
-    this.sentence = "";
-
     try {
-      this.sentence = (await stopCollectingKey(this.inferenceProcessID, true, this.sentence)).data.sentence;
-      this.props.setSentence(this.sentence);
+      this.props.setSentence(this.props.sentence + (await stopCollectingKey(this.inferenceProcessID, true, this.props.sentence)).data.next_character);
 
       await stopBCI(this.inferenceProcessID);
       this.inferenceProcessID = -1;

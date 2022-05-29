@@ -8,7 +8,7 @@ function App() {
   const [chartData, setChartData] = useState<any[]>([]);
   const [useInference, setInference] = useState<boolean>(false);
 
-  const [sentence, setSentence] = useState<string>("sentence");
+  const [sentence, setSentence] = useState<string>("");
 
   return (
     <div className='parent'>
@@ -27,7 +27,7 @@ function App() {
                 </div>
 
                 <div className='rel'>
-                  <Keyboard chartData={chartData} setChartData={setChartData} useInference={useInference} setSentence={setSentence}/>
+                  <Keyboard chartData={chartData} setChartData={setChartData} useInference={useInference} sentence={sentence} setSentence={setSentence}/>
 
                   {useInference && <div className='abs'>
                   <InferenceView
