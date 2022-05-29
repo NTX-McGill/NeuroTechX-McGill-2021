@@ -12,6 +12,8 @@ from dcp.models.data import CollectedData
 from dcp.models.collection import BCICollection
 from dcp.signals.predict import predict_letter
 
+from dcp.ml.predict import dispatch
+
 import numpy as np
 
 import time
@@ -189,10 +191,10 @@ def openbci_process_collect_stop(process_id: int):
             stream_data = shared.queue.get_nowait()
 
         # call the ML function for next word prediction or current word autocompletion
-        #ml_predictions = dispatch(data["sentence"])
+        ml_predictions = dispatch(data["sentence"])
 
         # TODO check if 200 response code is the correct choice
-        return {"sentence": data["sentence"], "next_character": next_character}, 200#, "predictions": ml_predictions["options"], "mode": ml_predictions["mode"]}, 200
+        return {"sentence": data["sentence"], "next_character": next_character, "predictions": ml_predictions["options"], "mode": ml_predictions["mode"]}, 200
 
 
 def predict_character(shared_queue):

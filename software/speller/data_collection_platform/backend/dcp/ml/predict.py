@@ -1,4 +1,4 @@
-from utils import NEARBY_KEYS, load_models, process_input_prefix, clean_and_parse
+from dcp.ml.utils import NEARBY_KEYS, load_models, process_input_prefix, clean_and_parse
 from collections import Counter 
 import sys, os 
 import argparse 
