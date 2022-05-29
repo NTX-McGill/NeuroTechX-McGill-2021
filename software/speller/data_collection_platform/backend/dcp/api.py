@@ -16,6 +16,8 @@ import numpy as np
 
 import time
 
+import cProfile
+
 bp = Blueprint('api', __name__, url_prefix='/api')
 
 
@@ -172,10 +174,14 @@ def openbci_process_collect_stop(process_id: int):
 
         startPredict = time.time()
 
+        current_app.logger.info("Profiling.")
+
         # call the matlab function with the EEG data in the shared queue
-        next_character = predict_character(shared.queue)
+        cProfile.runctx("current_app.logger.info(predict_character(shared.queue))", globals(), locals(), "profiling")
 
         current_app.logger.info(f"Prediction time: {time.time() - startPredict}.")
+
+        next_character = "a"
 
         data["sentence"] += next_character
 
@@ -190,6 +196,9 @@ def openbci_process_collect_stop(process_id: int):
 
 
 def predict_character(shared_queue):
+
+    #current_app.logger.info("Input to predict:", shared_queue.shape)
+
     """ Dummy function waiting for signal team """
     # pull out data from the shared queue
     bci_data = None
