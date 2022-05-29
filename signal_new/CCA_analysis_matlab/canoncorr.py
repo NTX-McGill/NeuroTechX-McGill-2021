@@ -44,8 +44,8 @@ def canoncorr(X, Y):
     # put coefficients back to their full size and their correct order
     A = np.zeros((p1, d))
     B = np.zeros((p2, d))
-    A[perm1] = np.concatenate([A_tmp, np.zeros((p1-rankX, d))])
-    B[perm2] = np.concatenate([B_tmp, np.zeros((p2-rankY, d))])
+    A[perm1[:rankX]] = A_tmp
+    B[perm2[:rankY]] = B_tmp
 
     # compute canonical variates
     U = X @ A
