@@ -179,11 +179,11 @@ def openbci_process_collect_stop(process_id: int):
         current_app.logger.info("Profiling.")
 
         # call the matlab function with the EEG data in the shared queue
-        cProfile.runctx("current_app.logger.info(predict_character(shared.queue))", globals(), locals(), "profiling")
+        #cProfile.runctx("current_app.logger.info(predict_character(shared.queue))", globals(), locals(), "profiling")
 
         current_app.logger.info(f"Prediction time: {time.time() - startPredict}.")
 
-        next_character = "a"
+        next_character = predict_character(shared.queue)
 
         data["sentence"] += next_character
 
@@ -191,10 +191,10 @@ def openbci_process_collect_stop(process_id: int):
             stream_data = shared.queue.get_nowait()
 
         # call the ML function for next word prediction or current word autocompletion
-        ml_predictions = dispatch(data["sentence"])
+        #ml_predictions = dispatch(data["sentence"])
 
         # TODO check if 200 response code is the correct choice
-        return {"sentence": data["sentence"], "next_character": next_character, "predictions": ml_predictions["options"], "mode": ml_predictions["mode"]}, 200
+        return {"sentence": data["sentence"], "next_character": next_character}, 200#, "predictions": ml_predictions["options"], "mode": ml_predictions["mode"]}, 200
 
 
 def predict_character(shared_queue):

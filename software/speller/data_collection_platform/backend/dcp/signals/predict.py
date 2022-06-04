@@ -4,7 +4,7 @@ import json
 from scipy.signal import filtfilt, cheby1, iirnotch
 
 
-def predict_letter(bci_data, subject_id='S08'):
+def predict_letter(bci_data, subject_id='S10'):
     prediction = None
     # bci_data # 8 channels of x seconds data, sampling rate = 250Hz, then shape = (250x, 8)
     # parameters
@@ -51,8 +51,14 @@ def predict_letter(bci_data, subject_id='S08'):
     bci_data = filtfilt(beta, alpha, bci_data.T).T
 
     for frequency in list(freq_letter_dict.keys()):  # Do FBCCA for every frequency, find the one with max corr
-        rho = filter_bank_cca_it(bci_data, float(frequency), low_bound_freq, upper_bound_freq, num_harmonics,
-                                 template.get(float(frequency)).astype(float)[:signal_len, :], sampling_rate)
+        reference_signal = template.get(float(frequency)).astype(float)[:signal_len, :]
+        bci_data_short = bci_data
+        if reference_signal.shape[0] < bci_data.shape[0]:
+            bci_data_short = bci_data_short[:reference_signal.shape[0]]
+#        raise ValueError(f'SHAPES: {bci_data_short.shape}, {reference_signal.shape}')
+        rho = filter_bank_cca_it(bci_data_short, float(frequency), low_bound_freq, upper_bound_freq, num_harmonics,
+                                 reference_signal,#template.get(float(frequency)).astype(float)[:signal_len, :], 
+                                 sampling_rate)
         corr.append(rho)
     prediction_index = np.argmax(corr)
     predicted_letter = freq_letter_dict.get(list(freq_letter_dict.keys())[prediction_index])
