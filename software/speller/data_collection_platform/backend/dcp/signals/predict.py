@@ -39,14 +39,14 @@ def predict_letter(bci_data, subject_id='S08'):
 
     with open("freq_letter_map.json") as fp:
         freq_letter_dict = json.load(fp)
-    # print(freq_letter_dict)
+
     signal_len = np.shape(bci_data)[0]
 
     # preprocessing: DC offset removal, notch filter, bandpass filter
     # only needs to be done once
     bci_data -= np.nanmean(bci_data, axis=0)
-    beta_notch, alpha_notch = iirnotch(notch_freq, notch_Q, fs=sampling_rate)
-    bci_data = filtfilt(beta_notch, alpha_notch, bci_data, axis=0)
+    # beta_notch, alpha_notch = iirnotch(notch_freq, notch_Q, fs=sampling_rate)
+    # bci_data = filtfilt(beta_notch, alpha_notch, bci_data, axis=0)
     beta, alpha = cheby1(N=2, rp=0.3, Wn=[low_bound_freq / nyq_freq, upper_bound_freq / nyq_freq], btype='band', output='ba')
     bci_data = filtfilt(beta, alpha, bci_data.T).T
 
