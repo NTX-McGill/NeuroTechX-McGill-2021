@@ -39,20 +39,23 @@ def predict_letter(bci_data, subject_id='S08'):
 
     with open("freq_letter_map.json") as fp:
         freq_letter_dict = json.load(fp)
-    # print(freq_letter_dict)
+
     signal_len = np.shape(bci_data)[0]
 
     # preprocessing: DC offset removal, notch filter, bandpass filter
     # only needs to be done once
     bci_data -= np.nanmean(bci_data, axis=0)
-    beta_notch, alpha_notch = iirnotch(notch_freq, notch_Q, fs=sampling_rate)
-    bci_data = filtfilt(beta_notch, alpha_notch, bci_data, axis=0)
+    # beta_notch, alpha_notch = iirnotch(notch_freq, notch_Q, fs=sampling_rate)
+    # bci_data = filtfilt(beta_notch, alpha_notch, bci_data, axis=0)
     beta, alpha = cheby1(N=2, rp=0.3, Wn=[low_bound_freq / nyq_freq, upper_bound_freq / nyq_freq], btype='band', output='ba')
     bci_data = filtfilt(beta, alpha, bci_data.T).T
 
     for frequency in list(freq_letter_dict.keys()):  # Do FBCCA for every frequency, find the one with max corr
-        rho = filter_bank_cca_it(bci_data, float(frequency), low_bound_freq, upper_bound_freq, num_harmonics,
-                                 template.get(float(frequency)).astype(float)[:signal_len, :], sampling_rate)
+        bci_data -= np.nanmean(bci_data, axis=0)
+        beta, alpha = cheby1(N=2, rp=0.3, Wn=[5.5 / 125.0, 54.0 / 125.0], btype='band', output='ba')
+        bci_data = filtfilt(beta, alpha, bci_data.T).T
+        rho = filter_bank_cca_it(bci_data[onset:], float(frequency), low_bound_freq, upper_bound_freq, num_harmonics,
+                                 template.get(float(frequency)).astype(float)[onset:signal_len, :], sampling_rate)
         corr.append(rho)
     prediction_index = np.argmax(corr)
     predicted_letter = freq_letter_dict.get(list(freq_letter_dict.keys())[prediction_index])
