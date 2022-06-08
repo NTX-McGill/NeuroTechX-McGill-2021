@@ -14,6 +14,7 @@ def predict_letter(bci_data, subject_id='S08'):
     upper_bound_freq = 54.0
     num_harmonics = 5  # parameter of FBCCA
     onset = 80  # remove visual latency and head
+    end = 45 #  remove tail of signal to avoid filtering artifacts
     notch_freq = 60
     notch_Q = 10
     nyq_freq = sampling_rate / 2
@@ -54,8 +55,8 @@ def predict_letter(bci_data, subject_id='S08'):
         bci_data -= np.nanmean(bci_data, axis=0)
         beta, alpha = cheby1(N=2, rp=0.3, Wn=[5.5 / 125.0, 54.0 / 125.0], btype='band', output='ba')
         bci_data = filtfilt(beta, alpha, bci_data.T).T
-        rho = filter_bank_cca_it(bci_data[onset:, :], float(frequency), low_bound_freq, upper_bound_freq, num_harmonics,
-                                 template.get(float(frequency)).astype(float)[onset:signal_len, :], sampling_rate)
+        rho = filter_bank_cca_it(bci_data[onset:-end, :], float(frequency), low_bound_freq, upper_bound_freq, num_harmonics,
+                                 template.get(float(frequency)).astype(float)[onset:signal_len-end, :], sampling_rate)
         corr.append(rho)
     prediction_index = np.argmax(corr)
     predicted_letter = freq_letter_dict.get(list(freq_letter_dict.keys())[prediction_index])
