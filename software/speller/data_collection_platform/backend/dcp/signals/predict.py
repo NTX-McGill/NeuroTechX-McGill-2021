@@ -1,7 +1,7 @@
 from FBCCA_IT import filter_bank_cca_it
 import numpy as np
 import json
-from scipy.signal import filtfilt, cheby1
+from scipy.signal import filtfilt, cheby1, iirnotch
 
 
 def predict_letter(bci_data, subject_id='S08'):
@@ -14,6 +14,9 @@ def predict_letter(bci_data, subject_id='S08'):
     upper_bound_freq = 54.0
     num_harmonics = 5  # parameter of FBCCA
     onset = 80  # remove visual latency and head
+    notch_freq = 60
+    notch_Q = 10
+    nyq_freq = sampling_rate / 2
 
     # dummy = np.random.rand(500, 8)  # 8 channels of 2s data, sampling rate = 250Hz
     # Template for each subject is stored locally, will be loaded as matlab array (for convenience) before inference.
@@ -38,6 +41,15 @@ def predict_letter(bci_data, subject_id='S08'):
         freq_letter_dict = json.load(fp)
     # print(freq_letter_dict)
     signal_len = np.shape(bci_data)[0]
+
+    # preprocessing: DC offset removal, notch filter, bandpass filter
+    # only needs to be done once
+    bci_data -= np.nanmean(bci_data, axis=0)
+    beta_notch, alpha_notch = iirnotch(notch_freq, notch_Q, fs=sampling_rate)
+    bci_data = filtfilt(beta_notch, alpha_notch, bci_data, axis=0)
+    beta, alpha = cheby1(N=2, rp=0.3, Wn=[low_bound_freq / nyq_freq, upper_bound_freq / nyq_freq], btype='band', output='ba')
+    bci_data = filtfilt(beta, alpha, bci_data.T).T
+
     for frequency in list(freq_letter_dict.keys()):  # Do FBCCA for every frequency, find the one with max corr
         bci_data -= np.nanmean(bci_data, axis=0)
         beta, alpha = cheby1(N=2, rp=0.3, Wn=[5.5 / 125.0, 54.0 / 125.0], btype='band', output='ba')
