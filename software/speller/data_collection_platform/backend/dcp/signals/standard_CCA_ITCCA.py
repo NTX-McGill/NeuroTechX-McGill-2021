@@ -1,6 +1,6 @@
 import numpy as np
-from standard_CCA import standard_cca
-from IT_CCA import it_cca
+from .standard_CCA import standard_cca
+from .IT_CCA import it_cca
 
 
 def standard_cca_it_cca(signal, sampling_rate, fund_frequency, num_harmonics, template):

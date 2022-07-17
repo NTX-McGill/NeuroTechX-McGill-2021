@@ -1,5 +1,6 @@
 from datetime import datetime
 from functools import wraps
+from re import L
 from flask import Blueprint, request, current_app
 import os
 
@@ -9,9 +10,19 @@ from collections import deque
 import time
 from dcp.models.data import CollectedData
 from dcp.models.collection import BCICollection
+from dcp.signals.predict import predict_letter
 
+from dcp.ml.predict import dispatch
+
+import numpy as np
+
+import time
+
+import cProfile
 
 bp = Blueprint('api', __name__, url_prefix='/api')
+
+#idx = 0
 
 
 def validate_json(*fields):
@@ -92,48 +103,123 @@ def openbci_start():
 def openbci_process_collect_start(process_id: int):
     data = request.json
 
-    # We now know that the request contains all the keys
+    print("Queue size:", shared.queue.qsize());
+
     if process_id not in shared.get_bci_processes_states():
         return {'error_message': f'There is no process with id {process_id}, make sure your process id is valid'}, 404
+        
     subprocess_dict = shared.get_bci_processes_states()[process_id]
 
-    try:
-        subprocess_dict['character'] = data['character']
-        subprocess_dict['frequency'] = float(data['frequency'])
-        subprocess_dict['phase'] = float(data['phase'])
-    except KeyError as e:
-        return {'error_message': f'Key {e} is missing from json.'}, 400
-    except ValueError as e:
-        return {'error_message': f'{e}. Make sure the data is the correct type: string for character, and float for phase and frequency.'}, 400
+    if not data["predict"]:
 
-    subprocess_dict['state'] = 'collect'
-    current_app.logger.info(
-        f"BCI is collecting data for character \"{subprocess_dict['character']}\" with phase {subprocess_dict['phase']} and frequency {subprocess_dict['frequency']}.")
+        # We now know that the request contains all the key
 
-    return {'success_message': 'BCI is collecting.'}, 201
+        try:
+            subprocess_dict['character'] = data['character']
+            subprocess_dict['frequency'] = float(data['frequency'])
+            subprocess_dict['phase'] = float(data['phase'])
+        except KeyError as e:
+            return {'error_message': f'Key {e} is missing from json.'}, 400
+        except ValueError as e:
+            return {'error_message': f'{e}. Make sure the data is the correct type: string for character, and float for phase and frequency.'}, 400
+
+        subprocess_dict['state'] = 'collect'
+        current_app.logger.info(
+            f"BCI is collecting data for character \"{subprocess_dict['character']}\" with phase {subprocess_dict['phase']} and frequency {subprocess_dict['frequency']}.")
+
+        return {'success_message': 'BCI is collecting.'}, 201
+
+    else:
+
+        subprocess_dict['state'] = 'collect'
+        current_app.logger.info(
+            f"BCI is collecting data for inference.")
+        return {'success_message': 'BCI is collecting.'}, 201
 
 
 @bp.route('/openbci/<int:process_id>/collect/stop', methods=['POST'])
 def openbci_process_collect_stop(process_id: int):
+
+    data = request.json
+
     if process_id not in shared.get_bci_processes_states():
         return {'error_message': 'There is no process with this id, make sure your process id is valid'}, 404
 
     subprocess_dict = shared.get_bci_processes_states()[process_id]
     subprocess_dict['state'] = 'ready'
-    current_app.logger.info(f"Stopped collecting for character {subprocess_dict['character']}.")
-    current_app.logger.info(f"Writing collected data for character {subprocess_dict['character']} to the database.")
 
-    # write to database
-    if not write_stream_data(subprocess_dict):
-        return {'error_message': "Did not write any data to the database, make sure to call /openbci/<int:process_id>/collect/start before this route."}, 400
+    # if predict is false
+    if not data["predict"]:
 
-    # clear the subprocess_dict
-    subprocess_dict['character'] = None
-    subprocess_dict['frequency'] = None
-    subprocess_dict['phase'] = None
+        current_app.logger.info(f"Stopped collecting for character {subprocess_dict['character']}.")
+        current_app.logger.info(f"Writing collected data for character {subprocess_dict['character']} to the database.")
 
-    return {'success_message': 'BCI has stopped collecting, and the queue has been written to the database'}, 201
+        # write to database
+        if not write_stream_data(subprocess_dict):
+            return {'error_message': "Did not write any data to the database, make sure to call /openbci/<int:process_id>/collect/start before this route."}, 400
 
+        # clear the subprocess_dict
+        subprocess_dict['character'] = None
+        subprocess_dict['frequency'] = None
+        subprocess_dict['phase'] = None
+
+        return {'success_message': 'BCI has stopped collecting, and the queue has been written to the database'}, 201
+
+    # run predict
+    else:
+
+        # TODO test the following if statement for error handling     
+        if shared.queue.empty():
+            return {"error_message": "Did not return prediction. Queue for BCI data is empty."}, 400
+
+        # TODO test the following if statement for error handling
+        if data["sentence"] is None:
+            return {"error_message": "Sentence must be a string and cannot be a NoneType. Try using an empty string if sentence has length 0."}, 400
+
+        startPredict = time.time()
+
+        current_app.logger.info("Profiling.")
+
+        # call the matlab function with the EEG data in the shared queue
+        #cProfile.runctx("current_app.logger.info(predict_character(shared.queue))", globals(), locals(), "profiling")
+
+        current_app.logger.info(f"Prediction time: {time.time() - startPredict}.")
+
+        #change this
+        next_character = predict_character(shared.queue)
+        '''
+        global idx
+        sample = "Th1 2is a 3sample sentence. "
+        next_character = sample[idx%len(sample)]
+        idx += 1
+        '''
+
+        data["sentence"] += next_character
+
+        while not shared.queue.empty():
+            stream_data = shared.queue.get_nowait()
+
+        # call the ML function for next word prediction or current word autocompletion
+        ml_predictions = dispatch(data["sentence"])
+
+        # TODO check if 200 response code is the correct choice
+        return {"sentence": data["sentence"], "next_character": next_character, "predictions": ml_predictions["options"], "mode": ml_predictions["mode"]}, 200
+
+
+def predict_character(shared_queue):
+
+    #current_app.logger.info("Input to predict:", shared_queue.shape)
+
+    """ Dummy function waiting for signal team """
+    # pull out data from the shared queue
+    bci_data = None
+    while not shared.queue.empty():
+        stream_data = shared.queue.get_nowait()
+        bci_data = np.asarray(stream_data) if (bci_data is None) else np.concatenate((bci_data, np.asarray(stream_data)))
+
+    print("Final shape:", bci_data.shape)
+    
+    return predict_letter(bci_data)
 
 @bp.route("/openbci/<int:process_id>/stop", methods=['POST'])
 def openbci_stop(process_id: int):
@@ -149,12 +235,15 @@ def openbci_stop(process_id: int):
     subprocess_dict['state'] = 'stop'
     if not shared.queue.empty():
         return {'error_message': f"Stopped bci process, however the queue for BCI data was not empty, data for character {subprocess_dict['character']} might be incomplete."}, 400
-        
-    collection = db.session.query(BCICollection).get(subprocess_dict['collection_id'])
-    collection.collection_end_time = datetime.utcnow()
-    db.session.commit()
+    
+    try:
+        collection = db.session.query(BCICollection).get(subprocess_dict['collection_id'])
+        collection.collection_end_time = datetime.utcnow()
+        db.session.commit()
 
-    shared.get_bci_processes_states().pop(process_id)
+        shared.get_bci_processes_states().pop(process_id)
+    except Exception as e:
+        return {'error_message': e.message}, 500
 
     return {'success_message': f"Successfully ended BCI subprocess with id {process_id}"}, 200
 
@@ -183,6 +272,8 @@ def write_stream_data(subprocess_dict):
                 )
             )
             order += 1
+
+    current_app.logger.info("Queue size after writing:", shared.queue.qsize())
 
     db.session.add_all(collected_data)
     db.session.commit()

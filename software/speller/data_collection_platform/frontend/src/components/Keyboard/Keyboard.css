@@ -11,6 +11,12 @@
   padding: 1rem;
 }
 
+.space {
+  margin: 0.6rem;
+  padding: 1rem;
+  height: 3rem;
+}
+
 .keyboard {
   display: flex;
   flex-direction: column;
@@ -23,6 +29,10 @@
   text-align: left;
 }
 
+button:disabled {
+  visibility:hidden;
+}
+
 .keyboard > label > input {
   border-radius: 8px;
   border: 1px solid #000;
@@ -30,4 +40,8 @@
   height: 2.5rem;
   padding: 0.125em 0.5em;
   margin-top: 0.125em;
+}
+
+select {
+  color: black;
 }

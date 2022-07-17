@@ -2,7 +2,7 @@
   aspect-ratio: 1;
   border-color: #ff0000;
   color: #ffffff;
-  font-size: 1.05rem;
+  font-size: 2rem;
   outline: none;
   cursor: pointer;
   display: inline-block;
@@ -12,5 +12,5 @@
   padding: 0;
   -webkit-tap-highlight-color: transparent;
   position: relative;
-  margin: 0.5rem;
+  margin: 1rem;
 }
