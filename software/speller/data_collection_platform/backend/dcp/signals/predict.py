@@ -11,11 +11,11 @@ def predict_letter(bci_data, subject_id='S02'):
     # parameters
     corr = []
     sampling_rate = 250.0
-    low_bound_freq = 5.5
+    low_bound_freq = 7.75 # lowest freq - + 0.25
     # low_bound_freq = 9.0
-    upper_bound_freq = 22.0
+    upper_bound_freq = 16.25
     # upper_bound_freq = 12.0
-    num_harmonics = 2  # parameter of FBCCA
+    num_harmonics = 1  # parameter of FBCCA
     channels = [4]
     # channels = [0 , 1, 2, 3, 4, 5, 6, 7]  # index of channels used in prediction
     # onset = 80  # remove visual latency and head
