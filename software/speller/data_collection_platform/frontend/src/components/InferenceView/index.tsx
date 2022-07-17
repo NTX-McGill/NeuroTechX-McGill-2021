@@ -4,12 +4,10 @@ import './index.css';
 const InferenceView = ({
   label,
   predictions,
-  nextWord,
   setSentence
 }: {
   label: string;
-  predictions: { value: string; confidence: number }[];
-  nextWord?: boolean;
+  predictions: string[];
   setSentence: Function;
 }) => {
   const textLog = React.createRef<HTMLTextAreaElement>();
@@ -17,13 +15,6 @@ const InferenceView = ({
   const clearSentence = () => {
     setSentence("");
   }
-
-  const parsedPredictions = React.useMemo(() => {
-    return predictions.sort((a, b) => {
-      if (a.confidence > b.confidence) return -1;
-      else return 1;
-    });
-  }, [predictions]);
 
   React.useEffect(() => {
     if (textLog.current) {
@@ -36,10 +27,10 @@ const InferenceView = ({
     <div className={'main-container'}>
       <textarea ref={textLog} value={label} readOnly={true}/>
       <div className={'p-container'}>
-        <h5>{nextWord ? 'Next Word:' : 'Next Character:'}</h5>
+        <h5>{"Autocomplete:"}</h5>
         <div className={'predictions'}>
-          {parsedPredictions.map((p, index) => (
-            <h6 key={index}>{p.value}</h6>
+          {predictions.map((p, index) => (
+            <h6 key={index}>{p}</h6>
           ))}
         </div>
         <button className="clear" onClick={clearSentence}>Clear</button>

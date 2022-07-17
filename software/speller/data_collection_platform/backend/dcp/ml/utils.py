@@ -3,6 +3,10 @@ import re
 import pickle 
 import argparse
 
+def clean(word):
+    word = word.lower()  
+    regex = re.compile('[^a-z]')
+    return regex.sub('', word)
 
 def load_models(model_path): 
     ''' 
