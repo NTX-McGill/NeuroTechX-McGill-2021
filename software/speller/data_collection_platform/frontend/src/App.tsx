@@ -9,6 +9,7 @@ function App() {
   const [useInference, setInference] = useState<boolean>(false);
 
   const [sentence, setSentence] = useState<string>("");
+  const [autocompletePredictions, setAutocompletePredictions] = useState<string[]>(["option1", "option2", "option3"]);
 
   return (
     <div className='parent'>
@@ -27,15 +28,12 @@ function App() {
                 </div>
 
                 <div className='rel'>
-                  <Keyboard chartData={chartData} setChartData={setChartData} useInference={useInference} sentence={sentence} setSentence={setSentence}/>
+                  <Keyboard chartData={chartData} setChartData={setChartData} useInference={useInference} sentence={sentence} setSentence={setSentence} setAutocompletePredictions={setAutocompletePredictions} predictions={autocompletePredictions}/>
 
                   {useInference && <div className='abs'>
                   <InferenceView
                     label={sentence}
-                    predictions={[
-                      { value: 'a', confidence: 0.9 },
-                      { value: 'b', confidence: 0.8 },
-                    ]}
+                    predictions={autocompletePredictions}
                     setSentence={setSentence}
                   />
                   </div>}

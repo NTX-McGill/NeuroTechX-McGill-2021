@@ -22,6 +22,8 @@ import cProfile
 
 bp = Blueprint('api', __name__, url_prefix='/api')
 
+#idx = 0
+
 
 def validate_json(*fields):
     """Decorator to validate JSON body.
@@ -183,7 +185,14 @@ def openbci_process_collect_stop(process_id: int):
 
         current_app.logger.info(f"Prediction time: {time.time() - startPredict}.")
 
+        #change this
         next_character = predict_character(shared.queue)
+        '''
+        global idx
+        sample = "Th1 2is a 3sample sentence. "
+        next_character = sample[idx%len(sample)]
+        idx += 1
+        '''
 
         data["sentence"] += next_character
 
@@ -191,10 +200,10 @@ def openbci_process_collect_stop(process_id: int):
             stream_data = shared.queue.get_nowait()
 
         # call the ML function for next word prediction or current word autocompletion
-        #ml_predictions = dispatch(data["sentence"])
+        ml_predictions = dispatch(data["sentence"])
 
         # TODO check if 200 response code is the correct choice
-        return {"sentence": data["sentence"], "next_character": next_character}, 200#, "predictions": ml_predictions["options"], "mode": ml_predictions["mode"]}, 200
+        return {"sentence": data["sentence"], "next_character": next_character, "predictions": ml_predictions["options"], "mode": ml_predictions["mode"]}, 200
 
 
 def predict_character(shared_queue):

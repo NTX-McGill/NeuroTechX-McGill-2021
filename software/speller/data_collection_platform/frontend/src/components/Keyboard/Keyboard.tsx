@@ -55,7 +55,9 @@ interface KeyboardProps {
   setChartData: Dispatch<SetStateAction<any[]>>;
   useInference: boolean;
   setSentence: Function;
+  setAutocompletePredictions: Function;
   sentence: string;
+  predictions: any;
 }
 
 class Keyboard extends Component<KeyboardProps, KeyboardState> {
@@ -72,6 +74,8 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   processID: number;
   inferenceProcessID: number;
   listRefs: any;
+
+  prevPredictions: any;
 
   constructor(props: KeyboardProps) {
     super(props);
@@ -274,6 +278,43 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
     this.startFlash.bind(this)();
   }
 
+  autocomplete(predictions: any) {
+
+    var indexSpace = this.props.sentence.lastIndexOf(" ")
+
+    console.log("this:", predictions.data.next_character);
+
+    switch(predictions.data.next_character) {
+      case "1":
+        return this.props.sentence.substring(0, indexSpace+1) + this.prevPredictions[0] + " ";
+      case "2":
+        return this.props.sentence.substring(0, indexSpace+1) + this.prevPredictions[1] + " ";
+      case "3":
+        return this.props.sentence.substring(0, indexSpace+1) + this.prevPredictions[2] + " ";
+      default: {
+        return this.props.sentence + predictions.data.next_character;
+      }
+    }
+  }
+
+  async updateSentence(){
+    let predictions = await stopCollectingKey(this.inferenceProcessID, true, this.props.sentence)
+
+      this.prevPredictions = this.props.predictions;
+      this.props.setAutocompletePredictions(predictions.data.predictions)
+
+      try {
+        this.props.setSentence(this.next(predictions));
+      } catch (error) {
+        console.error(error);
+      }
+  }
+
+  next(predictions: any) { //this.props.sentence
+
+    return this.autocomplete(predictions);
+  }
+
   async startInference() {
 
     console.log("Collector:", this.state.collectorName);
@@ -295,11 +336,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
         this.listRefs[val].current.setColor(COLOR_DEFAULT);
       }
 
-      try {
-        this.props.setSentence(this.props.sentence + (await stopCollectingKey(this.inferenceProcessID, true, this.props.sentence)).data.next_character);
-      } catch (error) {
-        console.error(error);
-      }
+      this.updateSentence()
 
       setTimeout(async () => {
 
@@ -343,7 +380,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   async stopInference() {
 
     try {
-      this.props.setSentence(this.props.sentence + (await stopCollectingKey(this.inferenceProcessID, true, this.props.sentence)).data.next_character);
+      this.updateSentence()
     } catch (error) {
       console.error(error);
     }

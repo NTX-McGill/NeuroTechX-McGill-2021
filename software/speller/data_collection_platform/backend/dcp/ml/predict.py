@@ -7,20 +7,20 @@ from transformers import GPT2LMHeadModel, GPT2Tokenizer, pipeline, set_seed
 
 
 
-def autocomplete(prefix, top_n=3):
+def autocomplete(prefix, model, top_n=3):
     '''
     :prefix: one word that isn't complete to be autocompleted 
     :top_n: number of suggested words for autocompletion
     :returns: n suggested autocompletions for given prefix 
     '''
     
-    options = [k for k, v in WORDS_MODEL.most_common()
+    options = [k for k, v in model.most_common()
             if k.startswith(prefix)][:top_n]
     if len(options) < top_n: 
         options.extend([""]*top_n)
     return list(options)[:min(len(options), top_n)]
     
-def next_word_tuple(prefix, top_n=3):
+def next_word_tuple(prefix, model, top_n=3):
     '''
     :prefix: last word of the sentence  
     :top_n: number of suggested words for next words
@@ -34,7 +34,7 @@ def next_word_tuple(prefix, top_n=3):
     possible_cur_prefixes.append(prefix)
 
     options = list({w for w, c in
-                WORD_TUPLES_MODEL[prefix].items()
+                model[prefix].items()
                 for prefix in possible_cur_prefixes}) 
     
     #padding for length
@@ -66,11 +66,14 @@ def dispatch(sentence, top_n=3):
         - mode: autocompletion, prediction 
         - options: list of autocompletion or next word suggestion (of length top_n) --> default 3 
     '''
+
+    WORDS_MODEL, WORD_TUPLES_MODEL = load_models("./dcp/ml/both_models.pkl")
+
     prefix, last_space = clean_and_parse(sentence)
     if last_space : 
-        options = next_word_tuple(prefix[-1])
+        options = next_word_tuple(prefix[-1], WORD_TUPLES_MODEL)
     else: 
-        options = autocomplete(prefix[-1])
+        options = autocomplete(prefix[-1], WORDS_MODEL)
     mode = "completion" if last_space else "prediction" 
     return {'mode': mode, 'options': options}  
 
