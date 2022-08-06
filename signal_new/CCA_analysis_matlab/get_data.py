@@ -9,8 +9,8 @@ from scipy.signal import iirnotch, filtfilt
 from scipy.io.matlab import savemat
 
 # parameters
-SUBJECT_ID = 'S08'
-FREQ_TYPE = 'C'
+SUBJECT_ID = 'P02'
+FREQ_TYPE = 'D'
 VERBOSE = True # if True, prints some output to screen
 
 # runs that should not be included at all in the data
@@ -22,6 +22,7 @@ REF_FREQ_MAP = {
     'A': {*np.around(np.arange(8, 15.751, 0.25), decimals=2)} - {12},
     'B': {*np.around(np.arange(5.1, 12.851, 0.25), decimals=2)} - {10.85},
     'C': {*np.around(np.arange(5.85, 10.651, 0.16), decimals=2)},
+    'D': {*np.around(np.arange(6, 12.901, 0.23), decimals=2)}
 }
 
 FPATH_DOTENV = 'config.env'
@@ -56,7 +57,7 @@ def get_subject_data(database_url, subject_id, target_freq_type, bad_collection_
         # bci_collection table has one row per data collection session
         # each session has an associated collector_name
         bci_collection = pd.read_sql("SELECT * FROM bci_collection", db_connection)
-        all_ids = bci_collection['collector_name']
+        all_ids = bci_collection['collector_name'].drop_duplicates()
 
         # add some flexibility for the subject ID
         # ex: S09 has 3 trials called 'S09_trial1', 's09_trial2', and 's09_trial3'
