@@ -67,7 +67,7 @@ def dispatch(sentence, top_n=3):
         - options: list of autocompletion or next word suggestion (of length top_n) --> default 3 
     '''
 
-    WORDS_MODEL, WORD_TUPLES_MODEL = load_models("./dcp/ml/both_models.pkl")
+    WORDS_MODEL, WORD_TUPLES_MODEL = load_models("./dcp/ml/model_test3.pk1")
 
     prefix, last_space = clean_and_parse(sentence)
     if last_space : 
