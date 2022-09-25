@@ -293,11 +293,9 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
         return this.props.sentence.substring(0, indexSpace+1) + this.prevPredictions[1] + " ";
       case "3":
         return this.props.sentence.substring(0, indexSpace+1) + this.prevPredictions[2] + " ";
-      case "\s":
-        //temp hack
+      case "\\s":
         return this.props.sentence + " ";
       case " ":
-        //temp hack
         return this.props.sentence.slice(0, -1)
       default: {
         return this.props.sentence + predictions.data.next_character;
