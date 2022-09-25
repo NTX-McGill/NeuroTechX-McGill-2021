@@ -284,7 +284,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
     var indexSpace = this.props.sentence.lastIndexOf(" ")
 
-    console.log("this:", predictions.data.next_character);
+    console.log("this:", predictions.data.next_character.charCodeAt(0));
 
     switch(predictions.data.next_character) {
       case "1":
