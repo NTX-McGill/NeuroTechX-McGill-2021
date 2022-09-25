@@ -284,7 +284,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
     var indexSpace = this.props.sentence.lastIndexOf(" ")
 
-    console.log("this:", predictions.data.next_character.charCodeAt(0));
+    console.log("this:", predictions.data.next_character);
 
     if (predictions.data.next_character.charCodeAt(0) == 8) {
       return this.props.sentence.slice(0, -1);
@@ -307,7 +307,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
   async updateSentence(){
     console.log("input to ML: " + this.props.sentence)
-    let predictions = await stopCollectingKey(this.inferenceProcessID, true, this.props.sentence)
+    let predictions = await stopCollectingKey(this.inferenceProcessID, true, this.props.sentence, this.prevPredictions)
 
       this.prevPredictions = this.props.predictions;
       this.props.setAutocompletePredictions(predictions.data.predictions)
