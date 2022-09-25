@@ -306,6 +306,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   }
 
   async updateSentence(){
+    console.log("input to ML: " + this.props.sentence)
     let predictions = await stopCollectingKey(this.inferenceProcessID, true, this.props.sentence)
 
       this.prevPredictions = this.props.predictions;
@@ -323,6 +324,7 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
       try {
         this.props.setSentence(this.next(predictions));
+        console.log("sentence updated: " + this.props.sentence);
       } catch (error) {
         console.error(error);
       }
