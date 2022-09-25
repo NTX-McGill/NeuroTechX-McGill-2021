@@ -286,6 +286,10 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
     console.log("this:", predictions.data.next_character.charCodeAt(0));
 
+    if (predictions.data.next_character.charCodeAt(0) == 8) {
+      return this.props.sentence.slice(0, -1);
+    }
+
     switch(predictions.data.next_character) {
       case "1":
         return this.props.sentence.substring(0, indexSpace+1) + this.prevPredictions[0] + " ";
@@ -295,8 +299,6 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
         return this.props.sentence.substring(0, indexSpace+1) + this.prevPredictions[2] + " ";
       case "\\s":
         return this.props.sentence + " ";
-      case " ":
-        return this.props.sentence.slice(0, -1)
       default: {
         return this.props.sentence + predictions.data.next_character;
       }
