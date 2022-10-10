@@ -194,7 +194,7 @@ def openbci_process_collect_stop(process_id: int):
         idx += 1
         '''
 
-        data["sentence"] = process_sentence(data["sentence"], next_character, data[options])
+        data["sentence"] = process_sentence(data["sentence"], next_character, data["options"])
 
         while not shared.queue.empty():
             stream_data = shared.queue.get_nowait()
