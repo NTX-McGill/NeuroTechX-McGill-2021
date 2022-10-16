@@ -6,6 +6,6 @@ We collected data from eleven university students, both male and female, with an
 
 ![10:20 System Schematic](https://github.com/NTX-McGill/NeuroTechX-McGill-2021/blob/cleanup/img/10:20%20System%20Schematic.png | width=100)
 
-<10:20 System Schematic src="https://github.com/NTX-McGill/NeuroTechX-McGill-2021/blob/cleanup/img/10:20%20System%20Schematic.png" width="100" height="100">
+<img src="https://github.com/NTX-McGill/NeuroTechX-McGill-2021/blob/cleanup/img/10:20%20System%20Schematic.png" width="100" height="100">
 
 The data collection interface cued the participant to look at a specific key on the keyboard by highlighting it red. All keys would then flash at their unique frequencies and phases for five seconds. Frequencies varied from 6.00–12.90 Hz incremented by 0.23 Hz while the phases started at 0 and increased by 0.35 pi radians. The data collected during the five seconds was then stored in the database and attributed to the cued key. This process iterated through each key on the keyboard, completing one block of data collection. We aimed to acquire 10—15 blocks of data per participant.
