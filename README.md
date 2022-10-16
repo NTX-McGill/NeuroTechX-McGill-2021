@@ -13,3 +13,7 @@ The data collection interface cued the participant to look at a specific key on 
 Materials: boards, batteries, electrodes, paste, USB dongles, headbands, etc.
 
 To collect data from a participant, we first set up the necessary software. This included streaming live data using the OpenBCI GUI and opening the front and back ends. Meanwhile, the headband was placed on the participant's head using the aforementioned landmarks. The electrodes were then threaded through specific holes in the headband correlating to measured locations on the participant's head according to the 10/20 system (Figure 2). Two electrodes were additionally placed on both of the participant's ear lobes as the reference and bias electrodes.
+
+<img src="https://github.com/NTX-McGill/NeuroTechX-McGill-2021/blob/cleanup/img/Sample%20Electode%20Set-Up.jpeg" width="500">
+
+Figure 2: Sample Electrode Set-Up
