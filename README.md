@@ -2,7 +2,7 @@
 
 ## Data
 
-We collected data from eleven university students, both male and female, with an 8-electrode set-up on the participant’s occipital lobe. The Oz, O1, O2, PO7, PO8, PO, PO3, and PO4 electrode positions of the 10/20 system were used for data collection (Figure 1). The electrodes were fixed in position with a headband using the nasion, inion, and the helices of the pinnae as landmarks. Noise was limited to 8 microvolts for each electrode by limiting movement of the participant and of others in the vicinity. Data collection conditions were controlled for each participant by using the same electrode placements, positioning the participants around 40 cm from the keyboard display on the screen, and using the same hardware and environment conditions.
+We collected data from eleven university students, both male and female, with an 8-electrode set-up on the participant’s occipital lobe. The Oz, O1, O2, PO7, PO8, POZ, PO3, and PO4 electrode positions of the 10/20 system were used for data collection (Figure 1). The electrodes were fixed in position with a headband using the nasion, inion, and the helices of the pinnae as landmarks. Noise was limited to 8 microvolts for each electrode by limiting movement of the participant and of others in the vicinity. Data collection conditions were controlled for each participant by using the same electrode placements, positioning the participants around 40 cm from the keyboard display on the screen, and using the same hardware and environment conditions.
 
 <img src="https://github.com/NTX-McGill/NeuroTechX-McGill-2021/blob/cleanup/img/10:20%20System%20Schematic.png" width="500">
 
@@ -17,3 +17,5 @@ To collect data from a participant, we first set up the necessary software. This
 <img src="https://github.com/NTX-McGill/NeuroTechX-McGill-2021/blob/cleanup/img/Sample%20Electode%20Set-Up.jpeg" width="500">
 
 Figure 2: Sample Electrode Set-Up
+
+The electrode positions were located by first measuring the distance between the nasion and the inion (d1) and the distance between the two ears (d2) using a measuring tape. The eight occipital electrode placements consisted of two rows, five on the bottom and three on the top. The two rows were marked by imaginary curves along 10% and 20% of d1 as measured from the inion. The five columns on the bottom row were marked by imaginary curves along 30%, 40%, 50%, 60%, and 70% of d2 as measured from one of the ears. The three columns on the top row were 40%, 50%, and 60% of d2. The electrodes were placed at the eight intersection points between these lines to achieve the Oz, O1, O2, PO7, PO8, POZ, PO3, and PO4 electrode positions of the 10/20 system.
