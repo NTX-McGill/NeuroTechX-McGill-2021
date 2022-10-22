@@ -194,7 +194,7 @@ def openbci_process_collect_stop(process_id: int):
         idx += 1
         '''
 
-        data["sentence"] += next_character
+        data["sentence"] = process_sentence(data["sentence"], next_character, data[options])
 
         while not shared.queue.empty():
             stream_data = shared.queue.get_nowait()
@@ -205,6 +205,22 @@ def openbci_process_collect_stop(process_id: int):
         # TODO check if 200 response code is the correct choice
         return {"sentence": data["sentence"], "next_character": next_character, "predictions": ml_predictions["options"], "mode": ml_predictions["mode"]}, 200
 
+def process_sentence(sentence, next_character, options):
+
+    indexSpace = sentence.rfind(' ')
+
+    if ord(next_character) == 8:
+      return sentence[:-1]
+    elif next_character == "1":
+        return sentence[:indexSpace+1] + options[0] + " "
+    elif next_character == "2":
+        return sentence[:indexSpace+1] + options[1] + " "
+    elif next_character == "3":
+        return sentence[:indexSpace+1] + options[2] + " "
+    elif next_character == r"\s":
+        return sentence + " "
+    else:
+        return sentence + next_character
 
 def predict_character(shared_queue):
 
