@@ -9,11 +9,12 @@ from scipy.signal import iirnotch, filtfilt
 from scipy.io.matlab import savemat
 
 # parameters
-SUBJECT_ID = 'S09'
+SUBJECT_ID = 'S08'
 FREQ_TYPE = 'C'
 VERBOSE = True  # if True, prints some output to screen
 
 BAD_COLLECTION_IDS = [44, 80]  # runs that should not be included in the data
+# BAD_COLLECTION_IDS = []
 REF_FREQ_MAP = {
     # add 0.001 to upper bound because np.arange() doesn't include endpoint
     # round to 2 decimal places to avoid mismatches due to numerical errors
@@ -25,7 +26,7 @@ REF_FREQ_MAP = {
 FPATH_DOTENV = 'config.env'
 
 FS = 250  # sampling frequency
-TRIAL_DURATION = 5  # in seconds
+TRIAL_DURATION = 4  # in seconds
 N_CHANNELS = 8
 CHANNEL_NAMES = [f'channel_{i + 1}' for i in range(N_CHANNELS)]
 
@@ -151,7 +152,7 @@ if __name__ == '__main__':
             except KeyError:
                 if VERBOSE:
                     print(f'Missing freq: {freq} Hz')
-                nan_trial = np.empty((n_samples_per_trial, N_CHANNELS))
+                nan_trial = np.empty((int(n_samples_per_trial), N_CHANNELS))
                 nan_trial[:] = np.nan
                 block_data.append(nan_trial)
                 continue
@@ -165,7 +166,7 @@ if __name__ == '__main__':
 
             # extract and preprocess EEG channel data
             trial_data = trial_data.sort_values('order').reset_index(drop=True)
-            trial_data = trial_data.loc[:n_samples_per_trial - 1, CHANNEL_NAMES]
+            trial_data = trial_data.loc[:int(n_samples_per_trial) - 1, CHANNEL_NAMES]
             trial_data_preprocessed = preprocess_trial(trial_data.to_numpy(), FS)
             block_data.append(trial_data_preprocessed)
 

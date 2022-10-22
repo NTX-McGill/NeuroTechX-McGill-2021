@@ -32,11 +32,11 @@ for test_i in range(6):
     data_template = np.mean(data_template, axis=3)
     results = []
     predictions = []
-    onset = 40
+    onset = 50
     latency = 35
-    d_len = 4.5
+    d_len = 4
     for tar in range(len(freq_list)):
-        beta, alpha = cheby1(N=2, rp=0.3, Wn=[5.5 / 125.0, 54.0 / 125.0], btype='band', output='ba')
+        beta, alpha = cheby1(N=2, rp=1.0, Wn=[4.9 / 125.0, 51.6 / 125.0], btype='band', output='ba')
         signal = data_test[:, :, tar]
         signal = filtfilt(beta, alpha, signal[:, onset + latency:int(onset + latency + 250 * d_len)])
         signal = savgol_filter(signal, 5, 2, mode='nearest')
@@ -48,7 +48,7 @@ for test_i in range(6):
             template = savgol_filter(template, 5, 2, mode='nearest')
             template = matlab.double(template.T.tolist())
             # rho = engine.FBCCA_IT(signal, freq_list[i], 7.0, 88.0, 5.0, template, 1.0, 0.5, 5.0, 250.0, 2.0)
-            rho = engine.FBCCA_IT(signal, freq_list[i], 5.5, 54.0, 5.0, template, 1.0, 0.5, 5.0, 250.0, 2.0)
+            rho = engine.FBCCA_IT(signal, freq_list[i], 4.9, 51.6, 4.0, template, 1.0, 0.0, 4.0, 250.0, 2.0)
             rho_array.append(rho)
         print(np.argmax(rho_array))
         predictions.append(np.argmax(rho_array))
