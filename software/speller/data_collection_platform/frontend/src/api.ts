@@ -31,7 +31,7 @@ export async function startCollectingKey(
     });
 }
 
-export async function stopCollectingKey(processID: number, predict: boolean, sentence?: string) {
+export async function stopCollectingKey(processID: number, predict: boolean, sentence?: string, options?: string[]) {
   var path = `/openbci/${processID}/collect/stop`;
 
   /*
@@ -45,5 +45,6 @@ export async function stopCollectingKey(processID: number, predict: boolean, sen
   return await axios.post(`${URL}${path}`, {
     predict: predict,
     sentence: sentence,
+    options: options,
   });
 }

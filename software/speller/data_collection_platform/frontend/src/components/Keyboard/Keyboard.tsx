@@ -28,11 +28,13 @@ const WIDTH_DEFAULT = '7rem';
 const COLOR_RUN = '#2ede28';
 const COLOR_PAUSE = '#F2C94C';
 const COLOR_STOP = '#ff0000';
+const COLOR_SELECT = '#1477ab';
 
 const DURATION_HIGHLIGHT_START = 1000;
 const DURATION_HIGHLIGHT_STOP = 100;
 const DURATION_FLASHING = 5000;
 const DURATION_REST = 1000;
+const DURATION_SELECT = 1000;
 
 const DURATION_FLASHING_INFERENCE = 5000;
 const DURATION_REST_INFERENCE = 2000;
@@ -284,6 +286,10 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
 
     console.log("this:", predictions.data.next_character);
 
+    if (predictions.data.next_character.charCodeAt(0) == 8) {
+      return this.props.sentence.slice(0, -1);
+    }
+
     switch(predictions.data.next_character) {
       case "1":
         return this.props.sentence.substring(0, indexSpace+1) + this.prevPredictions[0] + " ";
@@ -291,6 +297,8 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
         return this.props.sentence.substring(0, indexSpace+1) + this.prevPredictions[1] + " ";
       case "3":
         return this.props.sentence.substring(0, indexSpace+1) + this.prevPredictions[2] + " ";
+      case "\\s":
+        return this.props.sentence + " ";
       default: {
         return this.props.sentence + predictions.data.next_character;
       }
@@ -298,13 +306,25 @@ class Keyboard extends Component<KeyboardProps, KeyboardState> {
   }
 
   async updateSentence(){
-    let predictions = await stopCollectingKey(this.inferenceProcessID, true, this.props.sentence)
+    console.log("input to ML: " + this.props.sentence)
+    let predictions = await stopCollectingKey(this.inferenceProcessID, true, this.props.sentence, this.prevPredictions)
 
       this.prevPredictions = this.props.predictions;
       this.props.setAutocompletePredictions(predictions.data.predictions)
 
+      const newState = { ...this.state.keys };
+
+      newState[predictions.data.next_character].color = COLOR_SELECT;
+      this.setState({ keys: newState });
+
+      setTimeout(async () => {
+        newState[predictions.data.next_character].color = COLOR_DEFAULT;
+        this.setState({ keys: newState });
+      }, DURATION_SELECT);
+
       try {
         this.props.setSentence(this.next(predictions));
+        console.log("sentence updated: " + this.props.sentence);
       } catch (error) {
         console.error(error);
       }
