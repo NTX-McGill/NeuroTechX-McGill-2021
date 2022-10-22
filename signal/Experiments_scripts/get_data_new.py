@@ -9,11 +9,13 @@ from scipy.signal import iirnotch, filtfilt
 from scipy.io.matlab import savemat
 
 # parameters
-SUBJECT_ID = 'S09'
+SUBJECT_ID = 'S08'
 FREQ_TYPE = 'C'
 VERBOSE = True  # if True, prints some output to screen
 
-BAD_COLLECTION_IDS = [44, 80]  # runs that should not be included in the data
+# runs that should not be included at all in the data
+# (e.g., if software was very laggy so we don't know if the data is any good)
+BAD_COLLECTION_IDS = [44, 80, 112]
 REF_FREQ_MAP = {
     # add 0.001 to upper bound because np.arange() doesn't include endpoint
     # round to 2 decimal places to avoid mismatches due to numerical errors
@@ -119,6 +121,12 @@ def preprocess_trial(data, fs, dc_chunk_length=0.5, notch_freq=60, notch_Q=10):
     return data
 
 
+def create_nan_array(size):
+    nan_array = np.empty(size)
+    nan_array[:] = np.nan
+    return nan_array
+
+
 if __name__ == '__main__':
 
     # get database URL from environment variable
@@ -151,8 +159,7 @@ if __name__ == '__main__':
             except KeyError:
                 if VERBOSE:
                     print(f'Missing freq: {freq} Hz')
-                nan_trial = np.empty((n_samples_per_trial, N_CHANNELS))
-                nan_trial[:] = np.nan
+                nan_trial = create_nan_array((n_samples_per_trial, N_CHANNELS))
                 block_data.append(nan_trial)
                 continue
 
@@ -163,9 +170,19 @@ if __name__ == '__main__':
                     char = '\\b'  # escape this for MATLAB to be able to read it as '\b'
                 freq_char_map[freq] = char
 
-            # extract and preprocess EEG channel data
+            # extract EEG channel data
             trial_data = trial_data.sort_values('order').reset_index(drop=True)
             trial_data = trial_data.loc[:n_samples_per_trial - 1, CHANNEL_NAMES]
+
+            # trials with less than expected number of samples --> replace with NaNs
+            if trial_data.shape[0] != n_samples_per_trial:
+                if VERBOSE:
+                    print(f'Partial data for freq: {freq} Hz')
+                nan_trial = create_nan_array((n_samples_per_trial, N_CHANNELS))
+                block_data.append(nan_trial)
+                continue
+
+            # preprocess and append data
             trial_data_preprocessed = preprocess_trial(trial_data.to_numpy(), FS)
             block_data.append(trial_data_preprocessed)
 

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy.io.matlab import loadmat
+from scipy.io.matlab import loadmat, savemat
 
 def rms(data, axis=None):
     data = np.array(data)
@@ -51,15 +51,16 @@ def generate_fig_name(fpath, suffix=None, prefix=None, sep='_', ext='png', appen
 if __name__ == '__main__':
 
     # data file, specified here or as command line argument
-    fpath_mat = None
+    fpath_mat = 'S02_typeC.mat'
 
     # number of trials to plot
-    n_rows = 10
-    n_cols = 4
+    n_rows = 18
+    n_cols = 5
     ax_width = 5
     ax_height = 1.5
     y_lims = [-200, 200]
     alpha = 0.7
+    rejection_rms_threshold = 15.0
 
     noisiness_metric_fn = rms
     noisiness_metric_name = 'rms'
@@ -88,7 +89,7 @@ if __name__ == '__main__':
     for i_freq in range(n_freqs):
         for i_block in range(n_blocks):
 
-            data_trial = data[:, :, i_freq, i_block]
+            data_trial = data[:, 80:-80, i_freq, i_block]
 
             # skip NA trials
             if np.sum(np.isnan(data_trial)) != 0:
@@ -119,8 +120,20 @@ if __name__ == '__main__':
     df_data = pd.concat(dfs_data).reset_index()
 
     # plot histogram of noisiness metric averaged across all channels
+    # print(df_data.sort_values(get_mean_noisiness_label(), ascending=False))
+    # df_data.sort_values(get_mean_noisiness_label(), ascending=False).to_csv('noisy_data.csv')
+    print(df_data[df_data['mean_rms'] > rejection_rms_threshold][['i_freq', 'i_block']])
+    for index in df_data[df_data['mean_rms'] > rejection_rms_threshold][['i_freq', 'i_block']].to_numpy(dtype=int):
+        print(index)
+        data[:, :, index[0], index[1]] = None
+    fpath_out = f'cleaned_{fpath_mat}'
+    savemat(fpath_out, {'data': data.tolist()})
+    cleaned_d = loadmat(fpath_out, simplify_cells=True)
+    print(np.shape(cleaned_d['data']))
+    exit(0)
+
     fig_hist, ax_hist = plt.subplots()
-    sns.histplot(df_data[get_mean_noisiness_label()], ax=ax_hist)
+    sns.histplot(df_data[get_mean_noisiness_label()], ax=ax_hist, bins=60)
     fig_hist.savefig(generate_fig_name(fpath_mat, f'hist'), dpi=300, bbox_inches='tight')
 
     # plot raw signals for top/bottom noisy trials
