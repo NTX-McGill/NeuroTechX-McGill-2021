@@ -18,7 +18,7 @@
 - Open Source
 
 [Sample of the TV Corpus](https://www.corpusdata.org/formats.asp)
-- 21 000 000 words
+- 21 000 000 words in linear text of a completely random sample of the full corporus.
 - British and American
 - Works from 1950-2018
 - Every 200 words, ten words are removed and are replaced with ten "@".
@@ -49,6 +49,6 @@ Example:
 ## Files
 
 The code consists of three files: 
-1. `utils.py`:
-2. `train.py`: 
-3. `predict.py`: 
+1. `utils.py`: Contains functions for cleaning, parsing and loading pickle of models. There is also a dictionary of nearby keys for possible mistyping and bad letter prediction.
+3. `train.py`: Creates word tuple models based on selected dataset and saves os.file paths of models.
+4. `predict.py`: Contains functions for next word predictions and an interative testing loop for prediction tests.
