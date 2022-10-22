@@ -38,7 +38,7 @@ Next Word Prediction
 Example:
 
 | Incomplete Word | User Character Selection | Autocomplete Options |
-| :---------------: |:--:| :----------------------------: |
+| :--------------- |:--:| :----------------------------: |
 | 'h'             | 'e' | (1. he , 2. her , 3. help)   |
 | 'he'            | 'l' | (1. he , 2. her , 3. help)   |
 | 'hel'           | '2' | (1. help, 2. hello, 3. held) |
