@@ -1,13 +1,5 @@
 # Data
 
-``display_signal.py`` can be used to easily see what data is inside of a file, it takes as an argument the path to a data file, then filters and displays the content. Run ``python display_signal.py "path_to_datafile"`` to see what the data looks like in a specific file
-
-For example, try running the following 
-```
-python display_signal.py 2021-05-20/01-1_video_OpenBCI-RAW-2021-05-20_19-59-47.txt
-```
-Note: you can use tabs in your terminal to autocomplete long filenames.
-
 We collected data from eleven university students, both male and female, with an 8-electrode set-up on the participant’s occipital lobe. The Oz, O1, O2, PO7, PO8, POZ, PO3, and PO4 electrode positions of the 10/20 system were used for data collection (Figure 1). The electrodes were fixed in position with a headband using the nasion, inion, and the helices of the pinnae as landmarks. Noise was limited to 8 microvolts for each electrode by limiting movement of the participant and of others in the vicinity. Data collection conditions were controlled for each participant by using the same electrode placements, positioning the participants around 40 cm from the keyboard display on the screen, and using the same hardware and environment conditions.
 
 <img src="https://github.com/NTX-McGill/NeuroTechX-McGill-2021/blob/cleanup/img/10:20%20System%20Schematic.png" width="500">
