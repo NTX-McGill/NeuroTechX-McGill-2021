@@ -25,7 +25,7 @@ We use canonical correlation analysis (CCA) to find the oscillation frequency th
 <!-- ![alt text](./figures/XXX.png) -->
 
 ### Remarks
-* predict.py takes live streamed EEG data and outputs a predited letter
-* standard_CCA.py contains code for the CCA algorithm used for inference (other CCA files are not used in production)
-* Experiments_scripts contain supplemental experiments and investigations, including code profiling, RMS-rejection, and building a template
-* eyeblink contains a computer vision program to detect blinks and double blinks to erase characters (currently unused)
+* `predict.py` takes live streamed EEG data and outputs a predited letter
+* `standard_CCA.py` contains code for the CCA algorithm used for inference (other CCA files are not used in production)
+* `Experiments_scripts/` contain supplemental experiments and investigations, including code profiling, RMS-rejection, and building a template
+* `eyeblink/` contains a computer vision program to detect blinks and double blinks to erase characters (currently unused)
