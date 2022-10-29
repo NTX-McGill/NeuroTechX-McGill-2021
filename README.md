@@ -42,6 +42,8 @@ We experimented with different frequency configurations, finding that there was 
 
 ### Autocomplete/next-word prediction
 
+<img src="https://github.com/NTX-McGill/NeuroTechX-McGill-2021/blob/cleanup/img/10:20%20spellerTest" >
+
 ### Spelling/inference platform
 
 ### Limitations and future directions
