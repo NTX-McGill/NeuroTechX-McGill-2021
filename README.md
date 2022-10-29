@@ -1,4 +1,4 @@
-# SSVEP Speller
+# IRiSSE: Interfaced Recurrences in Steady-State Evocation
 
 In this project, we built a speller that allows users to communicate by shifting their gaze to select characters on a flashing keyboard. It only requires users to be able to move their eyes, which could make it a useful tool for patients with disorders such as Locked-in syndrome or other forms of paralysis. 
 
