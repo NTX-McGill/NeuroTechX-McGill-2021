@@ -8,6 +8,7 @@
 - ***A***: 8.00-15.75 Hz (inclusive), steps of 0.25 Hz, excluding 12 Hz
 - ***B***: 5.10-12.85 Hz (inclusive), steps of 0.25 Hz, excluding 10.85 Hz
 - ***C***: 5.85-10.65 Hz (inclusive), steps of 0.16 Hz
+- ***D***: 6.00-12.90 Hz (inclusive), steps of 0.23 Hz
 
 ## S02
 
@@ -27,6 +28,10 @@
 - 8 blocks (2022-03-06)
     - 9 blocks were recorded but one of them (`collection_id` 80) had bad timing/lag in software (***DO NOT USE***)
 - 5 blocks (2022-03-20)
+
+### Frequency configuration ***D***
+
+- 8 blocks (2022-08-06)
 
 ## S04
 
@@ -75,3 +80,13 @@
 - 3 blocks (2022-03-08)
     - 1 block (`collection_id` 97) has 1 missing target
     - *Note*: `'collector_name'` is not consistent (used `'S09_trial1'`, `'s09_trial2'`, `'s09_trial3'`)
+
+## S10
+
+### Frequency configuration ***C***
+
+- 5 blocks (2022-05-29)
+
+### Frequency configuration ***D***
+
+- 3 blocks (2022-08-28)
