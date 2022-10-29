@@ -57,7 +57,15 @@ By incorporating a natural language model into our BCI ecosystem, we are able to
 ### Spelling/inference platform
 
 ### Limitations and future directions
+There are still a few limitations in our product. 
+1. The refresh rate of monitor needs to be high (~120Hz)
+2. Fatigue (A common problem of all SSVEP spellers, accuracy degrades over time)
+3. Stimulus time (4-5s) is al little bit long
 
+In the future, we could potentially improve on:
+1. Lower the refresh rate requirements by finer design
+2. Further shorten the stimulus time by improving algorithm
+3. Improve the language model to increase communication efficiency
 ## Partners
 
 * [Building 21](https://building21.ca/)
