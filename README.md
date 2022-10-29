@@ -42,6 +42,10 @@ We experimented with different frequency configurations, finding that there was 
 
 ### Autocomplete/next-word prediction
 
+Each time the user selects a letter on the keyboard, the language model gives the top 3 most likely word completions. The model was trained on TV transcripts by learning the frequencies between pairs of words and single words. TV transcripts provide good information for natural language and discussion. 
+
+By incorporating a natural language model into our BCI ecosystem, we are able to speed up the about of information communicated and handle errors that would otherwise lead to miscommunication.
+
 <img src="https://github.com/NTX-McGill/NeuroTechX-McGill-2021/blob/cleanup/img/spellerTest.png" width="500" >
 
 ### Spelling/inference platform
