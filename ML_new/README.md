@@ -12,20 +12,20 @@
 ## Files
 
 The code consists of three files: 
-- `utils.py`: Contains functions for cleaning, parsing and loading pickle of models. There is also a dictionary of nearby keys for possible mistyping and bad letter prediction.
+* `utils.py`: Contains functions for cleaning, parsing and loading pickle of models. There is also a dictionary of nearby keys for possible mistyping and bad letter prediction.
 
-- `train.py`: Creates word tuple models based on selected dataset and saves os.file paths of models.
+* `train.py`: Creates word tuple models based on selected dataset and saves os.file paths of models.
 
-To train the model: 
-1. Load a corpus and split words into an array.
-2. Create an model of 2-tuple or bigrams of the word frequencies and one of unigrams or single words
-3. Save pickle file of models
+  * To train the model: 
+    1. Load a corpus and split words into an array.
+    2. Create an model of 2-tuple or bigrams of the word frequencies and one of unigrams or single words
+    3. Save pickle file of models
 
-- `predict.py`: Contains functions for next word predictions and an interative testing loop for prediction tests.
+* `predict.py`: Contains functions for next word predictions and an interative testing loop for prediction tests.
 
-To test a model:
-1. Use command: python predict.py -m model_test3.pk1
-2. Follow terminal commands
+  * To test a model:
+    1. Use command: python predict.py -m model_test3.pk1
+    2. Follow terminal commands
 
 ### Corpora
 
