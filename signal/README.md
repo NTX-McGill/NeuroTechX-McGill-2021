@@ -22,7 +22,7 @@ To denoise our signal, we first apply a 60 Hz notch filter to remove the EMG noi
 
 We use canonical correlation analysis (CCA) to find the oscillation frequency that most strongly correlates with our signal. The selected channels of the signal are passed into the algorithm with sine and cosine waves at a frequency matching each of the flashing keys. The sinusoid with highest correlation is chosen and the corresponding key is sent to software to be displayed and fed into the language model.
 
-<img src="./figures/spectrogram.png" style="width:500px;"/> <img src="./figures/cca_pred.png" style="width:500px;"/>
+<img src="./figures/spectrogram.png" style="width:330px;"/> <img src="./figures/cca_pred.png" style="width:500px;"/>
 <!-- ![alt text](./figures/XXX.png) -->
 
 ### Remarks
