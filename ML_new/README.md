@@ -9,6 +9,24 @@
 - [Pickle](https://docs.python.org/3/library/pickle.html)
 - [Re](https://docs.python.org/3/library/re.html)
 
+## Files
+
+The code consists of three files: 
+- `utils.py`: Contains functions for cleaning, parsing and loading pickle of models. There is also a dictionary of nearby keys for possible mistyping and bad letter prediction.
+
+- `train.py`: Creates word tuple models based on selected dataset and saves os.file paths of models.
+
+To train the model: 
+1. Load a corpus and split words into an array.
+2. Create an model of 2-tuple or bigrams of the word frequencies and one of unigrams or single words
+3. Save pickle file of models
+
+- `predict.py`: Contains functions for next word predictions and an interative testing loop for prediction tests.
+
+To test a model:
+1. Use command: python predict.py -m model_test3.pk1
+2. Follow terminal commands
+
 ### Corpora
 
 [Project Gutenberg's Moby Dick; or The Whale](https://www.gutenberg.org/files/2701/2701-h/2701-h.htm)
@@ -25,7 +43,9 @@
 
 ## Model
 
-N-Gram with Markov Chains. 
+Bigram with Markov Chains.
+
+This model learns the frequencies of words and pairs of words to autocomplete by the most likely word by the typed letters.
 
 ### Features
 
@@ -46,9 +66,3 @@ Example:
 | 'hello w'       | '1' | ( 1. world , 2. weekend  , 3. windchill ) |
 | 'hello world '  | ''  | () |
 
-## Files
-
-The code consists of three files: 
-1. `utils.py`: Contains functions for cleaning, parsing and loading pickle of models. There is also a dictionary of nearby keys for possible mistyping and bad letter prediction.
-3. `train.py`: Creates word tuple models based on selected dataset and saves os.file paths of models.
-4. `predict.py`: Contains functions for next word predictions and an interative testing loop for prediction tests.
