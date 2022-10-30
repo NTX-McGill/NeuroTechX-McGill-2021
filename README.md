@@ -25,10 +25,9 @@ Our speller has a keyboard layout where each key flashes with a different freque
 We collected data from eleven university students, both male and female, with an 8-electrode set-up on the participant’s occipital lobe. The Oz, O1, O2, PO7, PO8, POZ, PO3, and PO4 electrode positions of the 10/20 system were used for data collection (Figure 1). To speed up the EEG setup time and help fix electrodes in place, we marked approximate locations for the eight 10/20 positions of interest on a headband. We placed the headband in a consistent way for all participants, using the inion, the top of the eyebrows and the helices of the pinnae (top of the ears) as landmarks. This way, we avoided having to measure each participant's head dimensions and had a more streamlined data collection process. 
 
 <img src="img/10:20%20System%20Schematic.png" alt="10/20 System Schematic" width="500">
+<!-- Figure 1: 10/20 System Schematic -->
 
 Noise was limited to 8 microvolts for each electrode by limiting movement of the participant and of others in the vicinity. Data collection conditions were controlled for each participant by using the same electrode placements, positioning the participants around 40 cm from the keyboard display on the screen, and using the same hardware and environment conditions.
-
-<!-- Figure 1: 10/20 System Schematic -->
 
 ### Data collection platform
 
@@ -36,7 +35,7 @@ The data collection interface cued the participant to look at a specific key on 
 
 We experimented with different frequency configurations, finding that there was a range of frequencies that produced more easily identifiable SSVEP signals. Our final configuration consists of frequencies from 6.00–12.90 Hz incremented by 0.23 Hz, with phases starting at 0 and increasing by 0.35 $\pi$ radians. We mapped each frequency-phase pair to a key in our speller, making sure that keys that were physically close to each other would flash at frequencies that are more than 1 Hz apart.
 
-<!-- TODO screenshot of data collection interface -->
+<img src="img/data_collection_platform.png" alt="Data collection platform" width="800">
 
 ### Signal processing
 
