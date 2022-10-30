@@ -24,9 +24,11 @@ Our speller has a keyboard layout where each key flashes with a different freque
 
 We collected data from eleven university students, both male and female, with an 8-electrode set-up on the participant’s occipital lobe. The Oz, O1, O2, PO7, PO8, POZ, PO3, and PO4 electrode positions of the 10/20 system were used for data collection (Figure 1). To speed up the EEG setup time and help fix electrodes in place, we marked approximate locations for the eight 10/20 positions of interest on a headband. We placed the headband in a consistent way for all participants, using the inion, the top of the eyebrows and the helices of the pinnae (top of the ears) as landmarks. This way, we avoided having to measure each participant's head dimensions and had a more streamlined data collection process. 
 
-<img src="https://github.com/NTX-McGill/NeuroTechX-McGill-2021/blob/cleanup/img/10:20%20System%20Schematic.png" width="500">
+<img src="img/10:20%20System%20Schematic.png" alt="10/20 System Schematic" width="500">
 
-Figure 1: 10/20 System Schematic
+Noise was limited to 8 microvolts for each electrode by limiting movement of the participant and of others in the vicinity. Data collection conditions were controlled for each participant by using the same electrode placements, positioning the participants around 40 cm from the keyboard display on the screen, and using the same hardware and environment conditions.
+
+<!-- Figure 1: 10/20 System Schematic -->
 
 ### Data collection platform
 
@@ -43,29 +45,27 @@ Electroencephalography (EEG) signals often require processing and filtering befo
 The main EEG frequencies are delta (0.5 to 4Hz), theta (4 to 7Hz), alpha (8 to 12Hz), and beta (13 to 30Hz). For our speller, visual flashing frequencies of interest lie in the 6-12.9 Hz range, corresponding mostly to alpha waves. The range was chosen after experimentation to maximize frequency spacing between letters while keeping the maximum frequency low to prevent aliasing.
 
 To denoise our signal, we first apply a 60 Hz notch filter to remove the EMG noise. Then, to isolate frequencies of interest, we apply a 2nd order Chebyshev bandpass filter with a ripple of 0.3 dB to the range roughly corresponding to flashing frequencies (5.75-13.15Hz). We tuned hyperparameters to optimize performance. We experimented with signal smoothing and a procedure to reject channels based on an RMS threshold but found no significant performance benefits. In the end, we found only 1 channel is sufficient and best for our purposes.
+
 ### Signal classification
 
 We use canonical correlation analysis (CCA) to find the oscillation frequency that most strongly correlates with our signal. The selected channels of the signal are passed into the algorithm with sine and cosine waves at a frequency matching each of the flashing keys. The sinusoid with highest correlation is chosen and the corresponding key is sent to software to be displayed and fed into the language model.
+
 ### Autocomplete/next-word prediction
 
 Each time the user selects a letter on the keyboard, the language model gives the top 3 most likely word completions. The model was trained on TV transcripts by learning the frequencies between pairs of words and single words. TV transcripts provide good information for natural language and discussion. 
 
 By incorporating a natural language model into our BCI ecosystem, we are able to speed up the about of information communicated and handle errors that would otherwise lead to miscommunication.
 
-<img src="https://github.com/NTX-McGill/NeuroTechX-McGill-2021/blob/cleanup/img/spellerTest.png" width="500" >
+<img src="img/spellerTest.png" width="500" >
 
 ### Spelling/inference platform
 
 ### Limitations and future directions
-There are still a few limitations in our product. 
-1. The refresh rate of monitor needs to be high (~120Hz)
-2. Fatigue (A common problem of all SSVEP spellers, accuracy degrades over time)
-3. Stimulus time (4-5s) is a little bit long
 
-In the future, we could potentially improve on:
-1. Lower the refresh rate requirements by finer design
-2. Further shorten the stimulus time by improving algorithm
-3. Improve the language model to increase communication efficiency
+Although our speller works well and is able to correctly predict the character the user is looking at, it still has some limitations. First, we have found that accuracy increases with higher screen refresh rates: our best results were obtained using an external monitor with a 120Hz refresh rate. A general limitation of SSVEP-based interfaces is that the flashing display may be taxing on the eyes. We have not investigated the effects of fatigue on SSVEP spellers, though accuracy may decrease over time within a session. Moreover, there is a tradeoff between stimulus time and spelling speed: longer stimulus time means more data, which leads to higher accuracy, but it also means that it will take longer for the user to type a sentence.
+
+Future directions would be centered around improving user experience and accessibility. We would like to refine our prediction algorithm since the speller still sometimes makes mistakes. Also, since stimulation time is currently the bottleneck for spelling speed, we would like to improve our prediction model so that it still achieves good performance with less data. For the text prediction feature, one way to improve the language models would be to make them continuously update based the words/sentences previously typed by the user, similar to what some mobile phones do. Finally, on the hardware side, a future direction would be to improve the rendering of the flashing (e.g., reduce lags), which could lower screen refresh rate requirements.
+
 ## Partners
 
 * [Building 21](https://building21.ca/)
