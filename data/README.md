@@ -136,6 +136,6 @@ print(data.keys()) # dict_keys(['data', 'freq_type', 'freqs', 'chars'])
 
 ### Running the speller
 
-The setup is exactly the same as for data collection, except we use the "Inference" page of the web application.
+The setup is exactly the same as for data collection, except we use the different page in the web application. Click on **Go to Inference**. The keyboard display remains the same, except now there is a text box in the bottom left corner that will show the speller's predictions. Below the text box, the top three autocomplete/next word predictions are displayed. The user can choose any of them by selecting the "1", "2", or "3" keys.
 
-<!-- TODO screenshot -->
+<img src="img/inference_platform.png" alt="Inference platform" width="800"/>
