@@ -26,6 +26,16 @@ Raw EEG data streamed from the OpenBCI GUI are available for 9 participants. EEG
 - `freqs`: all frequencies (in Hz) associated with this frequency configuration, sorted in ascending order.
 - `chars`: all characters associated with the frequencies in `freqs` (same order).
 
+Each channel always corresponds to the same 10/20 electrode position:
+- Channel 1: PO7
+- Channel 2: PO3
+- Channel 3: O1
+- Channel 4: POZ
+- Channel 5: OZ (best)
+- Channel 6: PO4
+- Channel 7: O2
+- Channel 8: PO8
+
 Here is an example showing how pickled data can be loaded in Python:
 
 ```{python}
