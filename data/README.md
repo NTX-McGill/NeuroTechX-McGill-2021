@@ -67,7 +67,7 @@ print(data.keys()) # dict_keys(['data', 'freq_type', 'freqs', 'chars'])
     * The two rows are determined by imaginary curves along 10% and 20% of $d_1$ as measured from the inion.
     * The five columns on the bottom row are determined by imaginary curves along 30%, 40%, 50%, 60%, and 70% of $d_2$ as measured from one of the ears. 
     The three columns on the top row were 40%, 50%, and 60% of $d_2$. 
-    * Mark the intersection points corresponding to the Oz, O1, O2, PO7, PO8, POZ, PO3, and PO4 electrode positions of the 10/20 system
+    * Mark the intersection points corresponding to the Oz, O1, O2, PO7, PO8, POz, PO3, and PO4 electrode positions of the 10/20 system
 
 <!-- TODO screenshot of Yigu video with annotations -->
 
@@ -88,8 +88,7 @@ print(data.keys()) # dict_keys(['data', 'freq_type', 'freqs', 'chars'])
 <!-- To collect data from a participant, we first set up the necessary software. This included streaming live data using the OpenBCI GUI and opening the front and back ends. Meanwhile, the headband was placed on the participant's head using the aforementioned landmarks. The electrodes were then threaded through specific holes in the headband correlating to measured locations on the participant's head according to the 10/20 system. Two electrodes were additionally placed on both of the participant's ear lobes as the reference and bias electrodes. Figure 2 displays a sample electrode placement on one of the participants. -->
 
 <!-- <img src="https://github.com/NTX-McGill/NeuroTechX-McGill-2021/blob/cleanup/img/Sample%20Electode%20Set-Up.jpeg" width="500"> -->
-![Sample electrode setup](img/Sample%20Electode%20Set-Up.jpeg)
-
+<img src="img/Sample%20Electode%20Set-Up.jpeg" alt="Sample electrode setup" width="500"/>
 <!-- Figure 2: Sample Electrode Set-Up -->
 
 ### Setting up the OpenBCI GUI
@@ -100,13 +99,13 @@ print(data.keys()) # dict_keys(['data', 'freq_type', 'freqs', 'chars'])
 
 3. To start a session, select **LIVE (from Cyton)** > **Serial (from Dongle)** > **AUTO-CONNECT**.
 
-![OpenBCI GUI Start session](img/OpenBCI_GUI_start_session.png)
+<img src="img/OpenBCI_GUI_start_session.png" alt="OpenBCI GUI Start session" width="500"/>
 
 4. Click **Start Data Stream** in the top right corner of the GUI.
 
 5. Choose **Networking** for one of the widgets. In the dropdown **Protocol** menu, select **LSL**. Under **Stream 1**, set the **Data Type** field to **TimeSeries**, and click **Start LSL Stream**. 
 
-![OpenBCI GUI LSL streaming](img/OpenBCI_GUI_LSL.png)
+<img src="img/OpenBCI_GUI_LSL.png" alt="OpenBCI GUI LSL streaming" width="500"/>
 
 ### Data quality control
 
