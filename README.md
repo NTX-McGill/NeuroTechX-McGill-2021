@@ -47,7 +47,9 @@ To denoise our signal, we first apply a 60 Hz notch filter to remove the EMG noi
 
 ### Signal classification
 
-We use canonical correlation analysis (CCA) to find the oscillation frequency that most strongly correlates with our signal. The selected channels of the signal are passed into the algorithm with sine and cosine waves at a frequency matching each of the flashing keys. The sinusoid with highest correlation is chosen and the corresponding key is sent to software to be displayed and fed into the language model.
+We use canonical correlation analysis (CCA) to find the oscillation frequency that most strongly correlates with our signal. The selected channels of the signal are passed into the algorithm with sine and cosine waves at a frequency matching each of the flashing keys. The sinusoid with highest correlation is chosen and the corresponding key is sent to software to be displayed and fed into the language model. The detailed mathematical description will be included in the `signal/` folder.
+
+(Side note: initially we used data collected from the Data team to create a template for each participant, which was used to “train” the filter bank CCA (FBCCA) model, but this ended up not working well so we went with another CCA method that didn’t need to be trained)
 
 ### Autocomplete/next-word prediction
 
