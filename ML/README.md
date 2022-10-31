@@ -45,9 +45,11 @@ The code consists of three files:
 
 Bigram with Markov Chains.
 
-This model learns the frequencies of words and pairs of words to autocomplete by the most top 3 likely word by the typed letters.
+This model learns the frequencies of words and pairs (bigrams) of words in a corpus to autocomplete by the most top 3 likely word by the typed letters. 
 
 Markov chains reduce possible next words under the assumption that the current or last word is only needed to predict the next; the markov property. 
+
+A large and diverse corpus is assumed to asymptoticlly approximate every day English.
 
 ### Features
 
