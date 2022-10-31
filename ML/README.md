@@ -45,7 +45,9 @@ The code consists of three files:
 
 Bigram with Markov Chains.
 
-This model learns the frequencies of words and pairs of words to autocomplete by the most likely word by the typed letters.
+This model learns the frequencies of words and pairs of words to autocomplete by the most top 3 likely word by the typed letters.
+
+Markov chains reduce possible next words under the assumption that the current or last word is only needed to predict the next; the markov property. 
 
 ### Features
 
@@ -53,7 +55,7 @@ Autocomplete:
 - Autocompletes an incomplete word by the pevious prefix characters.
 
 Next Word Prediction
-- Autocomplete the next word given a previous word and the incomplete word's prefixes. 
+- Autocomplete the next word given a previous word and an incomplete word's prefixes. 
 
 Example:
 
