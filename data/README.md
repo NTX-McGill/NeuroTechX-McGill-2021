@@ -71,7 +71,7 @@ print(data.keys()) # dict_keys(['data', 'freq_type', 'freqs', 'chars'])
 
 1. Place the headband on a participant's head, the top of the eyebrows and the helices of the pinnae (top of the ears) as landmarks. Make sure the headband covers the participant's inion, and mark the location of the inion on the headband using paint.
 
-2. Remove the headband. Measure and record the distance between the nasion and the inion ( $d_1$ ) and the distance between the two ears ( $d_2$ ) using a measuring tape.
+2. Remove the headband. Measure and record the distance between the nasion and the inion ( $d_1$ ) and the distance between the two ears ( $d_2$ ) using a measuring tape (passing over the top of the head).
 
 3. Mark the eight occipital/parietal-occipital electrode placements on the headband using paint. The positions can be determined by constructing a 2x5 grid using $d_1$ and $d_2$ measured in the previous step:
     * The two rows are determined by imaginary curves along 10% and 20% of $d_1$ as measured from the inion.
@@ -79,9 +79,9 @@ print(data.keys()) # dict_keys(['data', 'freq_type', 'freqs', 'chars'])
     The three columns on the top row were 40%, 50%, and 60% of $d_2$. 
     * Mark the intersection points corresponding to the Oz, O1, O2, PO7, PO8, POz, PO3, and PO4 electrode positions of the 10/20 system
 
-<!-- TODO screenshot of Yigu video with annotations -->
-
 4. Cut holes below the top row of electrodes on the headband, to allow easier access. 
+
+<img src="img/headband_measurements.png" alt="Headband measurement diagram" width=800/>
 
 ### Electrode setup
 
