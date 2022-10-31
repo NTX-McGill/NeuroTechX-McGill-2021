@@ -29,13 +29,13 @@ The code consists of three files:
 
 ### Corpora
 
-[Project Gutenberg's Moby Dick; or The Whale](https://www.gutenberg.org/files/2701/2701-h/2701-h.htm)
+`text.txt`:[Project Gutenberg's Moby Dick; or The Whale](https://www.gutenberg.org/files/2701/2701-h/2701-h.htm)
 - 213 533 words
 - Published 1851
 - American
 - Open Source
 
-[Sample of the TV Corpus](https://www.corpusdata.org/formats.asp)
+`tv_text.txt`:[Sample of the TV Corpus](https://www.corpusdata.org/formats.asp)
 - 21 000 000 words in linear text of a completely random sample of the full corporus.
 - British and American
 - Works from 1950-2018
