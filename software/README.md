@@ -14,7 +14,7 @@ It uses a shared queue to store chunks of data and manages messaging between pro
 
 # How to run
 
-## OpenBCI GUI.
+## OpenBCI GUI
 
 The backend requires a stream of data from OpenBCI GUI. 
 
