@@ -14,7 +14,9 @@ It uses a shared queue to store chunks of data and manages messaging between pro
 
 # How to run
 
-## The backend requires a stream of data from OpenBCI GUI.
+## OpenBCI GUI.
+
+The backend requires a stream of data from OpenBCI GUI. 
 
 Open OpenBCI GUI > Synthetic > 8 chan > Start session > Select "Networking" instead of "Time series" > Change protocol to "LSL" > Select "Timeseries" for "Stream 1" > Start LSL Stream > Start Data Stream 
 
@@ -25,7 +27,9 @@ You can find the environment yml files in the backend folder
 `conda env create -f environment.yml`
 `conda activate environment`
 
-## Create a file backend/.env, example:
+## Environment file
+
+Create a file backend/.env, example:
 
 ```
 # flask
@@ -57,7 +61,14 @@ To run both the frontend and backend:
 `./start.sh`
 
 To run the frontend:
+`cd frontend`
+`npm start`
+
+To run the frontend with installation of dependencies:
 `./frontend/start_frontend.sh`
 
-To run the backend:
+To run the backend for development:
+`./backend/start_backend.sh`
+
+To run the backend for production:
 `./backend/start_backend.sh`
