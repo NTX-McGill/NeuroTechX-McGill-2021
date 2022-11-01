@@ -1,9 +1,9 @@
 # Overview
 
-# Frontend
+## Frontend
 The frontend is a React App that creates the interfaces for the training and inference platforms. It uses requestAnimationFrame() to animate the key opacities according to a sinusoidal function.
 
-#Backend
+## Backend
 The backend is a Flask application with four routes:
 - openbci_start: called to create the collection process, returns the process ID
 - openbci_stop: called to terminate process with ID
@@ -12,22 +12,22 @@ The backend is a Flask application with four routes:
 
 It uses a shared queue to store chunks of data and manages messaging between processes.
 
-## How to run
+# How to run
 
-### The backend requires a stream of data from OpenBCI GUI.
+## The backend requires a stream of data from OpenBCI GUI.
 
 Open OpenBCI GUI > Synthetic > 8 chan > Start session > Select "Networking" instead of "Time series" > Change protocol to "LSL" > Select "Timeseries" for "Stream 1" > Start LSL Stream > Start Data Stream 
 
-### Install the anaconda environment
+## Install the anaconda environment
 
 You can find the environment yml files in the backend folder
 
 `conda env create -f environment.yml`
 `conda activate environment`
 
-### Create a file backend/.env, example:
+## Create a file backend/.env, example:
 
-`
+```
 # flask
 FLASK_APP=dcp
 FLASK_ENV={development or production}
@@ -49,7 +49,9 @@ DEV_DB_PASSWORD={DEV_DB_PASSWORD}
 # change to 5432 if using docker-compose
 DEV_DB_PORT={DEV_DB_PORT}
 DEV_DATABASE_URL={DEV_DATABASE_URL}
-`
+```
+
+## Run
 
 To run both the frontend and backend:
 `./start.sh`
