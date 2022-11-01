@@ -1,0 +1,1 @@
+This folder contains experiments that justified trancating filtered data helps performance.

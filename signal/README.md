@@ -1,47 +1,39 @@
 # Signal Processing
 
-## Dependencies
-Install all of the packages together with ``pip install -r requirements.txt``
-- [Python 3.8.5](https://www.python.org/downloads/) or later
-- [Numpy 1.19.3](https://numpy.org/) or later ``pip install numpy``
-- [Matplotlib 3.3.2](https://matplotlib.org/) or later ``pip install matplotlib``
-- [MNE 0.22.0](https://mne.tools/stable/index.html) or later ``pip install mne``
-- [Scipy 1.5.3](https://www.scipy.org/) or later ``pip install scipy``
+## Dependencies:
+* [Python 3.7.6](https://www.python.org/downloads/) or later
+* [Numpy 1.18.1](https://numpy.org/) or later
+* [Matplotlib 3.1.3](https://matplotlib.org/) or later
+* [Scipy 1.4.1](https://www.scipy.org/) or later
 
-## EEG and ECG Signals
-In this project we use EEG (electroencephalogram) and ECG (electrocardiogram) signals to monitor the mood and behaviour of our users / patients.
 
-[See 2020 code for inspiration on writing this readme](https://github.com/NTX-McGill/NeuroTechX-McGill-2020/tree/main/offline/signal_processing)
+## Filtering
 
-### ECG
+Electroencephalography (EEG) signals often require processing and filtering before relevant features can be extracted from them.
 
-**peak detectiction** algorithm
-![peak detection algorithm](./figures/ecg_peak_detection.png)
+The main EEG frequencies are delta (0.5 to 4Hz), theta (4 to 7Hz), alpha (8 to 12Hz), and beta (13 to 30Hz). For our speller, visual flashing frequencies of interest lie in the 6-12.9 Hz range, corresponding mostly to alpha waves. The range was chosen after experimentation to maximize frequency spacing between letters while keeping the maximum frequency low to prevent aliasing.
 
-### EEG
+To denoise our signal, we first apply a 60 Hz notch filter to remove the EMG noise. Then, to isolate frequencies of interest, we apply a 2nd order Chebyshev bandpass filter with a ripple of 0.3 dB to the range roughly corresponding to flashing frequencies (5.75-13.15Hz). We tuned hyperparameters to optimize performance. We experimented with signal smoothing and a procedure to reject channels based on an RMS threshold but found no significant performance benefits. In the end, we found only 1 channel is sufficient and best for our purposes.
 
-## Code
-``example_code/`` contains a jupyter notebook ``numpy and mne filtering examples.ipynb`` that shows you how to filter signals with mne library. There is also a numpy implementation but it doesn't seem to be doing a good job - someone will have to fix this. Also contains ``plot_all_spectrograms.py``: some informative code from 2019.
+![alt text](./figures/channels.png)
+![alt text](./figures/filtering.png)
 
-Note: it's bad form to push jupyter notebooks, should we move this to google colab along with the 2019 data?. 
+## Canonical Correlation Analysis
 
-``filter.py``, this filters ECG data. The code here can be built upon so that it filters all channels of data. 
+We use canonical correlation analysis (CCA) to find the oscillation frequency that most strongly correlates with our signal. The selected channels of the signal are passed into the algorithm with sine and cosine waves at a frequency matching each of the flashing keys. The sinusoid with highest correlation is chosen and the corresponding key is sent to software to be displayed and fed into the language model. The detailed mathematical description is below:
 
-``featurize.py``, requires ``filter.py``, filters signals and extracts featurse from them for ML to play with
+<p align="center">
+    <img src="./figures/CCA_math.png" style="width:500px;"/> <br />
+    <img src="./figures/CCA_math2.png" style="width:500px;"/>
+</p>
 
-``signal_class.py`` is a class for processing our *offline* data: ECG and EEG signals, contains methods from ``filter.py`` and ``featurize.py``. Keep this file tidy and well organized, the first time you implement an algorithm don't do it in here, test it somewhere else beforehand.
+<p align="center">
+    <img src="./figures/spectrogram.png" style="width:345px;"/> <img src="./figures/cca_pred.png" style="width:500px;"/>
+</p>
+<!-- ![alt text](./figures/XXX.png) -->
 
-## Todo
-- [x] Improve ``filter.py`` so that it filters EEG as well as ECG -- watch out we will probably need to use a different frequency band for the EEG signals than the 8Hz to 20Hz band we use for ECG
-- [ ] Implement filters in numpy, see [2020](https://github.com/NTX-McGill/NeuroTechX-McGill-2020/blob/main/offline/signal_processing/filtering.py) and [2019](https://github.com/NTX-McGill/NeuroTechX-McGill-2019) code 
-- [ ] Research: Look into what the mne and mne-realtime libraries have to offer, we may not have to code everything ourselves if we can make use of these efficiently.
-- [ ] Start featurizing:
-    - [ ] Implement [peak detection algorithm](https://www.sciencedirect.com/science/article/pii/S2212017312004227) (I made a really basic one, but we need a better one, this one is not fool-proof in featurize), also https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3342622/, https://www.hindawi.com/journals/jhe/2017/4901017/
-    - [ ] basic time domain HRV (heart-rate variability) feature (keep in mind we'll have to make this a real-time feature, think about this when you design it) 
-    - [ ] Pointcare plots for nice visual display of HRV
-    - [ ] Frequency domain HRV stuff
-    - [ ] Look into wavelet transforms - maybe this is not great because our ECG data isn't so clean  
-- [ ] Research : spectrograms can be fed into computer vision algorithms, research + think of ways we could implement spectrograms over not-too-long time periods
-- [ ] Make class for signal processing for nicer, readable code
-
-[see this link info on hrv analysis](https://imotions.com/blog/heart-rate-variability/#hrv-analysis)
+### Remarks
+* `predict.py` takes live streamed EEG data and outputs a predited letter
+* `standard_CCA.py` contains code for the CCA algorithm used for inference (other CCA files are not used in production)
+* `Experiments_scripts/` contain supplemental experiments and investigations, including code profiling, RMS-rejection, and building a template
+* `eyeblink/` contains a computer vision program to detect blinks and double blinks to erase characters (currently unused)
