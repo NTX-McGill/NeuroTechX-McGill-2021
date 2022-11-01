@@ -71,4 +71,4 @@ To run the backend for development:
 `./backend/start_backend.sh`
 
 To run the backend for production:
-`./backend/start_backend.sh`
+`./backend/start_prod.sh`
