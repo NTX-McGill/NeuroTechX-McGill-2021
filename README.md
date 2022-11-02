@@ -62,11 +62,13 @@ Each time the user selects a letter on the keyboard, the language model gives th
 
 By incorporating a natural language model into our BCI ecosystem, we are able to increase the speller's information transfer rate and handle errors that would otherwise lead to miscommunication.
 
-<img src="img/spellerTest.png" width="500" >
+<img src="img/spellerTest.png" alt="Text prediction model" width="500">
 
 ### Spelling/inference platform
 
 The spelling interface alternates between flashing periods and prediction periods. During flashing periods, EEG signals are obtained from the biosensing in real time through Lab Streaming Layer (LSL). Once the flashing stops, the collected data are sent to a prediction function which applies any required processing and outputs the prediction obtained by our CCA model. If the predicted character is a letter of the alphabet or a space character, it is appended to the current sentence and displayed in a text box. If the predicted character is the backspace symbol or a number (indicating that the user wants to use the autocomplete feature), the software processes the previously predicted text as appropriate. 
+
+<img src="img/inference_platform.png" alt="Inference/spelling platform" width="800">
 
 ### Limitations and future directions
 
