@@ -1,4 +1,4 @@
-# Machine Learning
+# Text Prediction
 
 ## Dependancies 
 - [Numpy](https://numpy.org/) 
