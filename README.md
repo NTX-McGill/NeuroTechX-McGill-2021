@@ -10,11 +10,16 @@ Our speller has a keyboard layout where each key flashes with a different freque
 
 ## Video presentation of the project
 
-<!-- TODO add YouTube link/thumbnail -->
+[![McGill NeuroTech 2021 video](https://img.youtube.com/vi/NdMm_riAEsY/0.jpg)](https://youtu.be/NdMm_riAEsY)
 
 ## Navigating the repository
 
-<!-- TODO add links once merged to main -->
+- [`data`](https://github.com/NTX-McGill/NeuroTechX-McGill-2021/tree/main/data) contains raw (labelled) data files and data collection protocol.
+- [`signal`](https://github.com/NTX-McGill/NeuroTechX-McGill-2021/tree/main/signal) contains functions for real-time preprocessing and classification of SSVEP data.
+- [`text_prediction`](https://github.com/NTX-McGill/NeuroTechX-McGill-2021/tree/main/text_prediction) contains data and code for our autocompletion and next-word prediction models
+- [`software`](https://github.com/NTX-McGill/NeuroTechX-McGill-2021/tree/main/software) contains the source code for a web application that has two components:
+  - data collection interface: records SSVEP data and stores them to cloud database.
+  - inference/spelling platform: real-time spelling from user's EEG data.
 
 ## Overview of the project
 
